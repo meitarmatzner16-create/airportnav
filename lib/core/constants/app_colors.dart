@@ -12,10 +12,10 @@ class AppColors {
   static const skyTint = Color(0xFFEAF1FE);
   static const ink = Color(0xFF0F2350);
   static const textColor = Color(0xFF14213D);
-  static const muted = Color(0xFF6B7488);
+  static const muted = Color(0xFF677084);
   static const gold = Color(0xFFC2A05A);
   static const goldSoft = Color(0xFFE8D6AE);
-  static const goldText = Color(0xFF8A6D2F); // gold that must carry small text (AA)
+  static const goldText = Color(0xFF886B2D); // gold that must carry small text (AA)
   static const paper = Color(0xFFF7F5EF);
   static const card = Color(0xFFFFFFFF);
   static const hairline = Color(0xFFECE6D8);
