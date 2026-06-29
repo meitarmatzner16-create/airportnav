@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:airport_nav/core/constants/app_colors.dart';
+import 'package:airport_nav/core/constants/app_typography.dart';
 
 void main() {
   test('Sky Pass core tokens have exact values', () {
@@ -14,5 +15,10 @@ void main() {
     expect(AppColors.accent, AppColors.sky);       // interactive
     expect(AppColors.primary, AppColors.ink);      // brand/dark
     expect(AppColors.background, AppColors.paper);
+  });
+  testWidgets('display uses Poppins, body uses Inter', (tester) async {
+    expect(AppTypography.textTheme.headlineMedium!.fontFamily, contains('Poppins'));
+    expect(AppTypography.textTheme.bodyMedium!.fontFamily, contains('Inter'));
+    expect(AppTypography.mono(fontSize: 14).fontFamily, contains('Space'));
   });
 }

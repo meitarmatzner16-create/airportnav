@@ -1,97 +1,35 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Single-family Inter type scale tuned for a premium, minimal feel:
-///   - Tighter letter-spacing on display sizes (-0.4 to -0.8)
-///   - Restrained weights — w600 for emphasis, w500 for labels, w400 for body
-///   - 1.5 line-height on body text for breathable reading
+/// Sky Pass type: Poppins (display/UI), Inter (long-form body), Space Mono (data).
 class AppTypography {
   AppTypography._();
 
+  static TextStyle mono({double fontSize = 14, FontWeight weight = FontWeight.w700, Color? color}) =>
+      GoogleFonts.spaceMono(fontSize: fontSize, fontWeight: weight, color: color, letterSpacing: 0);
+
+  static TextStyle _d(double s, {double sp = -0.4, FontWeight w = FontWeight.w700, double h = 1.15}) =>
+      GoogleFonts.poppins(fontSize: s, fontWeight: w, letterSpacing: sp, height: h);
+  static TextStyle _ui(double s, {double sp = 0, FontWeight w = FontWeight.w600}) =>
+      GoogleFonts.poppins(fontSize: s, fontWeight: w, letterSpacing: sp);
+  static TextStyle _body(double s, {double sp = 0, FontWeight w = FontWeight.w400, double h = 1.5}) =>
+      GoogleFonts.inter(fontSize: s, fontWeight: w, letterSpacing: sp, height: h);
+
   static TextTheme get textTheme => TextTheme(
-        displayLarge: GoogleFonts.inter(
-          fontSize: 36,
-          fontWeight: FontWeight.w600,
-          letterSpacing: -0.8,
-          height: 1.1,
-        ),
-        displayMedium: GoogleFonts.inter(
-          fontSize: 30,
-          fontWeight: FontWeight.w600,
-          letterSpacing: -0.6,
-          height: 1.15,
-        ),
-        displaySmall: GoogleFonts.inter(
-          fontSize: 24,
-          fontWeight: FontWeight.w600,
-          letterSpacing: -0.4,
-          height: 1.2,
-        ),
-        headlineLarge: GoogleFonts.inter(
-          fontSize: 22,
-          fontWeight: FontWeight.w600,
-          letterSpacing: -0.3,
-          height: 1.25,
-        ),
-        headlineMedium: GoogleFonts.inter(
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-          letterSpacing: -0.2,
-          height: 1.3,
-        ),
-        headlineSmall: GoogleFonts.inter(
-          fontSize: 17,
-          fontWeight: FontWeight.w600,
-          letterSpacing: -0.2,
-          height: 1.3,
-        ),
-        titleLarge: GoogleFonts.inter(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          letterSpacing: -0.1,
-        ),
-        titleMedium: GoogleFonts.inter(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0,
-        ),
-        titleSmall: GoogleFonts.inter(
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          letterSpacing: 0.2,
-        ),
-        bodyLarge: GoogleFonts.inter(
-          fontSize: 16,
-          fontWeight: FontWeight.w400,
-          letterSpacing: 0,
-          height: 1.5,
-        ),
-        bodyMedium: GoogleFonts.inter(
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
-          letterSpacing: 0,
-          height: 1.5,
-        ),
-        bodySmall: GoogleFonts.inter(
-          fontSize: 13,
-          fontWeight: FontWeight.w400,
-          letterSpacing: 0.1,
-          height: 1.5,
-        ),
-        labelLarge: GoogleFonts.inter(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 0.1,
-        ),
-        labelMedium: GoogleFonts.inter(
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 0.2,
-        ),
-        labelSmall: GoogleFonts.inter(
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
-          letterSpacing: 0.3,
-        ),
+        displayLarge: _d(36, sp: -0.6, w: FontWeight.w700, h: 1.1),
+        displayMedium: _d(30, sp: -0.5),
+        displaySmall: _d(24, sp: -0.4),
+        headlineLarge: _d(22, sp: -0.3, h: 1.25),
+        headlineMedium: _ui(18, sp: -0.2, w: FontWeight.w700),
+        headlineSmall: _ui(17, sp: -0.2, w: FontWeight.w700),
+        titleLarge: _ui(16, sp: -0.1, w: FontWeight.w700),
+        titleMedium: _ui(14, w: FontWeight.w600),
+        titleSmall: _ui(12, sp: 0.2, w: FontWeight.w600),
+        bodyLarge: _body(16),
+        bodyMedium: _body(14),
+        bodySmall: _body(13, sp: 0.1),
+        labelLarge: _ui(14, sp: 0.1, w: FontWeight.w600),
+        labelMedium: _ui(12, sp: 0.2, w: FontWeight.w600),
+        labelSmall: _ui(11, sp: 0.3, w: FontWeight.w600),
       );
 }
