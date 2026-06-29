@@ -88,6 +88,24 @@ class AppColors {
   static const shadowMedium = Color(0x1A000000);
   static const shadowSky = Color(0x593577E7); // sky-tinted hero shadow
 
+  // Legacy alpha aliases — re-pointed to Sky Pass equivalents
+  /// @deprecated Use [skyAlpha10] directly.
+  static const accentAlpha10 = skyAlpha10;
+  /// @deprecated Use [skyAlpha15] directly.
+  static const accentAlpha15 = skyAlpha15;
+  /// @deprecated Use [skyAlpha20] directly.
+  static const accentAlpha20 = skyAlpha20;
+  /// @deprecated Use [inkAlpha10] directly.
+  static const primaryAlpha10 = inkAlpha10;
+  /// @deprecated Use [inkAlpha10] or a custom alpha. 15 % on ink.
+  static const primaryAlpha15 = Color(0x260F2350);
+  /// @deprecated Use [errorAlpha15] or a custom alpha. 40 % on error.
+  static const errorAlpha40 = Color(0x66E5484D);
+  /// @deprecated Use [shadowSky] for tinted shadows.
+  static const shadowAccent = Color(0x143577E7);
+  /// @deprecated Use [sky2] directly.
+  static const secondaryLight = sky2;
+
   // Offer category gradients (re-mapped to sky/gold family)
   static const gradientDiningStart = sky;
   static const gradientDiningEnd = sky2;
