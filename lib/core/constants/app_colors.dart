@@ -16,9 +16,9 @@ class AppColors {
   static const gold = Color(0xFFC2A05A);
   static const goldSoft = Color(0xFFE8D6AE);
   static const goldText = Color(0xFF886B2D); // gold that must carry small text (AA)
-  static const paper = Color(0xFFF7F5EF);
+  static const paper = Color(0xFFF8F9FA);
   static const card = Color(0xFFFFFFFF);
-  static const hairline = Color(0xFFECE6D8);
+  static const hairline = Color(0xFFE9EBEF);
   static const hairlineCool = Color(0xFFE2E8F4);
 
   // ---- Semantic ----
