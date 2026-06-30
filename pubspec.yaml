@@ -21,6 +21,7 @@ dependencies:
   shimmer: ^3.0.0
   smooth_page_indicator: ^1.2.0+3
   speech_to_text: ^7.0.0
+  qr_flutter: ^4.1.0
 
 dev_dependencies:
   flutter_test:

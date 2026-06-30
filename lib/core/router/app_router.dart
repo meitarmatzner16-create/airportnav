@@ -9,6 +9,7 @@ import '../../features/more/presentation/more_screen.dart';
 import '../../features/voice_chat/presentation/screens/voice_chat_screen.dart';
 import '../../features/flight/presentation/screens/flight_search_screen.dart';
 import '../../features/flight/presentation/screens/flight_detail_screen.dart';
+import '../../features/flight/presentation/screens/boarding_pass_screen.dart';
 import '../../features/venues/presentation/screens/venues_screen.dart';
 import '../widgets/app_shell.dart';
 
@@ -28,6 +29,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/map',
         builder: (context, state) => const AirportMapScreen(),
+      ),
+      // Full-screen boarding pass (pushed from the Home boarding-pass card tap)
+      GoRoute(
+        path: '/boarding-pass',
+        builder: (context, state) => const BoardingPassScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) => AppShell(child: child),

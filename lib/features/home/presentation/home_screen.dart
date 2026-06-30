@@ -87,7 +87,6 @@ class _DashboardView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final availableMinutes = ref.watch(availableTimeMinutesProvider) ?? 0;
     final venues = ref.watch(allVenuesProvider);
     final nearbyVenues = venues.take(5).toList();
 
@@ -96,12 +95,6 @@ class _DashboardView extends ConsumerWidget {
     final chatMessages = ref.watch(voiceChatMessagesProvider);
     // Only show Recent plans if user has exchanged messages (beyond the greeting)
     final hasHistory = chatMessages.length > 1;
-
-    final boardingHours = availableMinutes ~/ 60;
-    final boardingMins = availableMinutes % 60;
-    final boardingLabel = boardingHours > 0
-        ? '${boardingHours}h ${boardingMins}m until boarding'
-        : '${boardingMins}m until boarding';
 
     return ListView(
       padding: EdgeInsets.zero,
@@ -176,7 +169,7 @@ class _DashboardView extends ConsumerWidget {
           padding: const EdgeInsets.symmetric(horizontal: _gutter),
           child: BoardingPassCard(
             flight: flight,
-            onTap: () => context.push('/home/flight/${flight.id}'),
+            onTap: () => context.push('/boarding-pass'),
           ),
         ),
 
@@ -189,32 +182,6 @@ class _DashboardView extends ConsumerWidget {
         ),
 
         const SizedBox(height: _sectionGap),
-
-        // ── Quick add chips ───────────────────────────────────────────
-        Padding(
-          padding: const EdgeInsets.fromLTRB(_gutter, 0, _gutter, 0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Quick add',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? AppColors.dText : AppColors.ink,
-                ),
-              ),
-              Text(
-                boardingLabel,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontSize: 12,
-                  color: AppColors.muted,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        _QuickAddChips(isDark: isDark),
 
         // ── Active route (conditional) ────────────────────────────────
         if (currentPlan != null) ...[
@@ -626,72 +593,6 @@ class _ConcentricCirclesPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_ConcentricCirclesPainter old) => old.color != color;
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Quick-add chips
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _QuickAddChips extends StatelessWidget {
-  final bool isDark;
-  const _QuickAddChips({required this.isDark});
-
-  static const _chips = [
-    (Icons.local_cafe_rounded, 'Coffee'),
-    (Icons.shopping_bag_rounded, 'Shopping'),
-    (Icons.weekend_rounded, 'Lounge'),
-    (Icons.spa_rounded, 'Spa'),
-    (Icons.restaurant_rounded, 'Food'),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cardBg = isDark ? AppColors.dSurface : AppColors.card;
-    final hairline = isDark ? AppColors.dHairline : AppColors.hairline;
-
-    return SizedBox(
-      height: 44,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: _gutter),
-        itemCount: _chips.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 8),
-        itemBuilder: (context, i) {
-          final (icon, label) = _chips[i];
-          return GestureDetector(
-            onTap: () => context.go('/voice-chat'),
-            child: Container(
-              height: 44,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                border: Border.all(color: hairline, width: 1),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(icon,
-                      size: 15,
-                      color: isDark ? AppColors.dSky : AppColors.sky),
-                  const SizedBox(width: 6),
-                  Text(
-                    label,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: isDark ? AppColors.dText : AppColors.ink,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
