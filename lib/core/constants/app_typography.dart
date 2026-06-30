@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Sky Pass type: Poppins (display/UI), Inter (long-form body), Space Mono (data).
+/// Sky Pass type: Manrope (display/UI — calm, even), Inter (long-form body), Space Mono (data).
 class AppTypography {
   AppTypography._();
 
@@ -9,15 +9,15 @@ class AppTypography {
       GoogleFonts.spaceMono(fontSize: fontSize, fontWeight: weight, color: color, letterSpacing: 0);
 
   static TextStyle _d(double s, {double sp = -0.4, FontWeight w = FontWeight.w700, double h = 1.15}) =>
-      GoogleFonts.poppins(fontSize: s, fontWeight: w, letterSpacing: sp, height: h);
+      GoogleFonts.manrope(fontSize: s, fontWeight: w, letterSpacing: sp, height: h);
   static TextStyle _ui(double s, {double sp = 0, FontWeight w = FontWeight.w600}) =>
-      GoogleFonts.poppins(fontSize: s, fontWeight: w, letterSpacing: sp);
+      GoogleFonts.manrope(fontSize: s, fontWeight: w, letterSpacing: sp);
   static TextStyle _body(double s, {double sp = 0, FontWeight w = FontWeight.w400, double h = 1.5}) =>
       GoogleFonts.inter(fontSize: s, fontWeight: w, letterSpacing: sp, height: h);
 
   static TextTheme get textTheme => TextTheme(
-        displayLarge: _d(36, sp: -0.6, w: FontWeight.w700, h: 1.1),
-        displayMedium: _d(30, sp: -0.5),
+        displayLarge: _d(36, sp: -0.3, w: FontWeight.w700, h: 1.1),
+        displayMedium: _d(30, sp: -0.3),
         displaySmall: _d(24, sp: -0.4),
         headlineLarge: _d(22, sp: -0.3, h: 1.25),
         headlineMedium: _ui(18, sp: -0.2, w: FontWeight.w700),

@@ -17,7 +17,7 @@ void main() {
     expect(AppColors.background, AppColors.paper);
   });
   testWidgets('display uses Poppins, body uses Inter', (tester) async {
-    expect(AppTypography.textTheme.headlineMedium!.fontFamily, contains('Poppins'));
+    expect(AppTypography.textTheme.headlineMedium!.fontFamily, contains('Manrope'));
     expect(AppTypography.textTheme.bodyMedium!.fontFamily, contains('Inter'));
     expect(AppTypography.mono(fontSize: 14).fontFamily, contains('Space'));
   });
