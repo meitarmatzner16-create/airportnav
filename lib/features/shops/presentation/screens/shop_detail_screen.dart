@@ -1,8 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:airport_nav/core/constants/app_colors.dart';
+import 'package:airport_nav/core/constants/app_spacing.dart';
+import 'package:airport_nav/core/constants/app_typography.dart';
+import 'package:airport_nav/core/widgets/app_buttons.dart';
+import 'package:airport_nav/core/widgets/gold_divider.dart';
+import 'package:airport_nav/core/widgets/gradient_hero.dart';
+import 'package:airport_nav/core/widgets/info_row.dart';
+import 'package:airport_nav/core/widgets/rating_stars.dart';
+import 'package:airport_nav/core/widgets/state_views.dart';
 import 'package:airport_nav/features/shops/presentation/providers/shop_providers.dart';
 
+/// Sky Pass–styled shop detail screen.
+///
+/// Header: [GradientHero] (category-tinted via token map) + large icon watermark.
+/// Body: name (headlineLarge ink) · category chip + [RatingStars] + mono rating ·
+///       [InfoRow]s · [GoldDivider] · About · [PrimaryButton].
+/// All colours from tokens. Light/dark via brightness checks.
 class ShopDetailScreen extends ConsumerWidget {
   final String shopId;
 
@@ -11,271 +26,223 @@ class ShopDetailScreen extends ConsumerWidget {
     required this.shopId,
   });
 
-  String _categoryLabel(String category) {
-    switch (category) {
-      case 'dining':
-        return 'Dining';
-      case 'retail':
-        return 'Retail';
-      case 'duty_free':
-        return 'Duty Free';
-      case 'convenience':
-        return 'Convenience';
-      case 'luxury':
-        return 'Luxury';
-      case 'electronics':
-        return 'Electronics';
-      default:
-        return category;
-    }
+  // ── Category helpers ──────────────────────────────────────────────────────
+
+  static String _categoryLabel(String category) {
+    return switch (category) {
+      'dining' => 'Dining',
+      'retail' => 'Retail',
+      'duty_free' => 'Duty Free',
+      'convenience' => 'Convenience',
+      'luxury' => 'Luxury',
+      'electronics' => 'Electronics',
+      _ => category,
+    };
   }
 
-  Color _categoryColor(String category) {
-    switch (category) {
-      case 'dining':
-        return Colors.orange;
-      case 'retail':
-        return Colors.blue;
-      case 'duty_free':
-        return Colors.purple;
-      case 'convenience':
-        return Colors.green;
-      case 'luxury':
-        return Colors.amber.shade800;
-      case 'electronics':
-        return Colors.teal;
-      default:
-        return Colors.grey;
-    }
+  static IconData _categoryIcon(String category) {
+    return switch (category) {
+      'dining' => Icons.restaurant_rounded,
+      'retail' => Icons.shopping_bag_rounded,
+      'duty_free' => Icons.local_offer_rounded,
+      'convenience' => Icons.store_rounded,
+      'luxury' => Icons.diamond_rounded,
+      'electronics' => Icons.devices_rounded,
+      _ => Icons.storefront_rounded,
+    };
   }
 
-  IconData _categoryIcon(String category) {
-    switch (category) {
-      case 'dining':
-        return Icons.restaurant;
-      case 'retail':
-        return Icons.shopping_bag;
-      case 'duty_free':
-        return Icons.local_offer;
-      case 'convenience':
-        return Icons.store;
-      case 'luxury':
-        return Icons.diamond;
-      case 'electronics':
-        return Icons.devices;
-      default:
-        return Icons.storefront;
-    }
+  /// Maps category → gradient color pair using Sky Pass tokens.
+  static List<Color> _heroGradient(String category) {
+    return switch (category) {
+      'dining' => [AppColors.gradientDiningStart, AppColors.gradientDiningEnd],
+      'luxury' => [AppColors.ink, AppColors.gradientShoppingStart],
+      'duty_free' => [AppColors.gradientDutyFreeStart, AppColors.gradientDutyFreeEnd],
+      'retail' => [AppColors.gradientShoppingStart, AppColors.gradientShoppingEnd],
+      'electronics' => [AppColors.sky, AppColors.ink],
+      'convenience' => [AppColors.gradientTravelStart, AppColors.gradientTravelEnd],
+      _ => [AppColors.sky, AppColors.sky2],
+    };
+  }
+
+  /// Returns [chipBg, chipFg] using Sky Pass tokens.
+  static (Color, Color) _chipColors(String category, bool isDark) {
+    return switch (category) {
+      'luxury' => (AppColors.goldAlpha15, isDark ? AppColors.dGold : AppColors.goldText),
+      'dining' => (AppColors.skyAlpha10, isDark ? AppColors.dSky : AppColors.sky),
+      'retail' => (AppColors.inkAlpha10, isDark ? AppColors.dText : AppColors.ink),
+      _ => (AppColors.skyAlpha15, isDark ? AppColors.dSky : AppColors.sky2),
+    };
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final shop = ref.watch(shopByIdProvider(shopId));
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     if (shop == null) {
       return Scaffold(
+        backgroundColor: isDark ? AppColors.dBg : AppColors.paper,
         appBar: AppBar(title: const Text('Shop Not Found')),
-        body: const Center(
-          child: Text('The requested shop could not be found.'),
-        ),
+        body: const ErrorState(message: 'The requested shop could not be found.'),
       );
     }
 
-    final categoryColor = _categoryColor(shop.category);
+    final inkColor = isDark ? AppColors.dText : AppColors.ink;
+    final mutedColor = isDark ? AppColors.dMuted : AppColors.muted;
+    final (chipBg, chipFg) = _chipColors(shop.category, isDark);
+    final heroColors = _heroGradient(shop.category);
 
     return Scaffold(
+      backgroundColor: isDark ? AppColors.dBg : AppColors.paper,
       body: CustomScrollView(
         slivers: [
-          // Image header
+          // ── Gradient hero header ──────────────────────────────────────
           SliverAppBar(
             expandedHeight: 220,
             pinned: true,
+            backgroundColor: isDark ? AppColors.dBg : AppColors.paper,
+            surfaceTintColor: Colors.transparent,
+            foregroundColor: Colors.white,
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                color: Color((categoryColor.value & 0x00FFFFFF) | 0x26000000),
+              background: GradientHero(
+                height: 220,
+                colors: heroColors,
                 child: Center(
                   child: Icon(
                     _categoryIcon(shop.category),
                     size: 80,
-                    color: Color((categoryColor.value & 0x00FFFFFF) | 0x80000000),
+                    color: Colors.white.withAlpha(51), // large watermark
                   ),
                 ),
               ),
             ),
           ),
-          // Content
+
+          // ── Body content ─────────────────────────────────────────────
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Name
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // Shop name
                   Text(
                     shop.name,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                    style: theme.textTheme.headlineLarge?.copyWith(
+                      color: inkColor,
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  // Category badge and rating
+                  const SizedBox(height: AppSpacing.smMd),
+
+                  // Category chip + RatingStars + mono rating
                   Row(
                     children: [
+                      // Category chip
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 4),
+                          horizontal: AppSpacing.smMd,
+                          vertical: AppSpacing.xs,
+                        ),
                         decoration: BoxDecoration(
-                          color: Color((categoryColor.value & 0x00FFFFFF) | 0x1A000000),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                              color: Color((categoryColor.value & 0x00FFFFFF) | 0x80000000)),
+                          color: chipBg,
+                          borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(_categoryIcon(shop.category),
-                                size: 14, color: categoryColor),
-                            const SizedBox(width: 4),
+                            Icon(
+                              _categoryIcon(shop.category),
+                              size: AppSpacing.iconSm,
+                              color: chipFg,
+                            ),
+                            const SizedBox(width: AppSpacing.xs),
                             Text(
                               _categoryLabel(shop.category),
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: categoryColor,
-                                fontWeight: FontWeight.w600,
+                              style: theme.textTheme.labelMedium?.copyWith(
+                                color: chipFg,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      // Stars
-                      Row(
-                        children: List.generate(5, (index) {
-                          final starValue = index + 1;
-                          if (shop.rating >= starValue) {
-                            return const Icon(Icons.star,
-                                size: 18, color: Colors.amber);
-                          } else if (shop.rating >= starValue - 0.5) {
-                            return const Icon(Icons.star_half,
-                                size: 18, color: Colors.amber);
-                          }
-                          return const Icon(Icons.star_border,
-                              size: 18, color: Colors.amber);
-                        }),
-                      ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: AppSpacing.smMd),
+
+                      // Star rating
+                      RatingStars(rating: shop.rating, size: 16),
+                      const SizedBox(width: AppSpacing.xs),
+
+                      // Mono rating value
                       Text(
                         shop.rating.toStringAsFixed(1),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                        style: AppTypography.mono(
+                          fontSize: 13,
+                          weight: FontWeight.w700,
+                          color: mutedColor,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 20),
-                  // Location & terminal
-                  _InfoRow(
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // ── Info rows ─────────────────────────────────────────
+                  InfoRow(
                     icon: Icons.location_on_outlined,
                     label: 'Location',
                     value: shop.location,
                   ),
-                  const SizedBox(height: 10),
-                  _InfoRow(
-                    icon: Icons.flight,
+                  const SizedBox(height: AppSpacing.smMd),
+                  InfoRow(
+                    icon: Icons.flight_rounded,
                     label: 'Terminal',
-                    value: '${shop.terminal} - ${shop.airportCode}',
+                    value: '${shop.terminal} · ${shop.airportCode}',
                   ),
-                  const SizedBox(height: 10),
-                  // Opening hours
-                  _InfoRow(
-                    icon: Icons.access_time,
+                  const SizedBox(height: AppSpacing.smMd),
+                  InfoRow(
+                    icon: Icons.access_time_rounded,
                     label: 'Hours',
                     value: shop.openingHours,
                   ),
-                  const SizedBox(height: 20),
-                  const Divider(),
-                  const SizedBox(height: 16),
-                  // Description
-                  const Text(
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // ── Gold divider ───────────────────────────────────────
+                  const GoldDivider(),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // ── About section ──────────────────────────────────────
+                  Text(
                     'About',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: theme.textTheme.titleLarge?.copyWith(color: inkColor),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     shop.description,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      height: 1.5,
-                      color: Colors.black87,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: mutedColor,
+                      height: 1.6,
                     ),
                   ),
-                  const SizedBox(height: 28),
-                  // Show on Map button
+                  const SizedBox(height: AppSpacing.xl),
+
+                  // ── Show on map button ─────────────────────────────────
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        context.push('/map');
-                      },
-                      icon: const Icon(Icons.map),
-                      label: const Text('Show on Map'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        textStyle: const TextStyle(fontSize: 16),
-                      ),
+                    child: PrimaryButton(
+                      label: 'Show on map',
+                      icon: Icons.map_rounded,
+                      onPressed: () => context.push('/map'),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.xl),
                 ],
               ),
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-
-  const _InfoRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: Colors.grey.shade600),
-        const SizedBox(width: 10),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                color: Colors.grey.shade500,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            Text(
-              value,
-              style: const TextStyle(fontSize: 15),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }
