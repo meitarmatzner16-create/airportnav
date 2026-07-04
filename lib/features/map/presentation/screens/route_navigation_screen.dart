@@ -149,8 +149,19 @@ class _RouteNavigationScreenState extends ConsumerState<RouteNavigationScreen>
       }
     });
 
-    // Build stop positions for the current floor
-    final stopPositions = _buildStopPositions(stops, selectedFloor);
+    // Fallback canvas dimensions: first available floor's size, else 1000×600.
+    final fallbackWidth =
+        floors.isNotEmpty ? floors.first.width : 1000.0;
+    final fallbackHeight =
+        floors.isNotEmpty ? floors.first.height : 600.0;
+
+    // Build stop positions for the current floor (or synthetic on fallback canvas).
+    final stopPositions = _buildStopPositions(
+      stops,
+      selectedFloor,
+      fallbackWidth: fallbackWidth,
+      fallbackHeight: fallbackHeight,
+    );
 
     // Remaining minutes = sum of (walkMinutes + stayMinutes) for remaining stops
     final remainingMin = stops
@@ -282,23 +293,21 @@ class _RouteNavigationScreenState extends ConsumerState<RouteNavigationScreen>
             ),
 
             // ── Map area ──────────────────────────────────────────────
+            // Always render the map canvas. When the real floor plan is
+            // unavailable (e.g. stop on floor 3 but mock only has floors 1–2)
+            // we fall back to a schematic canvas with synthetic stop positions.
             Expanded(
-              child: selectedFloor == null
-                  ? Center(
-                      child: Text(
-                        'No map data',
-                        style: theme.textTheme.bodyLarge
-                            ?.copyWith(color: AppColors.muted),
-                      ),
-                    )
-                  : _MapArea(
-                      floor: selectedFloor,
-                      stops: stops,
-                      stopPositions: stopPositions,
-                      currentStopIndex: idx,
-                      markerAnim: reducedMotion ? null : _markerAnim,
-                      pulseAnim: reducedMotion ? null : _pulseAnim,
-                    ),
+              child: _MapArea(
+                floor: selectedFloor,
+                fallbackWidth: fallbackWidth,
+                fallbackHeight: fallbackHeight,
+                fallbackFloorNumber: currentStop.floor,
+                stops: stops,
+                stopPositions: stopPositions,
+                currentStopIndex: idx,
+                markerAnim: reducedMotion ? null : _markerAnim,
+                pulseAnim: reducedMotion ? null : _pulseAnim,
+              ),
             ),
 
             // ── Bottom control bar ────────────────────────────────────
@@ -334,12 +343,30 @@ class _RouteNavigationScreenState extends ConsumerState<RouteNavigationScreen>
   }
 
   /// Resolve each stop to a pixel position on the given floor.
-  /// Priority: case-insensitive name match among the floor's POIs.
-  /// Fallback: synthesize a deterministic zig-zag position.
+  ///
+  /// When [floor] is non-null, only stops whose [RouteStop.floor] matches
+  /// the floor's [MapFloor.floorNumber] are included. Each is resolved via a
+  /// case-insensitive POI name match first; falls back to synthetic zig-zag.
+  ///
+  /// When [floor] is null (missing floor plan), ALL stops are given synthetic
+  /// positions spread across the fallback canvas so the map always renders.
   Map<int, Offset> _buildStopPositions(
-      List<RouteStop> stops, MapFloor? floor) {
-    if (floor == null) return {};
+    List<RouteStop> stops,
+    MapFloor? floor, {
+    required double fallbackWidth,
+    required double fallbackHeight,
+  }) {
     final result = <int, Offset>{};
+
+    if (floor == null) {
+      // Schematic fallback: spread every stop across the fallback canvas.
+      final total = stops.length;
+      for (int i = 0; i < total; i++) {
+        result[i] = _syntheticPosition(i, total, fallbackWidth, fallbackHeight);
+      }
+      return result;
+    }
+
     final pois = floor.pois;
 
     // Only include stops that are on this floor's floorNumber.
@@ -439,11 +466,25 @@ class _RouteNavigationScreenState extends ConsumerState<RouteNavigationScreen>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Map Area — draws the floor with route polyline + animated markers
+// Map Area — draws the floor with route polyline + animated markers.
+// When [floor] is null the real floor plan is unavailable (e.g. stop on a
+// floor the mock data doesn't define). In that case we render a schematic
+// fallback canvas of [fallbackWidth]×[fallbackHeight] and still draw the
+// route polyline, numbered stop markers, and the "you are here" dot so the
+// map is never blank.
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _MapArea extends StatelessWidget {
-  final MapFloor floor;
+  /// Real floor plan. Null when the current stop's floor has no map data.
+  final MapFloor? floor;
+
+  /// Canvas dimensions used when [floor] is null.
+  final double fallbackWidth;
+  final double fallbackHeight;
+
+  /// Floor number shown in the schematic label when [floor] is null.
+  final int fallbackFloorNumber;
+
   final List<RouteStop> stops;
   final Map<int, Offset> stopPositions;
   final int currentStopIndex;
@@ -452,6 +493,9 @@ class _MapArea extends StatelessWidget {
 
   const _MapArea({
     required this.floor,
+    required this.fallbackWidth,
+    required this.fallbackHeight,
+    required this.fallbackFloorNumber,
     required this.stops,
     required this.stopPositions,
     required this.currentStopIndex,
@@ -461,22 +505,36 @@ class _MapArea extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final canvasWidth = floor?.width ?? fallbackWidth;
+    final canvasHeight = floor?.height ?? fallbackHeight;
+
     return ClipRect(
       child: InteractiveViewer(
         minScale: 0.5,
         maxScale: 4.0,
         boundaryMargin: const EdgeInsets.all(80),
         child: SizedBox(
-          width: floor.width,
-          height: floor.height,
+          width: canvasWidth,
+          height: canvasHeight,
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              // Floor plan background
+              // Floor plan background — real plan when available, schematic otherwise.
               Positioned.fill(
-                child: CustomPaint(
-                  painter: MapPainter(floor: floor),
-                ),
+                child: floor != null
+                    ? CustomPaint(
+                        painter: MapPainter(floor: floor!),
+                      )
+                    : _SchematicBackground(
+                        width: canvasWidth,
+                        height: canvasHeight,
+                        isDark: isDark,
+                        floorNumber: fallbackFloorNumber,
+                        theme: theme,
+                      ),
               ),
 
               // Route polyline through stop positions on this floor
@@ -520,8 +578,7 @@ class _MapArea extends StatelessWidget {
                   builder: (context, _) {
                     final t = markerAnim?.value ?? 1.0;
                     final fromPos = stopPositions[currentStopIndex]!;
-                    final toPos = currentStopIndex + 1 <
-                            stops.length
+                    final toPos = currentStopIndex + 1 < stops.length
                         ? stopPositions[currentStopIndex + 1] ?? fromPos
                         : fromPos;
                     final interpX = fromPos.dx + (toPos.dx - fromPos.dx) * t;
@@ -570,6 +627,124 @@ class _MapArea extends StatelessWidget {
       ),
     );
   }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Schematic background — shown when the real floor plan is unavailable.
+// Draws a clean grid canvas with a subtle "Floor N — schematic view" label,
+// using Sky Pass tokens so it's light/dark aware.
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _SchematicBackground extends StatelessWidget {
+  final double width;
+  final double height;
+  final bool isDark;
+  final int floorNumber;
+  final ThemeData theme;
+
+  const _SchematicBackground({
+    required this.width,
+    required this.height,
+    required this.isDark,
+    required this.floorNumber,
+    required this.theme,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomPaint(
+      painter: _SchematicPainter(
+        width: width,
+        height: height,
+        isDark: isDark,
+      ),
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: isDark
+                  ? AppColors.dSurfaceVariant
+                  : AppColors.skyAlpha10,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+            ),
+            child: Text(
+              'Floor $floorNumber — schematic view',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: isDark ? AppColors.dSky : AppColors.sky,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SchematicPainter extends CustomPainter {
+  final double width;
+  final double height;
+  final bool isDark;
+
+  _SchematicPainter({
+    required this.width,
+    required this.height,
+    required this.isDark,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // Background
+    canvas.drawRect(
+      Rect.fromLTWH(0, 0, size.width, size.height),
+      Paint()
+        ..color = isDark ? AppColors.dSurface : AppColors.paper,
+    );
+
+    // Outer border
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromLTWH(12, 12, size.width - 24, size.height - 24),
+        const Radius.circular(12),
+      ),
+      Paint()
+        ..color = isDark ? AppColors.dHairline : AppColors.hairlineCool
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1.5,
+    );
+
+    // Subtle grid lines
+    final gridPaint = Paint()
+      ..color =
+          (isDark ? AppColors.dHairline : AppColors.hairline).withAlpha(0x60)
+      ..strokeWidth = 0.5;
+
+    final scaleX = size.width / width;
+    final scaleY = size.height / height;
+
+    for (double x = 100; x < width; x += 100) {
+      canvas.drawLine(
+        Offset(x * scaleX, 12),
+        Offset(x * scaleX, size.height - 12),
+        gridPaint,
+      );
+    }
+    for (double y = 100; y < height; y += 100) {
+      canvas.drawLine(
+        Offset(12, y * scaleY),
+        Offset(size.width - 12, y * scaleY),
+        gridPaint,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _SchematicPainter old) =>
+      old.isDark != isDark || old.width != width || old.height != height;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
