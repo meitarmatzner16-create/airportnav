@@ -1,47 +1,22 @@
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/status_badge.dart';
 
+/// Thin shim that delegates to the kit-level [StatusBadge].
+///
+/// Public API is unchanged — any screen that constructs [FlightStatusBadge]
+/// continues to compile without modification.
 class FlightStatusBadge extends StatelessWidget {
   final String status;
+  final int? delayMinutes;
 
-  const FlightStatusBadge({super.key, required this.status});
+  const FlightStatusBadge({
+    super.key,
+    required this.status,
+    this.delayMinutes,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final (color, label) = _statusInfo(status);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: Color((color.value & 0x00FFFFFF) | 0x26000000),
-        borderRadius: BorderRadius.circular(100),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: color,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  (Color, String) _statusInfo(String status) {
-    switch (status) {
-      case 'on_time':
-        return (const Color(0xFF16A34A), 'On Time');
-      case 'delayed':
-        return (const Color(0xFFD97706), 'Delayed');
-      case 'cancelled':
-        return (const Color(0xFFDC2626), 'Cancelled');
-      case 'boarding':
-        return (const Color(0xFF7C3AED), 'Boarding');
-      case 'landed':
-        return (const Color(0xFF0891B2), 'Landed');
-      case 'scheduled':
-        return (const Color(0xFF2563EB), 'Scheduled');
-      default:
-        return (Colors.grey, status);
-    }
+    return StatusBadge(status: status, delayMinutes: delayMinutes);
   }
 }

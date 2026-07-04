@@ -4,9 +4,15 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/widgets/search_bar_widget.dart';
+import '../../../../core/widgets/state_views.dart';
 import '../providers/flight_providers.dart';
 import '../widgets/flight_card.dart';
 
+/// Sky Pass–styled flight search screen.
+///
+/// Token SearchBarWidget + FlightCard list (AppCard aesthetic + StatusBadge).
+/// EmptyState for no results. All hardcoded colors/padding replaced with tokens.
 class FlightSearchScreen extends ConsumerStatefulWidget {
   const FlightSearchScreen({super.key});
 
@@ -32,99 +38,64 @@ class _FlightSearchScreenState extends ConsumerState<FlightSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final flights = ref.watch(filteredFlightsProvider);
+    final query = ref.watch(flightSearchProvider);
 
     return Scaffold(
+      backgroundColor: isDark ? AppColors.dBg : AppColors.paper,
       appBar: AppBar(
-        title: const Text('Search Flights'),
-        elevation: AppSpacing.appBarElevation,
+        title: Text(
+          'Search Flights',
+          style: theme.textTheme.headlineSmall?.copyWith(
+            color: isDark ? AppColors.dText : AppColors.ink,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        backgroundColor: isDark ? AppColors.dBg : AppColors.paper,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Search field
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: TextField(
-              controller: _searchController,
-              onChanged: (value) {
-                ref.read(flightSearchProvider.notifier).state = value;
-              },
-              decoration: InputDecoration(
-                hintText: 'Search by flight number or city...',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          ref.read(flightSearchProvider.notifier).state = '';
-                        },
-                      )
-                    : null,
-                filled: true,
-                fillColor: AppColors.surfaceVariant,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.sm,
-                ),
-              ),
-            ),
+          // ── Search bar ────────────────────────────────────────────────
+          SearchBarWidget(
+            hint: 'Search by flight number or city…',
+            controller: _searchController,
+            onChanged: (value) {
+              ref.read(flightSearchProvider.notifier).state = value;
+            },
           ),
 
-          // Results count
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-            child: Align(
-              alignment: Alignment.centerLeft,
+          // ── Results count ─────────────────────────────────────────────
+          if (query.isNotEmpty && flights.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
               child: Text(
                 '${flights.length} flight${flights.length == 1 ? '' : 's'} found',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.onSurfaceVariant,
-                    ),
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: isDark ? AppColors.dMuted : AppColors.muted,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
 
-          // Flight list
+          const SizedBox(height: AppSpacing.xs),
+
+          // ── Flight list / empty ───────────────────────────────────────
           Expanded(
             child: flights.isEmpty
-                ? Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.flight_outlined,
-                          size: 64,
-                          color: const Color(0x805E6272),
-                        ),
-                        const SizedBox(height: AppSpacing.md),
-                        Text(
-                          'No flights found',
-                          style:
-                              Theme.of(context).textTheme.titleMedium?.copyWith(
-                                    color: AppColors.onSurfaceVariant,
-                                  ),
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          'Try searching with a different query',
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppColors.onSurfaceVariant,
-                                  ),
-                        ),
-                      ],
-                    ),
+                ? EmptyState(
+                    icon: Icons.flight_rounded,
+                    title: 'No flights found',
+                    message: query.isNotEmpty
+                        ? 'Try a different flight number or destination.'
+                        : 'Enter a flight number or city to search.',
                   )
                 : ListView.builder(
                     itemCount: flights.length,
-                    padding:
-                        const EdgeInsets.only(bottom: AppSpacing.xl),
+                    padding: const EdgeInsets.only(bottom: AppSpacing.xl),
                     itemBuilder: (context, index) {
                       final flight = flights[index];
                       return FlightCard(
