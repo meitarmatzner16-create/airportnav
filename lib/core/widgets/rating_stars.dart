@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import '../constants/app_colors.dart';
 
+/// Star rating row.
+///
+/// Default color is `AppColors.gold` (Sky Pass palette).
+/// Pass a custom `color` to override.
 class RatingStars extends StatelessWidget {
   final double rating;
   final double size;
@@ -14,7 +19,7 @@ class RatingStars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final starColor = color ?? Colors.amber;
+    final starColor = color ?? AppColors.gold;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(5, (index) {
