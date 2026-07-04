@@ -100,7 +100,7 @@ class _DashboardView extends ConsumerWidget {
         // ── Greeting + title block ────────────────────────────────────
         ScreenHeader(
           greeting: _timeGreeting(),
-          title: flight != null ? flight!.arrivalCity : 'Your flights',
+          title: flight != null ? flight!.departureCity : detectedAirport,
           subtitle: flight != null
               ? '${DateFormat('d MMM yyyy').format(flight!.departureTime)} · ${flight!.flightNumber}'
               : null,
@@ -290,46 +290,6 @@ class _TopBar extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          // ── "Flights board" tonal pill ──────────────────────────────
-          Semantics(
-            label: 'Flights board',
-            button: true,
-            child: GestureDetector(
-              onTap: () => context.push('/flights'),
-              behavior: HitTestBehavior.opaque,
-              child: Container(
-                constraints: const BoxConstraints(minHeight: 44),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.smMd, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? AppColors.skyAlpha15
-                      : AppColors.skyTint,
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.radiusFull),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.format_list_bulleted_rounded,
-                      size: 14,
-                      color: isDark ? AppColors.dSky : AppColors.sky,
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      'Flights',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: isDark ? AppColors.dSky : AppColors.sky,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
           // Airport selector chip
           _AirportChip(
             value: detectedAirport,

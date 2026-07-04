@@ -38,13 +38,13 @@ class FlightsBoardScreen extends ConsumerWidget {
             ScreenHeader(
               greeting: _timeGreeting(),
               title: 'Departing soon',
-              subtitle: 'Choose your flight',
+              subtitle: 'Pick your flight and we\'ll tailor your routes, map, and nearby venues to it.',
               bottomPadding: _sectionGap,
               actions: [
                 TonalPill(
                   label: 'Home',
                   icon: Icons.arrow_back_ios_new_rounded,
-                  onTap: () => context.pop(),
+                  onTap: () => context.go('/home'),
                 ),
                 TonalPill(
                   label: detectedAirport,
@@ -73,7 +73,7 @@ class FlightsBoardScreen extends ConsumerWidget {
                     isDark: isDark,
                     onTap: () {
                       ref.read(selectedFlightProvider.notifier).state = flight;
-                      context.pop();
+                      context.go('/home');
                     },
                   ),
                 ),
