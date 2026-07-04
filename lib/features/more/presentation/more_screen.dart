@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:airport_nav/app.dart';
 import 'package:airport_nav/core/constants/app_colors.dart';
 import 'package:airport_nav/core/constants/app_spacing.dart';
+import 'package:airport_nav/core/widgets/screen_header.dart';
 import 'package:airport_nav/features/flight/presentation/providers/flight_providers.dart';
 
 class MoreScreen extends ConsumerWidget {
@@ -14,23 +15,20 @@ class MoreScreen extends ConsumerWidget {
     final themeMode = ref.watch(themeModeProvider);
     final savedFlightIds = ref.watch(savedFlightIdsProvider);
 
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'More',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(
-          AppSpacing.gutter,
-          AppSpacing.smMd,
-          AppSpacing.gutter,
-          AppSpacing.xxl,
-        ),
+      backgroundColor: isDark ? AppColors.dBg : AppColors.paper,
+      body: SafeArea(
+       child: ListView(
+        padding: EdgeInsets.zero,
         children: [
+          const ScreenHeader(title: 'More', subtitle: 'Settings & preferences'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
           _SectionTitle('Your data'),
           _GroupedCard(children: [
             _SettingsTile(
@@ -118,7 +116,12 @@ class MoreScreen extends ConsumerWidget {
               onTap: () {},
             ),
           ]),
+          const SizedBox(height: AppSpacing.xxl),
+              ],
+            ),
+          ),
         ],
+       ),
       ),
     );
   }
@@ -168,11 +171,19 @@ class _GroupedCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: isDark ? AppColors.dSurface : AppColors.card,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.hairline, width: 1),
+        border: Border.all(
+            color: isDark ? AppColors.dHairline : AppColors.hairline, width: 1),
+        boxShadow: const [
+          BoxShadow(
+              color: AppColors.shadowSoft, blurRadius: 1, offset: Offset(0, 1)),
+          BoxShadow(
+              color: AppColors.shadow, blurRadius: 12, offset: Offset(0, 4)),
+        ],
       ),
       clipBehavior: Clip.antiAlias,
       child: Column(children: children),
@@ -210,6 +221,7 @@ class _SettingsTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -225,11 +237,11 @@ class _SettingsTile extends StatelessWidget {
                 width: 36,
                 height: 36,
                 decoration: BoxDecoration(
-                  color: AppColors.surfaceVariant,
+                  color: isDark ? AppColors.dSurfaceVariant : AppColors.skyTint,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                 ),
                 child: Icon(icon,
-                    color: AppColors.onSurfaceVariant, size: 18),
+                    color: isDark ? AppColors.dSky : AppColors.sky, size: 18),
               ),
               const SizedBox(width: AppSpacing.smMd),
               Expanded(
@@ -288,7 +300,7 @@ class _CountBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.accent,
+        color: AppColors.sky,
         borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
       ),
       child: Text(

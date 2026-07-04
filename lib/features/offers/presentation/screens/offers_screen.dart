@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:airport_nav/core/constants/app_colors.dart';
 import 'package:airport_nav/core/constants/app_spacing.dart';
+import 'package:airport_nav/core/widgets/app_card.dart';
+import 'package:airport_nav/core/widgets/category_filter_chips.dart';
+import 'package:airport_nav/core/widgets/screen_header.dart';
+import 'package:airport_nav/core/widgets/section_header.dart';
 import 'package:airport_nav/core/widgets/state_views.dart';
 import 'package:airport_nav/features/offers/presentation/providers/offer_providers.dart';
 import 'package:airport_nav/features/offers/presentation/widgets/offer_card.dart';
@@ -10,14 +14,8 @@ import 'package:airport_nav/features/flight/presentation/providers/flight_provid
 class OffersScreen extends ConsumerWidget {
   const OffersScreen({super.key});
 
-  static const _categories = [
-    {'key': 'all', 'label': 'All'},
-    {'key': 'dining', 'label': 'Dining'},
-    {'key': 'shopping', 'label': 'Shopping'},
-    {'key': 'lounge', 'label': 'Lounge'},
-    {'key': 'duty_free', 'label': 'Duty Free'},
-    {'key': 'travel', 'label': 'Travel'},
-  ];
+  static const _categoryKeys = ['all', 'dining', 'shopping', 'lounge', 'duty_free', 'travel'];
+  static const _categoryLabels = ['All', 'Dining', 'Shopping', 'Lounge', 'Duty Free', 'Travel'];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -26,138 +24,133 @@ class OffersScreen extends ConsumerWidget {
     final airlineOffers = ref.watch(airlineOffersProvider);
     final selectedFlight = ref.watch(selectedFlightProvider);
     final detectedAirport = ref.watch(detectedAirportProvider);
-    final theme = Theme.of(context);
 
     final airportCode = selectedFlight?.departureAirport ?? detectedAirport;
     final airline = selectedFlight?.airline;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
+      backgroundColor: Theme.of(context).brightness == Brightness.dark
+          ? AppColors.dBg
+          : AppColors.paper,
+      body: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Icons.local_offer_rounded,
-                color: AppColors.accent, size: 22),
-            const SizedBox(width: AppSpacing.sm),
-            Text(
-              'Offers',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
+            // ── Screen header ────────────────────────────────────────
+            ScreenHeader(
+              title: 'Offers',
+              subtitle: selectedFlight != null
+                  ? 'Personalised for ${selectedFlight.flightNumber} · $airportCode'
+                  : 'Deals at $airportCode',
             ),
-          ],
-        ),
-      ),
-      body: Column(
-        children: [
-          // Flight context strip
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.gutter,
-              AppSpacing.xs,
-              AppSpacing.gutter,
-              0,
-            ),
-            child: selectedFlight != null
-                ? _FlightContextCard(
-                    airline: selectedFlight.airline,
-                    flightNumber: selectedFlight.flightNumber,
-                    airportCode: airportCode,
-                  )
-                : _NoFlightHint(),
-          ),
 
-          const SizedBox(height: AppSpacing.md),
-
-          // Category filter chips
-          SizedBox(
-            height: 40,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
-              itemCount: _categories.length,
-              separatorBuilder: (_, _) => const SizedBox(width: AppSpacing.sm),
-              itemBuilder: (context, index) {
-                final cat = _categories[index];
-                final isSelected = selectedCategory == cat['key'];
-                return _FilterPill(
-                  label: cat['label']!,
-                  isSelected: isSelected,
-                  onTap: () {
-                    ref.read(offerCategoryFilterProvider.notifier).state =
-                        cat['key']!;
-                  },
-                );
-              },
-            ),
-          ),
-
-          const SizedBox(height: AppSpacing.lg),
-
-          Expanded(
-            child: ListView(
+            // ── Flight context strip ─────────────────────────────────
+            Padding(
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.gutter,
                 0,
                 AppSpacing.gutter,
-                AppSpacing.xxl,
+                AppSpacing.md,
               ),
-              children: [
-                if (airlineOffers.isNotEmpty &&
-                    selectedCategory == 'all' &&
-                    airline != null) ...[
-                  _SectionHeader(
-                    title: 'Exclusive for $airline',
-                    subtitle:
-                        'Curated for ${selectedFlight!.flightNumber} passengers',
-                  ),
-                  const SizedBox(height: AppSpacing.md),
-                  SizedBox(
-                    height: 230,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: airlineOffers.length,
-                      separatorBuilder: (_, _) =>
-                          const SizedBox(width: AppSpacing.smMd),
-                      itemBuilder: (context, index) {
-                        final offer = airlineOffers[index];
-                        return SizedBox(
-                          width: 280,
-                          child: OfferCard(offer: offer),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: AppSpacing.xl),
-                  _SectionHeader(title: 'All deals at $airportCode'),
-                  const SizedBox(height: AppSpacing.md),
-                ],
-
-                if (airlineOffers.isEmpty && selectedCategory == 'all') ...[
-                  _SectionHeader(title: 'Deals at $airportCode'),
-                  const SizedBox(height: AppSpacing.md),
-                ],
-
-                if (filteredOffers.isEmpty)
-                  const EmptyState(
-                    icon: Icons.local_offer_outlined,
-                    title: 'No offers yet',
-                    message: 'Check back closer to your flight',
-                  )
-                else
-                  ...filteredOffers
-                      .where((o) =>
-                          selectedCategory != 'all' ||
-                          !airlineOffers.any((ao) => ao.id == o.id))
-                      .map(
-                        (offer) => Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.md),
-                          child: OfferCard(offer: offer),
-                        ),
-                      ),
-              ],
+              child: selectedFlight != null
+                  ? _FlightContextCard(
+                      airline: selectedFlight.airline,
+                      flightNumber: selectedFlight.flightNumber,
+                      airportCode: airportCode,
+                    )
+                  : _NoFlightHint(),
             ),
-          ),
-        ],
+
+            // ── Category filter chips ────────────────────────────────
+            CategoryFilterChips(
+              categories: _categoryLabels,
+              selected: _categoryLabels[_categoryKeys.indexOf(
+                _categoryKeys.contains(selectedCategory) ? selectedCategory : 'all',
+              )],
+              onSelected: (label) {
+                final idx = _categoryLabels.indexOf(label);
+                if (idx >= 0) {
+                  ref.read(offerCategoryFilterProvider.notifier).state =
+                      _categoryKeys[idx];
+                }
+              },
+            ),
+
+            const SizedBox(height: AppSpacing.lg),
+
+            // ── Content ──────────────────────────────────────────────
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(
+                  AppSpacing.gutter,
+                  0,
+                  AppSpacing.gutter,
+                  AppSpacing.xxl,
+                ),
+                children: [
+                  // Airline exclusive section
+                  if (airlineOffers.isNotEmpty &&
+                      selectedCategory == 'all' &&
+                      airline != null) ...[
+                    SectionHeader(
+                      title: 'Exclusive for $airline',
+                      actionText: null,
+                    ),
+                    const SizedBox(height: AppSpacing.smMd),
+                    SizedBox(
+                      height: 230,
+                      child: ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: airlineOffers.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(width: AppSpacing.smMd),
+                        itemBuilder: (context, index) {
+                          final offer = airlineOffers[index];
+                          return SizedBox(
+                            width: 280,
+                            child: AppCard(
+                              padding: EdgeInsets.zero,
+                              child: OfferCard(offer: offer),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sectionGap),
+                    SectionHeader(title: 'All deals at $airportCode'),
+                    const SizedBox(height: AppSpacing.smMd),
+                  ],
+
+                  if (airlineOffers.isEmpty && selectedCategory == 'all') ...[
+                    SectionHeader(title: 'Deals at $airportCode'),
+                    const SizedBox(height: AppSpacing.smMd),
+                  ],
+
+                  if (filteredOffers.isEmpty)
+                    const EmptyState(
+                      icon: Icons.local_offer_outlined,
+                      title: 'No offers yet',
+                      message: 'Check back closer to your flight',
+                    )
+                  else
+                    ...filteredOffers
+                        .where((o) =>
+                            selectedCategory != 'all' ||
+                            !airlineOffers.any((ao) => ao.id == o.id))
+                        .map(
+                          (offer) => Padding(
+                            padding: const EdgeInsets.only(bottom: AppSpacing.md),
+                            child: AppCard(
+                              padding: EdgeInsets.zero,
+                              child: OfferCard(offer: offer),
+                            ),
+                          ),
+                        ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -185,7 +178,7 @@ class _FlightContextCard extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
-          colors: [AppColors.primary, AppColors.primaryLight],
+          colors: [AppColors.sky, AppColors.sky2],
         ),
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       ),
@@ -233,18 +226,15 @@ class _NoFlightHint extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Container(
+    final isDark = theme.brightness == Brightness.dark;
+    return AppCard(
       padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md, vertical: AppSpacing.smMd),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.hairline, width: 1),
-      ),
       child: Row(
         children: [
-          const Icon(Icons.info_outline_rounded,
-              size: AppSpacing.iconSm, color: AppColors.sky),
+          Icon(Icons.info_outline_rounded,
+              size: AppSpacing.iconSm,
+              color: isDark ? AppColors.dSky : AppColors.sky),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
@@ -259,82 +249,3 @@ class _NoFlightHint extends StatelessWidget {
     );
   }
 }
-
-class _FilterPill extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _FilterPill({
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.sky : AppColors.card,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-          border: Border.all(
-            color: isSelected ? AppColors.sky : AppColors.hairline,
-            width: 1,
-          ),
-        ),
-        child: Text(
-          label,
-          style: theme.textTheme.labelLarge?.copyWith(
-            color: isSelected ? Colors.white : AppColors.textColor,
-            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SectionHeader extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-
-  const _SectionHeader({
-    required this.title,
-    this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: theme.textTheme.headlineMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-            color: AppColors.ink,
-          ),
-        ),
-        if (subtitle != null) ...[
-          const SizedBox(height: 4),
-          Text(
-            subtitle!,
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppColors.muted,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-}
-

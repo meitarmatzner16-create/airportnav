@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:airport_nav/core/constants/app_colors.dart';
 import 'package:airport_nav/core/constants/app_spacing.dart';
 import 'package:airport_nav/core/theme/app_theme.dart';
+import 'package:airport_nav/core/widgets/app_card.dart';
+import 'package:airport_nav/core/widgets/screen_header.dart';
 import 'package:airport_nav/features/voice_chat/domain/entities/chat_message.dart';
 import 'package:airport_nav/features/voice_chat/presentation/providers/voice_chat_providers.dart';
 import 'package:airport_nav/features/voice_chat/presentation/widgets/chat_bubble.dart';
@@ -159,45 +161,46 @@ class _VoiceChatScreenState extends ConsumerState<VoiceChatScreen>
     final greetingText =
         messages.isNotEmpty && !messages.first.isUser ? messages.first.text : '';
 
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            ShaderMask(
-              shaderCallback: (rect) => const LinearGradient(
-                colors: [AppColors.accent, AppColors.primaryLight],
-              ).createShader(rect),
-              child: const Icon(Icons.auto_awesome, size: 22, color: Colors.white),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Text(
-              'Assistant',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          _AirportPill(
-            airportCode: airportCode,
-            onChanged: (value) {
-              ref.read(voiceChatAirportProvider.notifier).state = value;
-              ref.read(voiceChatMessagesProvider.notifier).resetChat();
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh_rounded),
-            tooltip: 'New conversation',
-            onPressed: () {
-              ref.read(voiceChatMessagesProvider.notifier).resetChat();
-            },
-          ),
-          const SizedBox(width: AppSpacing.xs),
-        ],
-      ),
-      body: Column(
+      backgroundColor: isDark ? AppColors.dBg : AppColors.paper,
+      body: SafeArea(
+        child: Column(
         children: [
+          // ── Screen header ────────────────────────────────────────
+          ScreenHeader(
+            title: 'Assistant',
+            subtitle: 'AI-powered airport planner',
+            bottomPadding: 0,
+            actions: [
+              TonalPill(
+                label: airportCode,
+                icon: Icons.public_rounded,
+              ),
+              Semantics(
+                label: 'New conversation',
+                button: true,
+                child: GestureDetector(
+                  onTap: () {
+                    ref.read(voiceChatMessagesProvider.notifier).resetChat();
+                  },
+                  behavior: HitTestBehavior.opaque,
+                  child: SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: Center(
+                      child: Icon(
+                        Icons.refresh_rounded,
+                        size: 20,
+                        color: isDark ? AppColors.dMuted : AppColors.muted,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
           Expanded(
             child: AnimatedSwitcher(
               duration: const Duration(milliseconds: 280),
@@ -262,6 +265,7 @@ class _VoiceChatScreenState extends ConsumerState<VoiceChatScreen>
             },
           ),
         ],
+       ),
       ),
     );
   }
@@ -414,35 +418,21 @@ class _SuggestionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final surface = isDark ? AppColors.darkSurface : AppColors.surface;
-    final hairline = isDark ? AppColors.hairlineDark : AppColors.hairline;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: surface,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            border: Border.all(color: hairline, width: 1),
-            boxShadow: AppShadows.card,
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Row(
+    return AppCard(
+      onTap: onTap,
+      child: Row(
               children: [
                 Container(
                   width: 40,
                   height: 40,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                    color: AppColors.accentAlpha10,
+                    color: isDark ? AppColors.skyAlpha15 : AppColors.skyTint,
                   ),
                   child: Icon(
                     suggestion.icon,
-                    color: AppColors.accent,
+                    color: isDark ? AppColors.dSky : AppColors.sky,
                     size: 20,
                   ),
                 ),
@@ -474,9 +464,6 @@ class _SuggestionCard extends StatelessWidget {
                   size: 18,
                 ),
               ],
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -661,9 +648,9 @@ class _InputDock extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final surface = isDark ? AppColors.darkSurface : AppColors.surface;
-    final fieldBg = isDark ? AppColors.darkSurfaceVariant : AppColors.surfaceVariant;
-    final hairline = isDark ? AppColors.hairlineDark : AppColors.hairline;
+    final surface = isDark ? AppColors.dSurface : AppColors.card;
+    final fieldBg = isDark ? AppColors.dSurfaceVariant : const Color(0xFFEEF1F4);
+    final hairline = isDark ? AppColors.dHairline : AppColors.hairline;
 
     return Container(
       decoration: BoxDecoration(
@@ -807,56 +794,6 @@ class _MicButton extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _AirportPill extends StatelessWidget {
-  final String airportCode;
-  final ValueChanged<String> onChanged;
-
-  const _AirportPill({required this.airportCode, required this.onChanged});
-
-  static const _airports = ['JFK', 'LAX', 'LHR', 'CDG', 'DXB', 'SIN', 'NRT', 'SFO'];
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.smMd, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.accentAlpha10,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-        border: Border.all(color: AppColors.accentAlpha20, width: 1),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(Icons.public_rounded, size: 14, color: AppColors.accent),
-          const SizedBox(width: 6),
-          DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: airportCode,
-              isDense: true,
-              icon: const Icon(Icons.arrow_drop_down_rounded,
-                  size: 18, color: AppColors.accent),
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: AppColors.accent,
-                fontWeight: FontWeight.w700,
-              ),
-              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              items: [
-                for (final a in _airports)
-                  DropdownMenuItem(value: a, child: Text(a)),
-              ],
-              onChanged: (value) {
-                if (value != null) onChanged(value);
-              },
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

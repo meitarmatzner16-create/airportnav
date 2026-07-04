@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
-import '../constants/app_spacing.dart';
+import '../constants/app_colors.dart';
 
+/// Canonical section header row.
+///
+/// - Title: `titleLarge` (~16px), w600, ink/dText.
+/// - Optional right action: sky, ~13px, w600, ≥44px touch target.
+/// - No horizontal padding — callers wrap in their own Padding (gutter).
 class SectionHeader extends StatelessWidget {
   final String title;
   final String? actionText;
@@ -15,25 +20,41 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: Theme.of(context).textTheme.headlineSmall,
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final titleColor = isDark ? AppColors.dText : AppColors.ink;
+    final actionColor = isDark ? AppColors.dSky : AppColors.sky;
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: theme.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: titleColor,
           ),
-          if (actionText != null)
-            TextButton(
-              onPressed: onAction,
-              child: Text(actionText!),
+        ),
+        if (actionText != null)
+          GestureDetector(
+            onTap: onAction,
+            behavior: HitTestBehavior.opaque,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: 44, minWidth: 44),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: Text(
+                  actionText!,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                    color: actionColor,
+                  ),
+                ),
+              ),
             ),
-        ],
-      ),
+          ),
+      ],
     );
   }
 }

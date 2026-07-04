@@ -8,6 +8,8 @@ import '../../../core/constants/app_spacing.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/boarding_pass_card.dart';
 import '../../../core/widgets/nearby_card.dart';
+import '../../../core/widgets/screen_header.dart';
+import '../../../core/widgets/section_header.dart';
 import '../../../core/widgets/state_views.dart';
 import '../../../features/flight/domain/entities/flight.dart';
 import '../../../features/flight/presentation/providers/flight_providers.dart';
@@ -96,63 +98,19 @@ class _DashboardView extends ConsumerWidget {
         ),
 
         // ── Greeting + title block ────────────────────────────────────
-        Padding(
-          padding: const EdgeInsets.fromLTRB(_gutter, 8, _gutter, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _timeGreeting(),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  fontSize: 14,
-                  color: AppColors.muted,
-                ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                flight != null ? flight!.arrivalCity : 'Your flights',
-                style: theme.textTheme.displaySmall?.copyWith(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.6,
-                  color: isDark ? AppColors.dText : AppColors.ink,
-                ),
-              ),
-              const SizedBox(height: 6),
-              if (flight != null)
-                Row(
-                  children: [
-                    Text(
-                      '${DateFormat('d MMM yyyy').format(flight!.departureTime)} · ${flight!.flightNumber}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        fontSize: 14,
-                        color: AppColors.muted,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    // "Change" → pushes to Flights Board
-                    GestureDetector(
-                      onTap: () => context.push('/flights'),
-                      behavior: HitTestBehavior.opaque,
-                      child: ConstrainedBox(
-                        constraints: const BoxConstraints(minHeight: 44, minWidth: 44),
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            'Change',
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w500,
-                              color: isDark ? AppColors.dSky : AppColors.sky,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-            ],
-          ),
+        ScreenHeader(
+          greeting: _timeGreeting(),
+          title: flight != null ? flight!.arrivalCity : 'Your flights',
+          subtitle: flight != null
+              ? '${DateFormat('d MMM yyyy').format(flight!.departureTime)} · ${flight!.flightNumber}'
+              : null,
+          actions: [
+            TonalPill(
+              label: 'Flights',
+              icon: Icons.format_list_bulleted_rounded,
+              onTap: () => context.push('/flights'),
+            ),
+          ],
         ),
 
         // ── Boarding pass card (or empty state if no flights) ─────────
@@ -225,34 +183,11 @@ class _DashboardView extends ConsumerWidget {
         // ── Near your gate ────────────────────────────────────────────
         const SizedBox(height: _sectionGapLg),
         Padding(
-          padding: const EdgeInsets.fromLTRB(_gutter, 0, _gutter, 0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Near your gate',
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? AppColors.dText : AppColors.ink,
-                ),
-              ),
-              GestureDetector(
-                onTap: () => context.go('/venues'),
-                behavior: HitTestBehavior.opaque,
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(minHeight: 44, minWidth: 44),
-                  child: Align(
-                    child: Text(
-                      'See all',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: isDark ? AppColors.dSky : AppColors.sky,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
+          padding: const EdgeInsets.symmetric(horizontal: _gutter),
+          child: SectionHeader(
+            title: 'Near your gate',
+            actionText: 'See all',
+            onAction: () => context.go('/venues'),
           ),
         ),
         const SizedBox(height: 12),
@@ -288,15 +223,9 @@ class _DashboardView extends ConsumerWidget {
           const SizedBox(height: _sectionGapLg),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: _gutter),
-            child: Text(
-              'Recent plans',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: isDark ? AppColors.dText : AppColors.ink,
-              ),
-            ),
+            child: SectionHeader(title: 'Recent plans'),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 4),
           _RecentPlansSection(isDark: isDark),
         ],
 

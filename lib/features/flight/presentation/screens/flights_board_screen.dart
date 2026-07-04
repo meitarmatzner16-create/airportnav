@@ -7,7 +7,9 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/screen_header.dart';
 import '../../../../core/widgets/state_views.dart';
+import '../../../../core/widgets/status_badge.dart';
 import '../../domain/entities/flight.dart';
 import '../providers/flight_providers.dart';
 
@@ -18,8 +20,6 @@ const _sectionGap = AppSpacing.sectionGap;
 /// Route: /flights  (top-level, no bottom nav shell)
 class FlightsBoardScreen extends ConsumerWidget {
   const FlightsBoardScreen({super.key});
-
-  static const _airports = ['JFK', 'LAX', 'LHR', 'CDG', 'DXB', 'SIN', 'NRT', 'SFO'];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -34,49 +34,23 @@ class FlightsBoardScreen extends ConsumerWidget {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            // ── Top bar ──────────────────────────────────────────────
-            _BoardTopBar(
-              detectedAirport: detectedAirport,
-              airports: FlightsBoardScreen._airports,
-              isDark: isDark,
-              onChangeAirport: (v) {
-                ref.read(detectedAirportProvider.notifier).state = v;
-              },
-              onBack: () => context.pop(),
-            ),
-
             // ── Title block ──────────────────────────────────────────
-            Padding(
-              padding: const EdgeInsets.fromLTRB(_gutter, 8, _gutter, _sectionGap),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _timeGreeting(),
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontSize: 14,
-                      color: AppColors.muted,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Departing soon',
-                    style: theme.textTheme.displaySmall?.copyWith(
-                      fontSize: 28,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -0.6,
-                      color: isDark ? AppColors.dText : AppColors.ink,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Choose your flight',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.muted,
-                    ),
-                  ),
-                ],
-              ),
+            ScreenHeader(
+              greeting: _timeGreeting(),
+              title: 'Departing soon',
+              subtitle: 'Choose your flight',
+              bottomPadding: _sectionGap,
+              actions: [
+                TonalPill(
+                  label: 'Home',
+                  icon: Icons.arrow_back_ios_new_rounded,
+                  onTap: () => context.pop(),
+                ),
+                TonalPill(
+                  label: detectedAirport,
+                  icon: Icons.gps_fixed_rounded,
+                ),
+              ],
             ),
 
             // ── Flight list or empty state ───────────────────────────
@@ -120,162 +94,7 @@ class FlightsBoardScreen extends ConsumerWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Board top bar — "← Home" pill + airport chip
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _BoardTopBar extends StatelessWidget {
-  final String detectedAirport;
-  final List<String> airports;
-  final bool isDark;
-  final ValueChanged<String> onChangeAirport;
-  final VoidCallback onBack;
-
-  const _BoardTopBar({
-    required this.detectedAirport,
-    required this.airports,
-    required this.isDark,
-    required this.onChangeAirport,
-    required this.onBack,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(_gutter, 12, _gutter, 4),
-      child: Row(
-        children: [
-          // ← Home pill
-          Semantics(
-            label: 'Go back to home',
-            button: true,
-            child: GestureDetector(
-              onTap: onBack,
-              behavior: HitTestBehavior.opaque,
-              child: Container(
-                constraints: const BoxConstraints(minHeight: 44, minWidth: 44),
-                padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.smMd, vertical: 8),
-                decoration: BoxDecoration(
-                  color: isDark
-                      ? AppColors.skyAlpha15
-                      : AppColors.skyAlpha10,
-                  borderRadius:
-                      BorderRadius.circular(AppSpacing.radiusFull),
-                  border: Border.all(
-                    color: isDark
-                        ? AppColors.skyAlpha20
-                        : AppColors.skyAlpha15,
-                    width: 1,
-                  ),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 12,
-                      color: isDark ? AppColors.dSky : AppColors.sky,
-                    ),
-                    const SizedBox(width: 5),
-                    Text(
-                      'Home',
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: isDark ? AppColors.dSky : AppColors.sky,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          const Spacer(),
-
-          // Airport chip
-          _BoardAirportChip(
-            value: detectedAirport,
-            airports: airports,
-            isDark: isDark,
-            onChanged: onChangeAirport,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Airport selector chip (board-local variant)
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _BoardAirportChip extends StatelessWidget {
-  final String value;
-  final List<String> airports;
-  final bool isDark;
-  final ValueChanged<String> onChanged;
-
-  const _BoardAirportChip({
-    required this.value,
-    required this.airports,
-    required this.isDark,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 6),
-      padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.smMd, vertical: 4),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.skyAlpha15 : AppColors.skyAlpha10,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-        border: Border.all(
-            color: isDark ? AppColors.skyAlpha20 : AppColors.skyAlpha15,
-            width: 1),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.gps_fixed_rounded,
-              size: 12,
-              color: isDark ? AppColors.dSky : AppColors.sky),
-          const SizedBox(width: 5),
-          DropdownButtonHideUnderline(
-            child: DropdownButton<String>(
-              value: value,
-              isDense: true,
-              icon: Icon(Icons.arrow_drop_down_rounded,
-                  size: 16,
-                  color: isDark ? AppColors.dSky : AppColors.sky),
-              style: theme.textTheme.labelLarge?.copyWith(
-                color: isDark ? AppColors.dSky : AppColors.sky,
-                fontWeight: FontWeight.w700,
-              ),
-              dropdownColor: isDark ? AppColors.dSurface : AppColors.card,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              items: [
-                for (final a in airports)
-                  DropdownMenuItem(value: a, child: Text(a)),
-              ],
-              onChanged: (v) {
-                if (v != null) onChanged(v);
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Flight card for the board (same visual DNA as home_screen._FlightCard)
+// Flight card for the board
 // ─────────────────────────────────────────────────────────────────────────────
 
 class _BoardFlightCard extends StatelessWidget {
@@ -356,10 +175,9 @@ class _BoardFlightCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                    _StatusPill(
+                    StatusBadge(
                       status: flight.status,
                       delayMinutes: flight.delayMinutes,
-                      isDark: isDark,
                     ),
                   ],
                 ),
@@ -520,63 +338,3 @@ class _BoardFlightCard extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Status pill (local copy — same logic as home_screen)
-// ─────────────────────────────────────────────────────────────────────────────
-
-class _StatusPill extends StatelessWidget {
-  final String status;
-  final int? delayMinutes;
-  final bool isDark;
-
-  const _StatusPill({
-    required this.status,
-    this.delayMinutes,
-    required this.isDark,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final (label, textColor, bgColor) = switch (status) {
-      'boarding' => ('Boarding', AppColors.sky, AppColors.skyAlpha15),
-      'on_time' => ('On time', AppColors.success, AppColors.successAlpha15),
-      'delayed' => (
-          'Delayed ${delayMinutes ?? ""}m',
-          AppColors.warning,
-          AppColors.warningAlpha15,
-        ),
-      'cancelled' => ('Cancelled', AppColors.error, AppColors.errorAlpha15),
-      'scheduled' => ('Scheduled', AppColors.muted, AppColors.inkAlpha10),
-      'landed' => ('Landed', AppColors.ink, AppColors.inkAlpha10),
-      _ => (status, AppColors.muted, AppColors.inkAlpha10),
-    };
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration:
-                BoxDecoration(shape: BoxShape.circle, color: textColor),
-          ),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: textColor,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

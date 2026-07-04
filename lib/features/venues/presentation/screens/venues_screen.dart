@@ -7,6 +7,10 @@ import 'package:airport_nav/features/venues/domain/entities/venue.dart';
 import 'package:airport_nav/features/venues/domain/services/venue_search_service.dart';
 import 'package:airport_nav/features/venues/domain/taxonomy/venue_taxonomy.dart';
 import 'package:airport_nav/features/venues/presentation/providers/venue_providers.dart';
+import 'package:airport_nav/core/widgets/app_card.dart';
+import 'package:airport_nav/core/widgets/screen_header.dart';
+import 'package:airport_nav/core/widgets/section_header.dart';
+import 'package:airport_nav/core/widgets/state_views.dart';
 import 'package:airport_nav/features/flight/presentation/providers/flight_providers.dart';
 
 class VenuesScreen extends ConsumerStatefulWidget {
@@ -37,63 +41,33 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
     final airport = ref.watch(detectedAirportProvider);
     final isSearching = query.isNotEmpty;
 
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            const Icon(Icons.search_rounded, color: AppColors.accent, size: 22),
-            const SizedBox(width: AppSpacing.sm),
-            Text(
-              'Venues',
-              style: theme.textTheme.headlineSmall?.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(
-                horizontal: AppSpacing.sm, vertical: AppSpacing.sm),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () => context.push('/map'),
-                borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.smMd, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: AppColors.accentAlpha10,
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                    border: Border.all(color: AppColors.accentAlpha20, width: 1),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.map_rounded,
-                          size: 14, color: AppColors.accent),
-                      const SizedBox(width: 4),
-                      Text('Map',
-                          style: theme.textTheme.labelLarge?.copyWith(
-                            color: AppColors.accent,
-                            fontWeight: FontWeight.w700,
-                          )),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-      body: Column(
+      backgroundColor: isDark ? AppColors.dBg : AppColors.paper,
+      body: SafeArea(
+       child: Column(
         children: [
+          // ── Screen header ────────────────────────────────────────
+          ScreenHeader(
+            title: 'Venues',
+            subtitle: isSearching
+                ? '${searchResult.matches.length} result${searchResult.matches.length == 1 ? '' : 's'}'
+                : '${allVenues.length} at $airport',
+            bottomPadding: AppSpacing.smMd,
+            actions: [
+              TonalPill(
+                label: 'Map',
+                icon: Icons.map_rounded,
+                onTap: () => context.push('/map'),
+              ),
+            ],
+          ),
+
           // Search field
           Padding(
             padding: const EdgeInsets.fromLTRB(AppSpacing.gutter,
-                AppSpacing.xs, AppSpacing.gutter, AppSpacing.smMd),
+                0, AppSpacing.gutter, AppSpacing.smMd),
             child: TextField(
               controller: _searchController,
               focusNode: _focusNode,
@@ -125,45 +99,6 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
             ),
           ),
 
-          // Context row (airport + count)
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm + 2, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryAlpha10,
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(Icons.public_rounded,
-                          size: 12, color: AppColors.primary),
-                      const SizedBox(width: 4),
-                      Text(airport,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w700,
-                              letterSpacing: 0.4)),
-                    ],
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  isSearching
-                      ? '${searchResult.matches.length} result${searchResult.matches.length == 1 ? '' : 's'}'
-                      : '${allVenues.length} venues',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppColors.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.smMd),
 
           // Content
           Expanded(
@@ -180,6 +115,7 @@ class _VenuesScreenState extends ConsumerState<VenuesScreen> {
             ),
           ),
         ],
+       ),
       ),
     );
   }
@@ -196,6 +132,7 @@ class _AlphabeticalListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final letters = byLetter.keys.toList()..sort();
 
     return ListView.builder(
@@ -216,7 +153,7 @@ class _AlphabeticalListView extends StatelessWidget {
                   Text(
                     letter,
                     style: theme.textTheme.labelMedium?.copyWith(
-                      color: AppColors.accent,
+                      color: isDark ? AppColors.dSky : AppColors.sky,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 0.6,
                     ),
@@ -263,11 +200,7 @@ class _SearchResultsView extends StatelessWidget {
           AppSpacing.gutter, 0, AppSpacing.gutter, AppSpacing.xxl),
       children: [
         if (matches.isNotEmpty) ...[
-          _ResultsSectionHeader(
-            icon: Icons.check_circle_rounded,
-            title: 'Found',
-            color: AppColors.accent,
-          ),
+          SectionHeader(title: 'Found'),
           const SizedBox(height: AppSpacing.sm),
           ...matches.map((v) => Padding(
                 padding: const EdgeInsets.only(bottom: AppSpacing.smMd),
@@ -277,9 +210,12 @@ class _SearchResultsView extends StatelessWidget {
 
         if (matches.isEmpty) ...[
           const SizedBox(height: AppSpacing.lg),
-          _NotFoundEmptyState(
-            query: query,
-            hasIntent: result.hasIntent,
+          EmptyState(
+            icon: Icons.search_off_rounded,
+            title: '"$query" not found here',
+            message: result.hasIntent
+                ? 'Here are similar venues you might like'
+                : 'Try a different venue, brand, or category',
           ),
           if (result.hasIntent) ...[
             const SizedBox(height: AppSpacing.smMd),
@@ -290,10 +226,8 @@ class _SearchResultsView extends StatelessWidget {
 
         if (suggestions.isNotEmpty) ...[
           if (matches.isNotEmpty) const SizedBox(height: AppSpacing.smMd),
-          _ResultsSectionHeader(
-            icon: Icons.auto_awesome_rounded,
+          SectionHeader(
             title: matches.isNotEmpty ? 'Similar venues' : 'You might like',
-            color: AppColors.primary,
           ),
           const SizedBox(height: AppSpacing.sm),
           ...suggestions.map((s) => _VenueListTile(
@@ -303,89 +237,6 @@ class _SearchResultsView extends StatelessWidget {
               )),
         ],
       ],
-    );
-  }
-}
-
-class _ResultsSectionHeader extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final Color color;
-
-  const _ResultsSectionHeader({
-    required this.icon,
-    required this.title,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Row(
-      children: [
-        Icon(icon, size: 16, color: color),
-        const SizedBox(width: 6),
-        Text(
-          title,
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: color,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _NotFoundEmptyState extends StatelessWidget {
-  final String query;
-  final bool hasIntent;
-
-  const _NotFoundEmptyState({required this.query, required this.hasIntent});
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md, vertical: AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.hairline, width: 1),
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.surfaceVariant,
-            ),
-            child: const Icon(Icons.search_off_rounded,
-                size: 24, color: AppColors.onSurfaceVariant),
-          ),
-          const SizedBox(height: AppSpacing.smMd),
-          Text(
-            '"$query" not found here',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            hasIntent
-                ? 'Here are similar venues you might like'
-                : 'Try a different venue, brand, or category',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: AppColors.onSurfaceVariant,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
     );
   }
 }
@@ -412,13 +263,9 @@ class _IntentBanner extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.smMd),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.accentAlpha10, AppColors.primaryAlpha10],
-        ),
+        color: AppColors.skyAlpha10,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.accentAlpha20, width: 1),
+        border: Border.all(color: AppColors.skyAlpha15, width: 1),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -426,7 +273,7 @@ class _IntentBanner extends StatelessWidget {
           Row(
             children: [
               const Icon(Icons.tips_and_updates_rounded,
-                  size: 14, color: AppColors.accent),
+                  size: 14, color: AppColors.sky),
               const SizedBox(width: 6),
               Flexible(
                 child: Text(
@@ -434,7 +281,7 @@ class _IntentBanner extends StatelessWidget {
                       ? 'Looks like you want ${intent.brand}'
                       : 'Looks like you want',
                   style: theme.textTheme.labelMedium?.copyWith(
-                    color: AppColors.primary,
+                    color: AppColors.sky,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -462,13 +309,13 @@ class _IntentChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.skyAlpha10,
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-        border: Border.all(color: AppColors.primaryAlpha15, width: 1),
+        border: Border.all(color: AppColors.skyAlpha15, width: 1),
       ),
       child: Text(label,
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AppColors.primary,
+              color: AppColors.sky,
               fontWeight: FontWeight.w600,
               fontSize: 11)),
     );
@@ -487,15 +334,8 @@ class _VenueResultCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.accentAlpha20, width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        child: Row(
+    return AppCard(
+      child: Row(
           children: [
             _VenueLogo(venue: venue, size: 48),
             const SizedBox(width: AppSpacing.smMd),
@@ -572,7 +412,6 @@ class _VenueResultCard extends StatelessWidget {
               ),
             ),
           ],
-        ),
       ),
     );
   }
@@ -814,7 +653,7 @@ class _LetterFallback extends StatelessWidget {
       child: Text(
         letter,
         style: TextStyle(
-          color: AppColors.primary,
+          color: AppColors.sky,
           fontWeight: FontWeight.w600,
           fontSize: size * 0.42,
           letterSpacing: -0.4,
