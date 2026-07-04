@@ -11,6 +11,7 @@ import '../../features/voice_chat/presentation/screens/voice_chat_screen.dart';
 import '../../features/flight/presentation/screens/flight_search_screen.dart';
 import '../../features/flight/presentation/screens/flight_detail_screen.dart';
 import '../../features/flight/presentation/screens/boarding_pass_screen.dart';
+import '../../features/flight/presentation/screens/flights_board_screen.dart';
 import '../../features/venues/presentation/screens/venues_screen.dart';
 import '../widgets/app_shell.dart';
 
@@ -35,6 +36,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/boarding-pass',
         builder: (context, state) => const BoardingPassScreen(),
+      ),
+      // Flights board — pick / change active flight (no bottom nav shell)
+      GoRoute(
+        path: '/flights',
+        builder: (context, state) => const FlightsBoardScreen(),
       ),
       // Guided route navigation (pushed from RoutePlanCard / Active plan card)
       GoRoute(
