@@ -14,10 +14,9 @@ class AppSpacing {
   static const double smMd = 12;
   static const double mdLg = 20;
 
-  /// Default horizontal screen content padding — used as the gutter that
-  /// gives the layout breathing room. Slightly larger than `md` for a
-  /// more spacious, premium feel.
-  static const double gutter = 20;
+  /// Default horizontal screen content padding — the "EL AL" gutter that
+  /// gives the layout breathing room across every screen.
+  static const double gutter = 24;
 
   /// Vertical breathing room between major sections within a screen.
   static const double sectionGap = 28;
