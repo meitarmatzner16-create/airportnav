@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:airport_nav/core/constants/app_colors.dart';
+import 'package:airport_nav/core/constants/app_spacing.dart';
+import 'package:airport_nav/core/widgets/app_card.dart';
+import 'package:airport_nav/core/widgets/rating_stars.dart';
 import 'package:airport_nav/features/lounges/domain/entities/lounge.dart';
 
+/// Sky Pass–styled lounge row card.
+///
+/// Uses [AppCard] for the white/hairline/radiusLg/soft-shadow surface.
+/// Access-type chip uses token colors. [RatingStars] gold. Public API unchanged.
 class LoungeCard extends StatelessWidget {
   final Lounge lounge;
   final VoidCallback onTap;
@@ -11,220 +19,232 @@ class LoungeCard extends StatelessWidget {
     required this.onTap,
   });
 
-  String _accessTypeLabel(String accessType) {
-    switch (accessType) {
-      case 'priority_pass':
-        return 'Priority Pass';
-      case 'airline_lounge':
-        return 'Airline Lounge';
-      case 'pay_per_use':
-        return 'Pay Per Use';
-      case 'membership':
-        return 'Membership';
-      default:
-        return accessType;
-    }
+  // ── Access-type helpers ───────────────────────────────────────────────────
+
+  static String _accessTypeLabel(String accessType) {
+    return switch (accessType) {
+      'priority_pass' => 'Priority Pass',
+      'airline_lounge' => 'Airline Lounge',
+      'pay_per_use' => 'Pay Per Use',
+      'membership' => 'Membership',
+      _ => accessType,
+    };
   }
 
-  Color _accessTypeColor(String accessType) {
-    switch (accessType) {
-      case 'priority_pass':
-        return Colors.indigo;
-      case 'airline_lounge':
-        return Colors.blue.shade700;
-      case 'pay_per_use':
-        return Colors.green.shade700;
-      case 'membership':
-        return Colors.purple.shade700;
-      default:
-        return Colors.grey;
-    }
+  /// Returns [iconBg, iconFg, chipBg, chipFg] from Sky Pass tokens.
+  static (Color, Color, Color, Color) _accessColors(String accessType, bool isDark) {
+    return switch (accessType) {
+      'priority_pass' => (
+          AppColors.successAlpha15,
+          isDark ? AppColors.dSky : AppColors.gradientLoungeStart,
+          AppColors.successAlpha15,
+          isDark ? AppColors.dSky : AppColors.gradientLoungeStart,
+        ),
+      'airline_lounge' => (
+          AppColors.inkAlpha10,
+          isDark ? AppColors.dText : AppColors.ink,
+          AppColors.inkAlpha10,
+          isDark ? AppColors.dText : AppColors.ink,
+        ),
+      'pay_per_use' => (
+          AppColors.skyAlpha10,
+          isDark ? AppColors.dSky : AppColors.sky,
+          AppColors.skyAlpha10,
+          isDark ? AppColors.dSky : AppColors.sky,
+        ),
+      'membership' => (
+          AppColors.goldAlpha15,
+          isDark ? AppColors.dGold : AppColors.goldText,
+          AppColors.goldAlpha15,
+          isDark ? AppColors.dGold : AppColors.goldText,
+        ),
+      _ => (
+          AppColors.skyAlpha10,
+          isDark ? AppColors.dSky : AppColors.sky2,
+          AppColors.skyAlpha10,
+          isDark ? AppColors.dSky : AppColors.sky2,
+        ),
+    };
   }
 
-  IconData _amenityIcon(String amenity) {
-    switch (amenity) {
-      case 'wifi':
-        return Icons.wifi;
-      case 'shower':
-        return Icons.shower;
-      case 'food':
-        return Icons.restaurant;
-      case 'bar':
-        return Icons.local_bar;
-      case 'spa':
-        return Icons.spa;
-      case 'sleep_pods':
-        return Icons.airline_seat_flat;
-      case 'business_center':
-        return Icons.business_center;
-      default:
-        return Icons.check_circle_outline;
-    }
+  // ── Amenity helpers ───────────────────────────────────────────────────────
+
+  static IconData _amenityIcon(String amenity) {
+    return switch (amenity) {
+      'wifi' => Icons.wifi_rounded,
+      'shower' => Icons.shower_rounded,
+      'food' => Icons.restaurant_rounded,
+      'bar' => Icons.local_bar_rounded,
+      'spa' => Icons.spa_rounded,
+      'sleep_pods' => Icons.airline_seat_flat_rounded,
+      'business_center' => Icons.business_center_rounded,
+      _ => Icons.check_circle_outline_rounded,
+    };
   }
 
   @override
   Widget build(BuildContext context) {
-    final accessColor = _accessTypeColor(lounge.accessType);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final inkColor = isDark ? AppColors.dText : AppColors.ink;
+    final mutedColor = isDark ? AppColors.dMuted : AppColors.muted;
+    final (iconBg, iconFg, chipBg, chipFg) = _accessColors(lounge.accessType, isDark);
 
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      clipBehavior: Clip.antiAlias,
-      elevation: 2,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Column(
+    return AppCard(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // ── Top row: icon · name/badge · price ───────────────────────
+          Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top row: name and access badge
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Icon
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: Color((accessColor.value & 0x00FFFFFF) | 0x1A000000),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      Icons.airline_seat_recline_extra,
-                      color: accessColor,
-                      size: 26,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          lounge.name,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: Color((accessColor.value & 0x00FFFFFF) | 0x1A000000),
-                                borderRadius: BorderRadius.circular(12),
-                                border: Border.all(
-                                    color: Color((accessColor.value & 0x00FFFFFF) | 0x66000000)),
-                              ),
-                              child: Text(
-                                _accessTypeLabel(lounge.accessType),
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: accessColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Icon(Icons.star, size: 14, color: Colors.amber),
-                            const SizedBox(width: 2),
-                            Text(
-                              lounge.rating.toStringAsFixed(1),
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                  // Price
-                  if (lounge.price != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.green.shade50,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        '${lounge.currency} ${lounge.price!.toStringAsFixed(0)}',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green.shade800,
-                        ),
-                      ),
-                    )
-                  else
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        'Included',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.blue.shade700,
-                        ),
-                      ),
-                    ),
-                ],
+              // Lounge icon
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: iconBg,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                ),
+                child: Icon(
+                  Icons.airline_seat_recline_extra_rounded,
+                  color: iconFg,
+                  size: 24,
+                ),
               ),
-              const SizedBox(height: 10),
-              // Amenity icons
-              Wrap(
-                spacing: 12,
-                runSpacing: 4,
-                children: lounge.amenities.map((amenity) {
-                  return Tooltip(
-                    message: amenity.replaceAll('_', ' '),
-                    child: Icon(
-                      _amenityIcon(amenity),
-                      size: 18,
-                      color: Colors.grey.shade600,
-                    ),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 8),
-              // Location and hours
-              Row(
-                children: [
-                  const Icon(Icons.location_on_outlined,
-                      size: 13, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      lounge.location,
-                      style:
-                          const TextStyle(fontSize: 12, color: Colors.grey),
+              const SizedBox(width: AppSpacing.smMd),
+
+              // Name + access chip + rating
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      lounge.name,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: inkColor,
+                      ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Row(
+                      children: [
+                        // Access-type chip
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.sm,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: chipBg,
+                            borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                          ),
+                          child: Text(
+                            _accessTypeLabel(lounge.accessType),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: chipFg,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+
+                        // Rating stars (small)
+                        RatingStars(rating: lounge.rating, size: 12),
+                        const SizedBox(width: 3),
+                        Text(
+                          lounge.rating.toStringAsFixed(1),
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: mutedColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              // Price badge
+              const SizedBox(width: AppSpacing.sm),
+              if (lounge.price != null)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.smMd,
+                    vertical: AppSpacing.xs,
                   ),
-                  const Icon(Icons.access_time, size: 13, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Text(
-                    lounge.openingHours,
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  decoration: BoxDecoration(
+                    color: AppColors.successAlpha15,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                   ),
-                ],
+                  child: Text(
+                    '${lounge.currency} ${lounge.price!.toStringAsFixed(0)}',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: isDark ? AppColors.dSky : AppColors.success,
+                    ),
+                  ),
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.smMd,
+                    vertical: AppSpacing.xs,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.skyAlpha10,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                  ),
+                  child: Text(
+                    'Included',
+                    style: theme.textTheme.labelMedium?.copyWith(
+                      color: isDark ? AppColors.dSky : AppColors.sky,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.smMd),
+
+          // ── Amenity icon row ──────────────────────────────────────────
+          Wrap(
+            spacing: AppSpacing.smMd,
+            runSpacing: AppSpacing.xs,
+            children: lounge.amenities.map((amenity) {
+              return Tooltip(
+                message: amenity.replaceAll('_', ' '),
+                child: Icon(
+                  _amenityIcon(amenity),
+                  size: 16,
+                  color: mutedColor,
+                ),
+              );
+            }).toList(),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+
+          // ── Location & hours ──────────────────────────────────────────
+          Row(
+            children: [
+              Icon(Icons.location_on_outlined, size: 13, color: mutedColor),
+              const SizedBox(width: AppSpacing.xs),
+              Expanded(
+                child: Text(
+                  lounge.location,
+                  style: theme.textTheme.labelSmall?.copyWith(color: mutedColor),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Icon(Icons.access_time_rounded, size: 13, color: mutedColor),
+              const SizedBox(width: AppSpacing.xs),
+              Text(
+                lounge.openingHours,
+                style: theme.textTheme.labelSmall?.copyWith(color: mutedColor),
               ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }

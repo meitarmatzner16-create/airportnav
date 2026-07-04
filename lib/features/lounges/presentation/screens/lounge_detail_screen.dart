@@ -1,8 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:airport_nav/core/constants/app_colors.dart';
+import 'package:airport_nav/core/constants/app_spacing.dart';
+import 'package:airport_nav/core/constants/app_typography.dart';
+import 'package:airport_nav/core/widgets/app_buttons.dart';
+import 'package:airport_nav/core/widgets/app_card.dart';
+import 'package:airport_nav/core/widgets/gold_divider.dart';
+import 'package:airport_nav/core/widgets/gradient_hero.dart';
+import 'package:airport_nav/core/widgets/info_row.dart';
+import 'package:airport_nav/core/widgets/rating_stars.dart';
+import 'package:airport_nav/core/widgets/state_views.dart';
 import 'package:airport_nav/features/lounges/presentation/providers/lounge_providers.dart';
 
+/// Sky Pass–styled lounge detail screen.
+///
+/// Header: [GradientHero] (access-type tinted via token map) + lounge icon watermark.
+/// Body: name (headlineLarge ink) · access-type chip + [RatingStars] + mono rating ·
+///       price/complimentary [AppCard] · Amenities Wrap of skyTint circles ·
+///       [GoldDivider] · Entry Conditions (titleLarge + bodyMedium) ·
+///       [InfoRow]s · [PrimaryButton].
+/// All colours from tokens. Light/dark via brightness checks.
 class LoungeDetailScreen extends ConsumerWidget {
   final String loungeId;
 
@@ -11,371 +29,354 @@ class LoungeDetailScreen extends ConsumerWidget {
     required this.loungeId,
   });
 
-  Color _accessTypeColor(String accessType) {
-    switch (accessType) {
-      case 'priority_pass':
-        return Colors.indigo;
-      case 'airline_lounge':
-        return Colors.blue.shade700;
-      case 'pay_per_use':
-        return Colors.green.shade700;
-      case 'membership':
-        return Colors.purple.shade700;
-      default:
-        return Colors.grey;
-    }
+  // ── Access-type helpers ───────────────────────────────────────────────────
+
+  static String _accessTypeLabel(String accessType) {
+    return switch (accessType) {
+      'priority_pass' => 'Priority Pass',
+      'airline_lounge' => 'Airline Lounge',
+      'pay_per_use' => 'Pay Per Use',
+      'membership' => 'Membership',
+      _ => accessType,
+    };
   }
 
-  String _accessTypeLabel(String accessType) {
-    switch (accessType) {
-      case 'priority_pass':
-        return 'Priority Pass';
-      case 'airline_lounge':
-        return 'Airline Lounge';
-      case 'pay_per_use':
-        return 'Pay Per Use';
-      case 'membership':
-        return 'Membership';
-      default:
-        return accessType;
-    }
+  /// Maps access type → gradient color pair using Sky Pass tokens.
+  static List<Color> _heroGradient(String accessType) {
+    return switch (accessType) {
+      'priority_pass' => [AppColors.gradientLoungeStart, AppColors.gradientLoungeEnd],
+      'airline_lounge' => [AppColors.ink, AppColors.sky],
+      'pay_per_use' => [AppColors.gradientShoppingStart, AppColors.gradientShoppingEnd],
+      'membership' => [AppColors.gradientTravelStart, AppColors.gradientTravelEnd],
+      _ => [AppColors.sky, AppColors.sky2],
+    };
   }
 
-  IconData _amenityIcon(String amenity) {
-    switch (amenity) {
-      case 'wifi':
-        return Icons.wifi;
-      case 'shower':
-        return Icons.shower;
-      case 'food':
-        return Icons.restaurant;
-      case 'bar':
-        return Icons.local_bar;
-      case 'spa':
-        return Icons.spa;
-      case 'sleep_pods':
-        return Icons.airline_seat_flat;
-      case 'business_center':
-        return Icons.business_center;
-      default:
-        return Icons.check_circle_outline;
-    }
+  /// Returns [chipBg, chipFg] using Sky Pass tokens.
+  static (Color, Color) _chipColors(String accessType, bool isDark) {
+    return switch (accessType) {
+      'priority_pass' => (AppColors.successAlpha15, isDark ? AppColors.dSky : AppColors.gradientLoungeStart),
+      'airline_lounge' => (AppColors.inkAlpha10, isDark ? AppColors.dText : AppColors.ink),
+      'pay_per_use' => (AppColors.skyAlpha10, isDark ? AppColors.dSky : AppColors.sky),
+      'membership' => (AppColors.goldAlpha15, isDark ? AppColors.dGold : AppColors.goldText),
+      _ => (AppColors.skyAlpha15, isDark ? AppColors.dSky : AppColors.sky2),
+    };
   }
 
-  String _amenityLabel(String amenity) {
-    switch (amenity) {
-      case 'wifi':
-        return 'Wi-Fi';
-      case 'shower':
-        return 'Showers';
-      case 'food':
-        return 'Food';
-      case 'bar':
-        return 'Bar';
-      case 'spa':
-        return 'Spa';
-      case 'sleep_pods':
-        return 'Sleep Pods';
-      case 'business_center':
-        return 'Business Center';
-      default:
-        return amenity;
-    }
+  // ── Amenity helpers ───────────────────────────────────────────────────────
+
+  static IconData _amenityIcon(String amenity) {
+    return switch (amenity) {
+      'wifi' => Icons.wifi_rounded,
+      'shower' => Icons.shower_rounded,
+      'food' => Icons.restaurant_rounded,
+      'bar' => Icons.local_bar_rounded,
+      'spa' => Icons.spa_rounded,
+      'sleep_pods' => Icons.airline_seat_flat_rounded,
+      'business_center' => Icons.business_center_rounded,
+      _ => Icons.check_circle_outline_rounded,
+    };
+  }
+
+  static String _amenityLabel(String amenity) {
+    return switch (amenity) {
+      'wifi' => 'Wi-Fi',
+      'shower' => 'Showers',
+      'food' => 'Food',
+      'bar' => 'Bar',
+      'spa' => 'Spa',
+      'sleep_pods' => 'Sleep Pods',
+      'business_center' => 'Business',
+      _ => amenity.replaceAll('_', ' '),
+    };
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final lounge = ref.watch(loungeByIdProvider(loungeId));
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     if (lounge == null) {
       return Scaffold(
+        backgroundColor: isDark ? AppColors.dBg : AppColors.paper,
         appBar: AppBar(title: const Text('Lounge Not Found')),
-        body: const Center(
-          child: Text('The requested lounge could not be found.'),
-        ),
+        body: const ErrorState(message: 'The requested lounge could not be found.'),
       );
     }
 
-    final accessColor = _accessTypeColor(lounge.accessType);
+    final inkColor = isDark ? AppColors.dText : AppColors.ink;
+    final mutedColor = isDark ? AppColors.dMuted : AppColors.muted;
+    final skyTintColor = isDark ? AppColors.dSurfaceVariant : AppColors.skyTint;
+    final skyIconColor = isDark ? AppColors.dSky : AppColors.sky;
+    final (chipBg, chipFg) = _chipColors(lounge.accessType, isDark);
+    final heroColors = _heroGradient(lounge.accessType);
 
     return Scaffold(
+      backgroundColor: isDark ? AppColors.dBg : AppColors.paper,
       body: CustomScrollView(
         slivers: [
-          // Image header
+          // ── Gradient hero header ──────────────────────────────────────
           SliverAppBar(
             expandedHeight: 220,
             pinned: true,
+            backgroundColor: isDark ? AppColors.dBg : AppColors.paper,
+            surfaceTintColor: Colors.transparent,
+            foregroundColor: Colors.white,
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                color: Color((accessColor.value & 0x00FFFFFF) | 0x1A000000),
+              background: GradientHero(
+                height: 220,
+                colors: heroColors,
                 child: Center(
                   child: Icon(
-                    Icons.airline_seat_recline_extra,
-                    size: 80,
-                    color: Color((accessColor.value & 0x00FFFFFF) | 0x66000000),
+                    Icons.airline_seat_recline_extra_rounded,
+                    size: 88,
+                    color: Colors.white.withAlpha(51), // watermark
                   ),
                 ),
               ),
             ),
           ),
-          // Content
+
+          // ── Body content ─────────────────────────────────────────────
           SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Name
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // Lounge name
                   Text(
                     lounge.name,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                    style: theme.textTheme.headlineLarge?.copyWith(
+                      color: inkColor,
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  // Access badge and rating
+                  const SizedBox(height: AppSpacing.smMd),
+
+                  // Access-type chip + RatingStars + mono rating
                   Row(
                     children: [
+                      // Access-type chip
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 4),
+                          horizontal: AppSpacing.smMd,
+                          vertical: AppSpacing.xs,
+                        ),
                         decoration: BoxDecoration(
-                          color: Color((accessColor.value & 0x00FFFFFF) | 0x1A000000),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                              color: Color((accessColor.value & 0x00FFFFFF) | 0x80000000)),
+                          color: chipBg,
+                          borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
                         ),
                         child: Text(
                           _accessTypeLabel(lounge.accessType),
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: accessColor,
-                            fontWeight: FontWeight.w600,
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: chipFg,
                           ),
                         ),
                       ),
-                      const SizedBox(width: 12),
-                      Row(
-                        children: List.generate(5, (index) {
-                          final starValue = index + 1;
-                          if (lounge.rating >= starValue) {
-                            return const Icon(Icons.star,
-                                size: 18, color: Colors.amber);
-                          } else if (lounge.rating >= starValue - 0.5) {
-                            return const Icon(Icons.star_half,
-                                size: 18, color: Colors.amber);
-                          }
-                          return const Icon(Icons.star_border,
-                              size: 18, color: Colors.amber);
-                        }),
-                      ),
-                      const SizedBox(width: 6),
+                      const SizedBox(width: AppSpacing.smMd),
+
+                      // Star rating
+                      RatingStars(rating: lounge.rating, size: 16),
+                      const SizedBox(width: AppSpacing.xs),
+
+                      // Mono rating value
                       Text(
                         lounge.rating.toStringAsFixed(1),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                        style: AppTypography.mono(
+                          fontSize: 13,
+                          weight: FontWeight.w700,
+                          color: mutedColor,
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
-                  // Price
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // ── Price / complimentary banner ──────────────────────
                   if (lounge.price != null)
-                    Container(
+                    AppCard(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.green.shade50,
-                        borderRadius: BorderRadius.circular(10),
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.smMd,
                       ),
                       child: Row(
-                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.payments_outlined,
-                              size: 18, color: Colors.green.shade700),
-                          const SizedBox(width: 8),
-                          Text(
-                            '${lounge.currency} ${lounge.price!.toStringAsFixed(0)} per visit',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.green.shade800,
+                          Container(
+                            width: 4,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: AppColors.success,
+                              borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.smMd),
+                          Icon(
+                            Icons.payments_outlined,
+                            size: 18,
+                            color: isDark ? AppColors.dSky : AppColors.success,
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: Text(
+                              '${lounge.currency} ${lounge.price!.toStringAsFixed(0)} per visit',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: inkColor,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     )
                   else
-                    Container(
+                    AppCard(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade50,
-                        borderRadius: BorderRadius.circular(10),
+                        horizontal: AppSpacing.md,
+                        vertical: AppSpacing.smMd,
                       ),
                       child: Row(
-                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Icons.check_circle_outline,
-                              size: 18, color: Colors.blue.shade700),
-                          const SizedBox(width: 8),
-                          Text(
-                            'Complimentary with eligible access',
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.blue.shade800,
+                          Container(
+                            width: 4,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: AppColors.sky,
+                              borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.smMd),
+                          Icon(
+                            Icons.check_circle_outline_rounded,
+                            size: 18,
+                            color: skyIconColor,
+                          ),
+                          const SizedBox(width: AppSpacing.sm),
+                          Expanded(
+                            child: Text(
+                              'Complimentary with eligible access',
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                color: inkColor,
+                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
-                  const SizedBox(height: 20),
-                  // Amenities grid
-                  const Text(
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // ── Amenities ─────────────────────────────────────────
+                  Text(
                     'Amenities',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: theme.textTheme.titleLarge?.copyWith(color: inkColor),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppSpacing.smMd),
                   Wrap(
-                    spacing: 12,
-                    runSpacing: 12,
+                    spacing: AppSpacing.smMd,
+                    runSpacing: AppSpacing.smMd,
                     children: lounge.amenities.map((amenity) {
                       return Container(
-                        width: 95,
+                        width: 88,
                         padding: const EdgeInsets.symmetric(
-                            vertical: 12, horizontal: 8),
+                          vertical: AppSpacing.smMd,
+                          horizontal: AppSpacing.sm,
+                        ),
                         decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          borderRadius: BorderRadius.circular(12),
+                          color: isDark ? AppColors.dSurface : AppColors.card,
+                          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+                          border: Border.all(
+                            color: isDark ? AppColors.dHairline : AppColors.hairline,
+                          ),
                         ),
                         child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
-                              _amenityIcon(amenity),
-                              size: 26,
-                              color: Theme.of(context).colorScheme.primary,
+                            Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: skyTintColor,
+                              ),
+                              child: Icon(
+                                _amenityIcon(amenity),
+                                size: 18,
+                                color: skyIconColor,
+                              ),
                             ),
-                            const SizedBox(height: 6),
+                            const SizedBox(height: AppSpacing.xs),
                             Text(
                               _amenityLabel(amenity),
                               textAlign: TextAlign.center,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w500,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: mutedColor,
                               ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ],
                         ),
                       );
                     }).toList(),
                   ),
-                  const SizedBox(height: 20),
-                  const Divider(),
-                  const SizedBox(height: 16),
-                  // Entry conditions
-                  const Text(
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // ── Gold divider ───────────────────────────────────────
+                  const GoldDivider(),
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // ── Entry conditions ───────────────────────────────────
+                  Text(
                     'Entry Conditions',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: theme.textTheme.titleLarge?.copyWith(color: inkColor),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: AppSpacing.sm),
                   Text(
                     lounge.entryConditions,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      height: 1.5,
-                      color: Colors.black87,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: mutedColor,
+                      height: 1.6,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  // Opening hours
-                  _InfoRow(
-                    icon: Icons.access_time,
+                  const SizedBox(height: AppSpacing.lg),
+
+                  // ── Info rows ─────────────────────────────────────────
+                  InfoRow(
+                    icon: Icons.access_time_rounded,
                     label: 'Opening Hours',
                     value: lounge.openingHours,
                   ),
-                  const SizedBox(height: 10),
-                  _InfoRow(
+                  const SizedBox(height: AppSpacing.smMd),
+                  InfoRow(
                     icon: Icons.location_on_outlined,
                     label: 'Location',
                     value: lounge.location,
                   ),
-                  const SizedBox(height: 10),
-                  _InfoRow(
-                    icon: Icons.flight,
+                  const SizedBox(height: AppSpacing.smMd),
+                  InfoRow(
+                    icon: Icons.flight_rounded,
                     label: 'Terminal',
-                    value: '${lounge.terminal} - ${lounge.airportCode}',
+                    value: '${lounge.terminal} · ${lounge.airportCode}',
                   ),
-                  const SizedBox(height: 28),
-                  // Show on Map button
+                  const SizedBox(height: AppSpacing.xl),
+
+                  // ── Show on map button ─────────────────────────────────
                   SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        context.push('/map');
-                      },
-                      icon: const Icon(Icons.map),
-                      label: const Text('Show on Map'),
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        textStyle: const TextStyle(fontSize: 16),
-                      ),
+                    child: PrimaryButton(
+                      label: 'Show on map',
+                      icon: Icons.map_rounded,
+                      onPressed: () => context.push('/map'),
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: AppSpacing.xl),
                 ],
               ),
             ),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _InfoRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-
-  const _InfoRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: Colors.grey.shade600),
-        const SizedBox(width: 10),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                color: Colors.grey.shade500,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            Text(
-              value,
-              style: const TextStyle(fontSize: 15),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }
