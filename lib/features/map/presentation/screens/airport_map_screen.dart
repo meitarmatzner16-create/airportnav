@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:airport_nav/core/constants/app_colors.dart';
 import 'package:airport_nav/core/constants/app_spacing.dart';
+import 'package:airport_nav/core/theme/app_theme.dart';
 import 'package:airport_nav/features/map/presentation/providers/map_providers.dart';
 import 'package:airport_nav/features/map/presentation/widgets/map_painter.dart';
 import 'package:airport_nav/features/map/presentation/widgets/nav_path_painter.dart';
@@ -92,7 +93,7 @@ class _AirportMapScreenState extends ConsumerState<AirportMapScreen> {
                   hintText: 'Search gates, shops, restaurants...',
                   prefixIcon: const Icon(Icons.search),
                   filled: true,
-                  fillColor: const Color(0x80ECEEF2),
+                  fillColor: AppColors.skyAlpha10,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                     borderSide: BorderSide.none,
@@ -114,14 +115,10 @@ class _AirportMapScreenState extends ConsumerState<AirportMapScreen> {
               constraints: const BoxConstraints(maxHeight: 200),
               margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
+                color: AppColors.card,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0x1A000000),
-                    blurRadius: 8,
-                  ),
-                ],
+                border: Border.all(color: AppColors.hairline, width: 1),
+                boxShadow: AppShadows.card,
               ),
               child: ListView.builder(
                 shrinkWrap: true,
@@ -175,8 +172,8 @@ class _AirportMapScreenState extends ConsumerState<AirportMapScreen> {
                             horizontal: 2, vertical: 4),
                         decoration: BoxDecoration(
                           color: isSelected
-                              ? AppColors.accent
-                              : AppColors.surfaceVariant,
+                              ? AppColors.sky
+                              : AppColors.skyTint,
                           borderRadius:
                               BorderRadius.circular(AppSpacing.radiusSm),
                         ),
@@ -186,7 +183,7 @@ class _AirportMapScreenState extends ConsumerState<AirportMapScreen> {
                           style: theme.textTheme.labelSmall?.copyWith(
                             color: isSelected
                                 ? Colors.white
-                                : AppColors.onSurfaceVariant,
+                                : AppColors.muted,
                             fontWeight: FontWeight.w600,
                           ),
                           textAlign: TextAlign.center,
@@ -203,7 +200,12 @@ class _AirportMapScreenState extends ConsumerState<AirportMapScreen> {
           // Map area
           Expanded(
             child: selectedFloor == null
-                ? const Center(child: Text('No map data available'))
+                ? Center(
+                    child: Text(
+                      'No map data available',
+                      style: theme.textTheme.bodyLarge?.copyWith(color: AppColors.muted),
+                    ),
+                  )
                 : Stack(
                     children: [
                       // Interactive map
@@ -260,7 +262,7 @@ class _AirportMapScreenState extends ConsumerState<AirportMapScreen> {
                         ),
                       ),
 
-                      // Navigation info bar
+                      // Navigation info bar — AppCard-style sky banner
                       if (activeNavPath != null)
                         Positioned(
                           top: 0,
@@ -270,17 +272,17 @@ class _AirportMapScreenState extends ConsumerState<AirportMapScreen> {
                             margin: const EdgeInsets.all(AppSpacing.sm),
                             padding: const EdgeInsets.symmetric(
                               horizontal: AppSpacing.md,
-                              vertical: AppSpacing.sm,
+                              vertical: AppSpacing.smMd,
                             ),
                             decoration: BoxDecoration(
-                              color: AppColors.accent,
+                              color: AppColors.sky,
                               borderRadius: BorderRadius.circular(
-                                  AppSpacing.radiusMd),
-                              boxShadow: [
+                                  AppSpacing.radiusLg),
+                              boxShadow: const [
                                 BoxShadow(
-                                  color: const Color(0x4D1FC5A5),
+                                  color: AppColors.shadowSky,
                                   blurRadius: 8,
-                                  offset: const Offset(0, 2),
+                                  offset: Offset(0, 2),
                                 ),
                               ],
                             ),
@@ -298,14 +300,14 @@ class _AirportMapScreenState extends ConsumerState<AirportMapScreen> {
                                   ),
                                 ),
                                 const SizedBox(width: AppSpacing.md),
-                                const Icon(Icons.timer,
-                                    color: Colors.white70, size: 18),
+                                Icon(Icons.timer,
+                                    color: AppColors.whiteAlpha80, size: 18),
                                 const SizedBox(width: 4),
                                 Text(
                                   '~${activeNavPath.estimatedMinutes} min',
                                   style:
                                       theme.textTheme.bodyMedium?.copyWith(
-                                    color: Colors.white70,
+                                    color: AppColors.whiteAlpha80,
                                   ),
                                 ),
                                 const Spacer(),
@@ -330,12 +332,11 @@ class _AirportMapScreenState extends ConsumerState<AirportMapScreen> {
                                       borderRadius: BorderRadius.circular(
                                           AppSpacing.radiusSm),
                                     ),
-                                    child: const Text(
+                                    child: Text(
                                       'End',
-                                      style: TextStyle(
+                                      style: theme.textTheme.labelMedium?.copyWith(
                                         color: Colors.white,
                                         fontWeight: FontWeight.w600,
-                                        fontSize: 13,
                                       ),
                                     ),
                                   ),

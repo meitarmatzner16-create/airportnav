@@ -786,7 +786,7 @@ class _VenueLogo extends StatelessWidget {
           width: size,
           height: size,
           fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) => _LetterFallback(venue: venue, size: size),
+          errorBuilder: (context, error, stackTrace) => _LetterFallback(venue: venue, size: size),
         ),
       );
     }

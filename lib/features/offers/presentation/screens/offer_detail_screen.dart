@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:airport_nav/core/constants/app_colors.dart';
 import 'package:airport_nav/core/constants/app_spacing.dart';
+import 'package:airport_nav/core/widgets/gradient_hero.dart';
+import 'package:airport_nav/core/widgets/state_views.dart';
 import 'package:airport_nav/features/offers/presentation/providers/offer_providers.dart';
 
 class OfferDetailScreen extends ConsumerWidget {
@@ -9,38 +11,16 @@ class OfferDetailScreen extends ConsumerWidget {
 
   const OfferDetailScreen({super.key, required this.offerId});
 
-  Color _gradientStartColor(String category) {
-    switch (category) {
-      case 'dining':
-        return const Color(0xFFFF6B35);
-      case 'shopping':
-        return const Color(0xFF7C3AED);
-      case 'lounge':
-        return const Color(0xFF0891B2);
-      case 'travel':
-        return const Color(0xFF059669);
-      case 'duty_free':
-        return const Color(0xFFDB2777);
-      default:
-        return AppColors.primary;
-    }
-  }
-
-  Color _gradientEndColor(String category) {
-    switch (category) {
-      case 'dining':
-        return const Color(0xFFEAB308);
-      case 'shopping':
-        return const Color(0xFFEC4899);
-      case 'lounge':
-        return const Color(0xFF6366F1);
-      case 'travel':
-        return const Color(0xFF2DD4BF);
-      case 'duty_free':
-        return const Color(0xFFF472B6);
-      default:
-        return AppColors.primaryLight;
-    }
+  /// Maps category → [start, end] gradient colors using Sky Pass tokens.
+  static List<Color> _heroGradient(String category) {
+    return switch (category) {
+      'dining' => [AppColors.gradientDiningStart, AppColors.gradientDiningEnd],
+      'shopping' => [AppColors.gradientShoppingStart, AppColors.gradientShoppingEnd],
+      'lounge' => [AppColors.gradientLoungeStart, AppColors.gradientLoungeEnd],
+      'travel' => [AppColors.gradientTravelStart, AppColors.gradientTravelEnd],
+      'duty_free' => [AppColors.gradientDutyFreeStart, AppColors.gradientDutyFreeEnd],
+      _ => [AppColors.sky, AppColors.sky2],
+    };
   }
 
   String _categoryLabel(String category) {
@@ -64,37 +44,36 @@ class OfferDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final offer = ref.watch(offerByIdProvider(offerId));
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     if (offer == null) {
       return Scaffold(
+        backgroundColor: isDark ? AppColors.dBg : AppColors.paper,
         appBar: AppBar(title: const Text('Offer')),
-        body: const Center(child: Text('Offer not found')),
+        body: const ErrorState(message: 'The requested offer could not be found.'),
       );
     }
 
     final now = DateTime.now();
     final daysLeft = offer.validUntil.difference(now).inDays;
     final hoursLeft = offer.validUntil.difference(now).inHours;
+    final heroColors = _heroGradient(offer.category);
 
     return Scaffold(
+      backgroundColor: isDark ? AppColors.dBg : AppColors.paper,
       body: CustomScrollView(
         slivers: [
-          // Gradient header
+          // Gradient hero header via GradientHero token
           SliverAppBar(
             expandedHeight: 200,
             pinned: true,
+            backgroundColor: isDark ? AppColors.dBg : AppColors.paper,
+            surfaceTintColor: Colors.transparent,
+            foregroundColor: Colors.white,
             flexibleSpace: FlexibleSpaceBar(
-              background: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      _gradientStartColor(offer.category),
-                      _gradientEndColor(offer.category),
-                    ],
-                  ),
-                ),
+              background: GradientHero(
+                height: 200,
+                colors: heroColors,
                 child: Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -112,7 +91,7 @@ class OfferDetailScreen extends ConsumerWidget {
                       Text(
                         _categoryLabel(offer.category),
                         style: theme.textTheme.titleMedium?.copyWith(
-                          color: Colors.white.withValues(alpha: 0.9),
+                          color: AppColors.whiteAlpha80,
                         ),
                       ),
                     ],
@@ -121,13 +100,13 @@ class OfferDetailScreen extends ConsumerWidget {
               ),
               title: Text(
                 offer.merchant,
-                style: const TextStyle(fontSize: 16),
+                style: theme.textTheme.titleMedium?.copyWith(color: Colors.white),
               ),
             ),
           ),
           // Content
           SliverPadding(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.gutter, vertical: AppSpacing.md),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 // Title
@@ -167,11 +146,11 @@ class OfferDetailScreen extends ConsumerWidget {
                     width: double.infinity,
                     padding: const EdgeInsets.all(AppSpacing.md),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.08),
+                      color: AppColors.skyAlpha10,
                       borderRadius:
                           BorderRadius.circular(AppSpacing.radiusMd),
                       border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.3),
+                        color: AppColors.skyAlpha20,
                         style: BorderStyle.solid,
                       ),
                     ),
@@ -181,7 +160,7 @@ class OfferDetailScreen extends ConsumerWidget {
                         Text(
                           offer.promoCode!,
                           style: theme.textTheme.headlineSmall?.copyWith(
-                            color: AppColors.primary,
+                            color: isDark ? AppColors.dSky : AppColors.ink,
                             fontWeight: FontWeight.w800,
                             letterSpacing: 2,
                           ),
@@ -200,8 +179,8 @@ class OfferDetailScreen extends ConsumerWidget {
                           icon: const Icon(Icons.copy, size: 16),
                           label: const Text('Copy'),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: AppColors.primary,
-                            side: const BorderSide(color: AppColors.primary),
+                            foregroundColor: isDark ? AppColors.dSky : AppColors.sky,
+                            side: BorderSide(color: isDark ? AppColors.dSky : AppColors.sky),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(
                                   AppSpacing.radiusSm),
@@ -226,7 +205,7 @@ class OfferDetailScreen extends ConsumerWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(AppSpacing.md),
                   decoration: BoxDecoration(
-                    color: AppColors.surfaceVariant.withValues(alpha: 0.5),
+                    color: isDark ? AppColors.dSurface : AppColors.skyTint,
                     borderRadius:
                         BorderRadius.circular(AppSpacing.radiusMd),
                   ),
@@ -252,8 +231,7 @@ class OfferDetailScreen extends ConsumerWidget {
                             vertical: AppSpacing.xs,
                           ),
                           decoration: BoxDecoration(
-                            color:
-                                AppColors.warning.withValues(alpha: 0.15),
+                            color: AppColors.warningAlpha15,
                             borderRadius: BorderRadius.circular(
                                 AppSpacing.radiusSm),
                           ),
@@ -286,8 +264,7 @@ class OfferDetailScreen extends ConsumerWidget {
                             vertical: AppSpacing.xs,
                           ),
                           decoration: BoxDecoration(
-                            color:
-                                AppColors.error.withValues(alpha: 0.15),
+                            color: AppColors.errorAlpha15,
                             borderRadius: BorderRadius.circular(
                                 AppSpacing.radiusSm),
                           ),
@@ -328,12 +305,11 @@ class OfferDetailScreen extends ConsumerWidget {
                       label: Text(
                         offer.airportCode,
                         style: theme.textTheme.labelLarge?.copyWith(
-                          color: AppColors.primary,
+                          color: isDark ? AppColors.dSky : AppColors.ink,
                           fontWeight: FontWeight.w700,
                         ),
                       ),
-                      backgroundColor:
-                          AppColors.primary.withValues(alpha: 0.1),
+                      backgroundColor: AppColors.skyAlpha10,
                       side: BorderSide.none,
                       shape: RoundedRectangleBorder(
                         borderRadius:
@@ -381,6 +357,7 @@ class _TermsExpansionTileState extends State<_TermsExpansionTile> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -403,7 +380,7 @@ class _TermsExpansionTileState extends State<_TermsExpansionTile> {
                   _expanded
                       ? Icons.keyboard_arrow_up
                       : Icons.keyboard_arrow_down,
-                  color: AppColors.onSurfaceVariant,
+                  color: isDark ? AppColors.dMuted : AppColors.muted,
                 ),
               ],
             ),
@@ -415,13 +392,13 @@ class _TermsExpansionTileState extends State<_TermsExpansionTile> {
             width: double.infinity,
             padding: const EdgeInsets.all(AppSpacing.md),
             decoration: BoxDecoration(
-              color: AppColors.surfaceVariant.withValues(alpha: 0.5),
+              color: isDark ? AppColors.dSurface : AppColors.skyTint,
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
             child: Text(
               widget.termsAndConditions,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: isDark ? AppColors.dMuted : AppColors.muted,
               ),
             ),
           ),

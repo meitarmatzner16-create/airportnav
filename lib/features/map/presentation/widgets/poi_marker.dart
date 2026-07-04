@@ -14,55 +14,40 @@ class PoiMarker extends StatelessWidget {
     this.isSelected = false,
   });
 
-  Color _categoryColor() {
-    switch (poi.category) {
-      case 'gate':
-        return const Color(0xFF1565C0);
-      case 'shop':
-        return const Color(0xFF7C3AED);
-      case 'lounge':
-        return const Color(0xFF0891B2);
-      case 'restaurant':
-        return const Color(0xFFFF6B35);
-      case 'restroom':
-        return const Color(0xFF6B7280);
-      case 'info':
-        return const Color(0xFF059669);
-      case 'security':
-        return const Color(0xFFDC2626);
-      case 'immigration':
-        return const Color(0xFFEAB308);
-      default:
-        return const Color(0xFF6B7280);
-    }
+  /// Returns [fill, shadow] color pair using Sky Pass tokens.
+  (Color, Color) _categoryColors() {
+    return switch (poi.category) {
+      'gate' => (AppColors.sky, AppColors.skyAlpha20),
+      'shop' => (AppColors.ink, AppColors.inkAlpha10),
+      'lounge' => (AppColors.gradientLoungeStart, AppColors.successAlpha15),
+      'restaurant' => (AppColors.gradientDiningStart, AppColors.warningAlpha15),
+      'restroom' => (AppColors.muted, AppColors.inkAlpha10),
+      'info' => (AppColors.success, AppColors.successAlpha15),
+      'security' => (AppColors.error, AppColors.errorAlpha15),
+      'immigration' => (AppColors.warning, AppColors.warningAlpha15),
+      _ => (AppColors.muted, AppColors.inkAlpha10),
+    };
   }
 
   IconData _categoryIcon() {
-    switch (poi.category) {
-      case 'gate':
-        return Icons.flight_takeoff;
-      case 'shop':
-        return Icons.store;
-      case 'lounge':
-        return Icons.airline_seat_individual_suite;
-      case 'restaurant':
-        return Icons.restaurant;
-      case 'restroom':
-        return Icons.wc;
-      case 'info':
-        return Icons.info_outline;
-      case 'security':
-        return Icons.security;
-      case 'immigration':
-        return Icons.badge;
-      default:
-        return Icons.place;
-    }
+    return switch (poi.category) {
+      'gate' => Icons.flight_takeoff,
+      'shop' => Icons.store,
+      'lounge' => Icons.airline_seat_individual_suite,
+      'restaurant' => Icons.restaurant,
+      'restroom' => Icons.wc,
+      'info' => Icons.info_outline,
+      'security' => Icons.security,
+      'immigration' => Icons.badge,
+      _ => Icons.place,
+    };
   }
 
   @override
   Widget build(BuildContext context) {
-    final color = _categoryColor();
+    final (categoryFill, categoryShadow) = _categoryColors();
+    final fillColor = isSelected ? AppColors.sky : categoryFill;
+    final shadowColor = isSelected ? AppColors.skyAlpha20 : categoryShadow;
     final size = isSelected ? 36.0 : 28.0;
 
     return GestureDetector(
@@ -74,15 +59,15 @@ class PoiMarker extends StatelessWidget {
             width: size,
             height: size,
             decoration: BoxDecoration(
-              color: isSelected ? AppColors.accent : Color((color.value & 0x00FFFFFF) | 0xD9000000),
+              color: fillColor,
               shape: BoxShape.circle,
               border: Border.all(
-                color: isSelected ? Colors.white : Colors.white70,
+                color: isSelected ? Colors.white : AppColors.whiteAlpha80,
                 width: isSelected ? 3 : 2,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: isSelected ? const Color(0x661FC5A5) : Color((color.value & 0x00FFFFFF) | 0x66000000),
+                  color: shadowColor,
                   blurRadius: isSelected ? 8 : 4,
                   offset: const Offset(0, 2),
                 ),
@@ -99,7 +84,7 @@ class PoiMarker extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
               decoration: BoxDecoration(
-                color: Colors.black87,
+                color: AppColors.ink,
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Text(

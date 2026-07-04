@@ -4,6 +4,8 @@ import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/widgets/app_card.dart';
+import '../../../../core/widgets/state_views.dart';
 import '../providers/flight_providers.dart';
 import '../widgets/flight_status_badge.dart';
 
@@ -23,7 +25,7 @@ class FlightDetailScreen extends ConsumerWidget {
     if (flight == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Flight Details')),
-        body: const Center(child: Text('Flight not found')),
+        body: const ErrorState(message: 'The requested flight could not be found.'),
       );
     }
 
@@ -38,7 +40,7 @@ class FlightDetailScreen extends ConsumerWidget {
           IconButton(
             icon: Icon(
               isSaved ? Icons.favorite : Icons.favorite_border,
-              color: isSaved ? Colors.red : null,
+              color: isSaved ? AppColors.error : null,
             ),
             onPressed: () {
               ref.read(savedFlightIdsProvider.notifier).toggle(flightId);
@@ -47,19 +49,17 @@ class FlightDetailScreen extends ConsumerWidget {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(AppSpacing.md),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.gutter,
+          vertical: AppSpacing.md,
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Header card
-            Card(
-              elevation: AppSpacing.cardElevation,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.lg),
-                child: Column(
+            AppCard(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Column(
                   children: [
                     // Airline + status
                     Row(
@@ -101,7 +101,7 @@ class FlightDetailScreen extends ConsumerWidget {
                               Text(
                                 flight.departureCity,
                                 style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: AppColors.onSurfaceVariant,
+                                  color: AppColors.muted,
                                 ),
                               ),
                               const SizedBox(height: AppSpacing.xs),
@@ -112,7 +112,7 @@ class FlightDetailScreen extends ConsumerWidget {
                               Text(
                                 dateFormat.format(flight.departureTime),
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: AppColors.onSurfaceVariant,
+                                  color: AppColors.muted,
                                 ),
                               ),
                             ],
@@ -131,7 +131,7 @@ class FlightDetailScreen extends ConsumerWidget {
                               Text(
                                 flight.arrivalCity,
                                 style: theme.textTheme.bodyMedium?.copyWith(
-                                  color: AppColors.onSurfaceVariant,
+                                  color: AppColors.muted,
                                 ),
                               ),
                               const SizedBox(height: AppSpacing.xs),
@@ -142,7 +142,7 @@ class FlightDetailScreen extends ConsumerWidget {
                               Text(
                                 dateFormat.format(flight.arrivalTime),
                                 style: theme.textTheme.bodySmall?.copyWith(
-                                  color: AppColors.onSurfaceVariant,
+                                  color: AppColors.muted,
                                 ),
                               ),
                             ],
@@ -156,34 +156,31 @@ class FlightDetailScreen extends ConsumerWidget {
                     _FlightProgressIndicator(status: flight.status),
                   ],
                 ),
-              ),
             ),
 
             const SizedBox(height: AppSpacing.md),
 
             // Delay info
             if (flight.delayMinutes != null)
-              Card(
-                elevation: AppSpacing.cardElevation,
-                color: const Color(0xFFFEF3C7),
-                shape: RoundedRectangleBorder(
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.warningAlpha15,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  border: Border.all(color: AppColors.warning.withAlpha(0x40), width: 1),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  child: Row(
-                    children: [
-                      const Icon(Icons.warning_amber_rounded,
-                          color: Color(0xFFD97706)),
-                      const SizedBox(width: AppSpacing.sm),
-                      Text(
-                        'Delayed by ${flight.delayMinutes} minutes',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: const Color(0xFFD97706),
-                        ),
+                padding: const EdgeInsets.all(AppSpacing.md),
+                child: Row(
+                  children: [
+                    const Icon(Icons.warning_amber_rounded,
+                        color: AppColors.warning),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      'Delayed by ${flight.delayMinutes} minutes',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: AppColors.warning,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
 
@@ -191,87 +188,75 @@ class FlightDetailScreen extends ConsumerWidget {
               const SizedBox(height: AppSpacing.md),
 
             // Gate & Terminal card
-            Card(
-              elevation: AppSpacing.cardElevation,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Gate & Terminal',
-                      style: theme.textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _DetailTile(
-                            icon: Icons.door_front_door_outlined,
-                            label: 'Gate',
-                            value: flight.gate ?? '--',
-                          ),
+            AppCard(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Gate & Terminal',
+                    style: theme.textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _DetailTile(
+                          icon: Icons.door_front_door_outlined,
+                          label: 'Gate',
+                          value: flight.gate ?? '--',
                         ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: _DetailTile(
-                            icon: Icons.business,
-                            label: 'Terminal',
-                            value: flight.terminal ?? '--',
-                          ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: _DetailTile(
+                          icon: Icons.business,
+                          label: 'Terminal',
+                          value: flight.terminal ?? '--',
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
 
             const SizedBox(height: AppSpacing.md),
 
             // Flight duration card
-            Card(
-              elevation: AppSpacing.cardElevation,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.md),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Flight Info',
-                      style: theme.textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: AppSpacing.md),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _DetailTile(
-                            icon: Icons.timer_outlined,
-                            label: 'Duration',
-                            value: _formatDuration(
-                              flight.arrivalTime
-                                  .difference(flight.departureTime),
-                            ),
+            AppCard(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Flight Info',
+                    style: theme.textTheme.titleLarge,
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _DetailTile(
+                          icon: Icons.timer_outlined,
+                          label: 'Duration',
+                          value: _formatDuration(
+                            flight.arrivalTime
+                                .difference(flight.departureTime),
                           ),
                         ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: _DetailTile(
-                            icon: Icons.calendar_today_outlined,
-                            label: 'Date',
-                            value: dateFormat.format(flight.departureTime),
-                          ),
+                      ),
+                      const SizedBox(width: AppSpacing.md),
+                      Expanded(
+                        child: _DetailTile(
+                          icon: Icons.calendar_today_outlined,
+                          label: 'Date',
+                          value: dateFormat.format(flight.departureTime),
                         ),
-                      ],
-                    ),
-                  ],
-                ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
 
@@ -309,7 +294,7 @@ class _FlightProgressIndicator extends StatelessWidget {
           height: 12,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: progress > 0 ? AppColors.primary : AppColors.outline,
+            color: progress > 0 ? AppColors.sky : AppColors.hairline,
           ),
         ),
 
@@ -319,13 +304,13 @@ class _FlightProgressIndicator extends StatelessWidget {
             children: [
               Container(
                 height: 3,
-                color: AppColors.outline,
+                color: AppColors.hairline,
               ),
               FractionallySizedBox(
                 widthFactor: progress,
                 child: Container(
                   height: 3,
-                  color: AppColors.primary,
+                  color: AppColors.sky,
                 ),
               ),
             ],
@@ -339,7 +324,7 @@ class _FlightProgressIndicator extends StatelessWidget {
             child: const Icon(
               Icons.flight,
               size: 20,
-              color: AppColors.primary,
+              color: AppColors.sky,
             ),
           ),
 
@@ -348,7 +333,7 @@ class _FlightProgressIndicator extends StatelessWidget {
           Expanded(
             child: Container(
               height: 3,
-              color: AppColors.outline,
+              color: AppColors.hairline,
             ),
           ),
 
@@ -358,7 +343,7 @@ class _FlightProgressIndicator extends StatelessWidget {
           height: 12,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: progress >= 1 ? AppColors.primary : AppColors.outline,
+            color: progress >= 1 ? AppColors.sky : AppColors.hairline,
           ),
         ),
       ],
@@ -403,12 +388,12 @@ class _DetailTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
-        color: const Color(0x80ECEEF2),
+        color: AppColors.skyTint,
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: AppColors.primary),
+          Icon(icon, size: 20, color: AppColors.sky),
           const SizedBox(width: AppSpacing.sm),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -416,7 +401,7 @@ class _DetailTile extends StatelessWidget {
               Text(
                 label,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.onSurfaceVariant,
+                  color: AppColors.muted,
                 ),
               ),
               Text(

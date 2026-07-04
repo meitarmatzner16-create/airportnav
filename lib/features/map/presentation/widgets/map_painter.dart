@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:airport_nav/core/constants/app_colors.dart';
 import 'package:airport_nav/features/map/domain/entities/map_floor.dart';
 
 class MapPainter extends CustomPainter {
@@ -11,28 +12,32 @@ class MapPainter extends CustomPainter {
     final scaleX = size.width / floor.width;
     final scaleY = size.height / floor.height;
 
-    // Background
-    final bgPaint = Paint()..color = const Color(0xFFF8FAFC);
+    // Background — paper token
+    final bgPaint = Paint()..color = AppColors.paper;
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.width, size.height),
       bgPaint,
     );
 
+    // Wall outlines — hairlineCool token
     final wallPaint = Paint()
-      ..color = const Color(0xFFCBD5E1)
+      ..color = AppColors.hairlineCool
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
+    // Room fill — skyTint token
     final roomFill = Paint()
-      ..color = const Color(0xFFE2E8F0)
+      ..color = AppColors.skyTint
       ..style = PaintingStyle.fill;
 
+    // Corridor fill — card (white) token
     final corridorPaint = Paint()
-      ..color = const Color(0xFFF1F5F9)
+      ..color = AppColors.card
       ..style = PaintingStyle.fill;
 
+    // Gate area — skyAlpha10 token
     final gateAreaPaint = Paint()
-      ..color = const Color(0xFFDDE4F7)
+      ..color = AppColors.skyAlpha10
       ..style = PaintingStyle.fill;
 
     // Draw main terminal outline
@@ -100,9 +105,9 @@ class MapPainter extends CustomPainter {
     _drawRoom(canvas, 730, floor.height * 0.42, 120, floor.height * 0.16,
         scaleX, scaleY, roomFill, wallPaint);
 
-    // Draw grid lines for orientation (subtle)
+    // Draw grid lines for orientation (subtle) — hairline at 50% alpha
     final gridPaint = Paint()
-      ..color = const Color(0x80E2E8F0)
+      ..color = AppColors.hairline.withAlpha(0x80)
       ..strokeWidth = 0.5;
 
     for (double x = 100; x < floor.width; x += 100) {

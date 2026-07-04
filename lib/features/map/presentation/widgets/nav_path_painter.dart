@@ -20,9 +20,9 @@ class NavPathPainter extends CustomPainter {
     final scaleX = size.width / mapWidth;
     final scaleY = size.height / mapHeight;
 
-    // Draw path shadow
+    // Draw path shadow — sky token at 20% alpha
     final shadowPaint = Paint()
-      ..color = AppColors.accentAlpha20
+      ..color = AppColors.skyAlpha20
       ..style = PaintingStyle.stroke
       ..strokeWidth = 8.0
       ..strokeCap = StrokeCap.round
@@ -41,9 +41,9 @@ class NavPathPainter extends CustomPainter {
     }
     canvas.drawPath(path, shadowPaint);
 
-    // Draw dashed path
+    // Draw dashed path — sky token
     final dashPaint = Paint()
-      ..color = AppColors.accent
+      ..color = AppColors.sky
       ..style = PaintingStyle.stroke
       ..strokeWidth = 4.0
       ..strokeCap = StrokeCap.round
@@ -51,22 +51,22 @@ class NavPathPainter extends CustomPainter {
 
     _drawDashedPath(canvas, path, dashPaint, 12.0, 8.0);
 
-    // Draw start marker
+    // Draw start marker — success token
     final startPoint = navPath.waypoints.first;
     _drawMarker(
       canvas,
       Offset(startPoint.x * scaleX, startPoint.y * scaleY),
-      const Color(0xFF16A34A),
-      const Color(0x4D16A34A),
+      AppColors.success,
+      AppColors.successAlpha15,
     );
 
-    // Draw end marker
+    // Draw end marker — error token
     final endPoint = navPath.waypoints.last;
     _drawMarker(
       canvas,
       Offset(endPoint.x * scaleX, endPoint.y * scaleY),
-      const Color(0xFFDC2626),
-      const Color(0x4DDC2626),
+      AppColors.error,
+      AppColors.errorAlpha15,
     );
   }
 

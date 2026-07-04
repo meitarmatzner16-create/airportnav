@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:airport_nav/core/constants/app_colors.dart';
 import 'package:airport_nav/core/constants/app_spacing.dart';
+import 'package:airport_nav/core/theme/app_theme.dart';
 import 'package:airport_nav/features/map/domain/entities/map_floor.dart';
 
 class PoiDetailSheet extends StatelessWidget {
@@ -15,94 +16,69 @@ class PoiDetailSheet extends StatelessWidget {
     this.onClose,
   });
 
-  Color _categoryColor() {
-    switch (poi.category) {
-      case 'gate':
-        return AppColors.primary;
-      case 'shop':
-        return const Color(0xFF7C3AED);
-      case 'lounge':
-        return const Color(0xFF0891B2);
-      case 'restaurant':
-        return const Color(0xFFFF6B35);
-      case 'restroom':
-        return AppColors.onSurfaceVariant;
-      case 'info':
-        return AppColors.success;
-      case 'security':
-        return AppColors.error;
-      case 'immigration':
-        return AppColors.warning;
-      default:
-        return AppColors.onSurfaceVariant;
-    }
+  /// Returns [accent, tintBg] color pair using Sky Pass tokens.
+  (Color, Color) _categoryColors() {
+    return switch (poi.category) {
+      'gate' => (AppColors.sky, AppColors.skyAlpha10),
+      'shop' => (AppColors.ink, AppColors.inkAlpha10),
+      'lounge' => (AppColors.gradientLoungeStart, AppColors.successAlpha15),
+      'restaurant' => (AppColors.gradientDiningStart, AppColors.warningAlpha15),
+      'restroom' => (AppColors.muted, AppColors.inkAlpha10),
+      'info' => (AppColors.success, AppColors.successAlpha15),
+      'security' => (AppColors.error, AppColors.errorAlpha15),
+      'immigration' => (AppColors.warning, AppColors.warningAlpha15),
+      _ => (AppColors.muted, AppColors.inkAlpha10),
+    };
   }
 
   String _categoryLabel() {
-    switch (poi.category) {
-      case 'gate':
-        return 'Gate';
-      case 'shop':
-        return 'Shop';
-      case 'lounge':
-        return 'Lounge';
-      case 'restaurant':
-        return 'Restaurant';
-      case 'restroom':
-        return 'Restroom';
-      case 'info':
-        return 'Information';
-      case 'security':
-        return 'Security';
-      case 'immigration':
-        return 'Immigration';
-      default:
-        return poi.category;
-    }
+    return switch (poi.category) {
+      'gate' => 'Gate',
+      'shop' => 'Shop',
+      'lounge' => 'Lounge',
+      'restaurant' => 'Restaurant',
+      'restroom' => 'Restroom',
+      'info' => 'Information',
+      'security' => 'Security',
+      'immigration' => 'Immigration',
+      _ => poi.category,
+    };
   }
 
   IconData _categoryIcon() {
-    switch (poi.category) {
-      case 'gate':
-        return Icons.flight_takeoff;
-      case 'shop':
-        return Icons.store;
-      case 'lounge':
-        return Icons.airline_seat_individual_suite;
-      case 'restaurant':
-        return Icons.restaurant;
-      case 'restroom':
-        return Icons.wc;
-      case 'info':
-        return Icons.info_outline;
-      case 'security':
-        return Icons.security;
-      case 'immigration':
-        return Icons.badge;
-      default:
-        return Icons.place;
-    }
+    return switch (poi.category) {
+      'gate' => Icons.flight_takeoff,
+      'shop' => Icons.store,
+      'lounge' => Icons.airline_seat_individual_suite,
+      'restaurant' => Icons.restaurant,
+      'restroom' => Icons.wc,
+      'info' => Icons.info_outline,
+      'security' => Icons.security,
+      'immigration' => Icons.badge,
+      _ => Icons.place,
+    };
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final color = _categoryColor();
+    final isDark = theme.brightness == Brightness.dark;
+    final (accentColor, tintBg) = _categoryColors();
 
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
+        color: isDark ? AppColors.dSurface : AppColors.card,
         borderRadius: const BorderRadius.vertical(
           top: Radius.circular(AppSpacing.radiusLg),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0x1A000000),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
+        border: Border(
+          top: BorderSide(
+            color: isDark ? AppColors.dHairline : AppColors.hairline,
+            width: 1,
           ),
-        ],
+        ),
+        boxShadow: AppShadows.card,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -112,24 +88,24 @@ class PoiDetailSheet extends StatelessWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: AppColors.outline,
+              color: isDark ? AppColors.dHairline : AppColors.hairline,
               borderRadius: BorderRadius.circular(2),
             ),
           ),
           const SizedBox(height: AppSpacing.md),
           Row(
             children: [
-              // Category icon
+              // Category icon disc
               Container(
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: Color((color.value & 0x00FFFFFF) | 0x26000000),
+                  color: tintBg,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),
                 child: Icon(
                   _categoryIcon(),
-                  color: color,
+                  color: accentColor,
                   size: 24,
                 ),
               ),
@@ -143,6 +119,7 @@ class PoiDetailSheet extends StatelessWidget {
                       poi.name,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
+                        color: isDark ? AppColors.dText : AppColors.ink,
                       ),
                     ),
                     const SizedBox(height: 2),
@@ -152,14 +129,14 @@ class PoiDetailSheet extends StatelessWidget {
                         vertical: 2,
                       ),
                       decoration: BoxDecoration(
-                        color: Color((color.value & 0x00FFFFFF) | 0x1A000000),
+                        color: tintBg,
                         borderRadius:
                             BorderRadius.circular(AppSpacing.radiusFull),
                       ),
                       child: Text(
                         _categoryLabel(),
                         style: theme.textTheme.labelSmall?.copyWith(
-                          color: color,
+                          color: accentColor,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -171,7 +148,10 @@ class PoiDetailSheet extends StatelessWidget {
               if (onClose != null)
                 IconButton(
                   onPressed: onClose,
-                  icon: const Icon(Icons.close),
+                  icon: Icon(
+                    Icons.close,
+                    color: isDark ? AppColors.dMuted : AppColors.muted,
+                  ),
                   iconSize: 20,
                 ),
             ],
@@ -185,7 +165,8 @@ class PoiDetailSheet extends StatelessWidget {
               icon: const Icon(Icons.navigation, size: 18),
               label: const Text('Navigate Here'),
               style: FilledButton.styleFrom(
-                backgroundColor: AppColors.accent,
+                backgroundColor: AppColors.sky,
+                foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
                 ),

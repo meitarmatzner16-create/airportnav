@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:airport_nav/core/constants/app_colors.dart';
 import 'package:airport_nav/core/constants/app_spacing.dart';
+import 'package:airport_nav/core/widgets/state_views.dart';
 import 'package:airport_nav/features/offers/presentation/providers/offer_providers.dart';
 import 'package:airport_nav/features/offers/presentation/widgets/offer_card.dart';
 import 'package:airport_nav/features/flight/presentation/providers/flight_providers.dart';
@@ -137,7 +138,11 @@ class OffersScreen extends ConsumerWidget {
                 ],
 
                 if (filteredOffers.isEmpty)
-                  _OffersEmptyState()
+                  const EmptyState(
+                    icon: Icons.local_offer_outlined,
+                    title: 'No offers yet',
+                    message: 'Check back closer to your flight',
+                  )
                 else
                   ...filteredOffers
                       .where((o) =>
@@ -232,20 +237,20 @@ class _NoFlightHint extends StatelessWidget {
       padding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md, vertical: AppSpacing.smMd),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: AppColors.card,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         border: Border.all(color: AppColors.hairline, width: 1),
       ),
       child: Row(
         children: [
           const Icon(Icons.info_outline_rounded,
-              size: AppSpacing.iconSm, color: AppColors.accent),
+              size: AppSpacing.iconSm, color: AppColors.sky),
           const SizedBox(width: AppSpacing.sm),
           Expanded(
             child: Text(
               'Pick a flight on Home for personalized deals',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.onSurfaceVariant,
+                color: AppColors.muted,
               ),
             ),
           ),
@@ -278,17 +283,17 @@ class _FilterPill extends StatelessWidget {
         padding: const EdgeInsets.symmetric(
             horizontal: AppSpacing.md, vertical: AppSpacing.sm),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : AppColors.surface,
+          color: isSelected ? AppColors.sky : AppColors.card,
           borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.hairline,
+            color: isSelected ? AppColors.sky : AppColors.hairline,
             width: 1,
           ),
         ),
         child: Text(
           label,
           style: theme.textTheme.labelLarge?.copyWith(
-            color: isSelected ? Colors.white : AppColors.onSurface,
+            color: isSelected ? Colors.white : AppColors.textColor,
             fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
           ),
         ),
@@ -316,7 +321,7 @@ class _SectionHeader extends StatelessWidget {
           title,
           style: theme.textTheme.headlineMedium?.copyWith(
             fontWeight: FontWeight.w600,
-            color: AppColors.onSurface,
+            color: AppColors.ink,
           ),
         ),
         if (subtitle != null) ...[
@@ -324,7 +329,7 @@ class _SectionHeader extends StatelessWidget {
           Text(
             subtitle!,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppColors.onSurfaceVariant,
+              color: AppColors.muted,
             ),
           ),
         ],
@@ -333,45 +338,3 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-class _OffersEmptyState extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.xxl),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.hairline, width: 1),
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: 64,
-            height: 64,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: AppColors.surfaceVariant,
-            ),
-            child: const Icon(Icons.local_offer_outlined,
-                size: 28, color: AppColors.onSurfaceVariant),
-          ),
-          const SizedBox(height: AppSpacing.smMd),
-          Text(
-            'No offers yet',
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            'Check back closer to your flight',
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: AppColors.onSurfaceVariant,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

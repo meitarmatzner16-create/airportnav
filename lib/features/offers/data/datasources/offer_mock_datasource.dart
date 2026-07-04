@@ -7,6 +7,7 @@ class OfferMockDatasource {
     final twoMonthsAhead = now.add(const Duration(days: 60));
     final oneMonthAhead = now.add(const Duration(days: 30));
     final twoWeeksAhead = now.add(const Duration(days: 14));
+    // ignore: unused_local_variable
     final oneWeekAhead = now.add(const Duration(days: 7));
     final threeDaysAhead = now.add(const Duration(days: 3));
 
