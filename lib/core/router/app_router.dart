@@ -4,6 +4,7 @@ import '../../features/onboarding/presentation/splash_screen.dart';
 import '../../features/onboarding/presentation/onboarding_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
 import '../../features/map/presentation/screens/airport_map_screen.dart';
+import '../../features/map/presentation/screens/route_navigation_screen.dart';
 import '../../features/offers/presentation/screens/offers_screen.dart';
 import '../../features/more/presentation/more_screen.dart';
 import '../../features/voice_chat/presentation/screens/voice_chat_screen.dart';
@@ -34,6 +35,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/boarding-pass',
         builder: (context, state) => const BoardingPassScreen(),
+      ),
+      // Guided route navigation (pushed from RoutePlanCard / Active plan card)
+      GoRoute(
+        path: '/navigate',
+        builder: (context, state) => const RouteNavigationScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) => AppShell(child: child),

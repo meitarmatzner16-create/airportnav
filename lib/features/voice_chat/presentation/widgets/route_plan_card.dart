@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:airport_nav/core/constants/app_colors.dart';
 import 'package:airport_nav/core/constants/app_spacing.dart';
 import 'package:airport_nav/core/theme/app_theme.dart';
+import 'package:airport_nav/core/widgets/app_buttons.dart';
 import 'package:airport_nav/features/voice_chat/domain/entities/chat_message.dart';
+import 'package:airport_nav/features/map/presentation/providers/map_providers.dart';
 
 /// Premium minimal route plan: a clean white card with a tight neutral
 /// timeline. The accent color is reserved for the total-time pill so it
 /// doesn't compete with the rest of the screen.
-class RoutePlanCard extends StatelessWidget {
+class RoutePlanCard extends ConsumerWidget {
   final RoutePlan plan;
 
   const RoutePlanCard({super.key, required this.plan});
@@ -73,7 +77,7 @@ class RoutePlanCard extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final surface = isDark ? AppColors.darkSurface : AppColors.surface;
@@ -143,6 +147,28 @@ class RoutePlanCard extends StatelessWidget {
                     ),
                   ),
                 ],
+              ),
+            ),
+            Container(height: 1, color: hairline),
+            // "View in map" — full-width primary button
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.md,
+                AppSpacing.smMd,
+                AppSpacing.md,
+                AppSpacing.xs,
+              ),
+              child: Semantics(
+                label: 'View route in map',
+                button: true,
+                child: PrimaryButton(
+                  label: 'View in map',
+                  icon: Icons.navigation_rounded,
+                  onPressed: () {
+                    ref.read(activeRoutePlanProvider.notifier).state = plan;
+                    context.push('/navigate');
+                  },
+                ),
               ),
             ),
             Container(height: 1, color: hairline),

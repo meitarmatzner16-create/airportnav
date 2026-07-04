@@ -13,6 +13,7 @@ import '../../../features/flight/domain/entities/flight.dart';
 import '../../../features/flight/presentation/providers/flight_providers.dart';
 import '../../../features/venues/presentation/providers/venue_providers.dart';
 import '../../../features/voice_chat/presentation/providers/voice_chat_providers.dart';
+import '../../../features/map/presentation/providers/map_providers.dart';
 
 /// Screen horizontal gutter per design spec (24px, overrides old 20px).
 const _gutter = 24.0;
@@ -599,14 +600,14 @@ class _ConcentricCirclesPainter extends CustomPainter {
 // Active route preview card (conditional)
 // ─────────────────────────────────────────────────────────────────────────────
 
-class _ActiveRouteCard extends StatelessWidget {
+class _ActiveRouteCard extends ConsumerWidget {
   final dynamic plan; // RoutePlan
   final bool isDark;
 
   const _ActiveRouteCard({required this.plan, required this.isDark});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final cardBg = isDark ? AppColors.dSurface : AppColors.card;
     final hairline = isDark ? AppColors.dHairline : AppColors.hairline;
@@ -619,7 +620,10 @@ class _ActiveRouteCard extends StatelessWidget {
     final durationLabel = hours > 0 ? '${hours}h ${mins}m' : '${mins}m';
 
     return GestureDetector(
-      onTap: () => context.go('/map'),
+      onTap: () {
+        ref.read(activeRoutePlanProvider.notifier).state = plan;
+        context.push('/navigate');
+      },
       child: Container(
         decoration: BoxDecoration(
           color: cardBg,
