@@ -98,7 +98,7 @@ class _HeaderRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final labelStyle = AppTypography.mono(
       fontSize: 9.5,
-      weight: FontWeight.w700,
+      weight: FontWeight.w600,
       color: AppColors.muted,
     ).copyWith(letterSpacing: 0.3);
 
@@ -175,11 +175,11 @@ class _DeparturesRow extends StatelessWidget {
         const SizedBox(width: _leadGap),
         dataCell(flight.flightNumber, _flightFlex,
             style: AppTypography.mono(
-                fontSize: 11, weight: FontWeight.w700, color: textColor)),
+                fontSize: 11, weight: FontWeight.w600, color: textColor)),
         dataCell('${flight.arrivalCity} (${flight.arrivalAirport})', _destFlex,
             style: theme.textTheme.bodySmall?.copyWith(
                   color: textColor,
-                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
                   fontSize: 11,
                 ) ??
                 const TextStyle()),
@@ -187,7 +187,7 @@ class _DeparturesRow extends StatelessWidget {
             style: AppTypography.mono(fontSize: 10.5, color: mutedColor)),
         dataCell(flight.gate ?? '—', _gateFlex,
             style: AppTypography.mono(
-                fontSize: 10.5, weight: FontWeight.w700, color: textColor)),
+                fontSize: 10.5, weight: FontWeight.w600, color: textColor)),
         Expanded(
           flex: _statusFlex,
           child: Align(

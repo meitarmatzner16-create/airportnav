@@ -154,7 +154,7 @@ class _AlphabeticalListView extends StatelessWidget {
                     letter,
                     style: theme.textTheme.labelMedium?.copyWith(
                       color: isDark ? AppColors.dSky : AppColors.sky,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
                       letterSpacing: 0.6,
                     ),
                   ),

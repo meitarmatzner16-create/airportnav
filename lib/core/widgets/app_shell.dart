@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:airport_nav/core/constants/app_colors.dart';
 import 'package:airport_nav/core/constants/app_spacing.dart';
+import 'package:airport_nav/core/theme/app_theme.dart';
 
-/// Bottom-tab shell. Four flat, equal-weight tabs (Home / Map / Flights /
-/// Assistant); the active tab gets a soft blue highlight pill.
+/// Bottom-tab shell. Five tabs with the Assistant centered and emphasized as
+/// the app's primary feature (a filled blue disc between the flat tabs).
 class AppShell extends StatelessWidget {
   final Widget child;
   const AppShell({super.key, required this.child});
@@ -17,10 +18,18 @@ class AppShell extends StatelessWidget {
       label: 'Home',
     ),
     _NavItem(
-      route: '/map',
-      icon: Icons.map_outlined,
-      activeIcon: Icons.map_rounded,
-      label: 'Map',
+      // Search tab opens the venues (food & drinks / shops) directory search.
+      route: '/venues',
+      icon: Icons.search_outlined,
+      activeIcon: Icons.search_rounded,
+      label: 'Search',
+    ),
+    _NavItem(
+      route: '/voice-chat',
+      icon: Icons.auto_awesome_rounded,
+      activeIcon: Icons.auto_awesome_rounded,
+      label: 'Assistant',
+      isHero: true,
     ),
     _NavItem(
       route: '/flights',
@@ -29,10 +38,10 @@ class AppShell extends StatelessWidget {
       label: 'Flights',
     ),
     _NavItem(
-      route: '/voice-chat',
-      icon: Icons.auto_awesome_outlined,
-      activeIcon: Icons.auto_awesome_rounded,
-      label: 'Assistant',
+      route: '/map',
+      icon: Icons.map_outlined,
+      activeIcon: Icons.map_rounded,
+      label: 'Map',
     ),
   ];
 
@@ -70,7 +79,7 @@ class AppShell extends StatelessWidget {
         child: SafeArea(
           top: false,
           child: SizedBox(
-            height: 64,
+            height: 70,
             child: Row(
               children: List.generate(_tabs.length, (i) {
                 final tab = _tabs[i];
@@ -95,12 +104,14 @@ class _NavItem {
   final IconData icon;
   final IconData activeIcon;
   final String label;
+  final bool isHero;
 
   const _NavItem({
     required this.route,
     required this.icon,
     required this.activeIcon,
     required this.label,
+    this.isHero = false,
   });
 }
 
@@ -110,6 +121,25 @@ class _NavTab extends StatelessWidget {
   final VoidCallback onTap;
 
   const _NavTab({
+    required this.item,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return item.isHero
+        ? _HeroTab(isActive: isActive, onTap: onTap, label: item.label)
+        : _StandardTab(item: item, isActive: isActive, onTap: onTap);
+  }
+}
+
+class _StandardTab extends StatelessWidget {
+  final _NavItem item;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _StandardTab({
     required this.item,
     required this.isActive,
     required this.onTap,
@@ -137,25 +167,89 @@ class _NavTab extends StatelessWidget {
             AnimatedContainer(
               duration: const Duration(milliseconds: 180),
               curve: Curves.easeOut,
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               decoration: BoxDecoration(
                 color: isActive
                     ? (isDark ? AppColors.skyAlpha15 : AppColors.skyTint)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
               ),
-              child: Icon(
-                isActive ? item.activeIcon : item.icon,
-                size: 24,
-                color: color,
-              ),
+              child: Icon(isActive ? item.activeIcon : item.icon,
+                  size: 24, color: color),
             ),
             const SizedBox(height: 4),
             Text(
               item.label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: theme.textTheme.labelSmall?.copyWith(
                 color: color,
                 fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                fontSize: 11,
+                letterSpacing: 0.2,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _HeroTab extends StatelessWidget {
+  final bool isActive;
+  final VoidCallback onTap;
+  final String label;
+
+  const _HeroTab({
+    required this.isActive,
+    required this.onTap,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final labelColor = isActive
+        ? (isDark ? AppColors.dSky : AppColors.sky)
+        : (isDark ? AppColors.dText : AppColors.ink);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+      child: Semantics(
+        selected: isActive,
+        button: true,
+        label: label,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+              width: 46,
+              height: 46,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [AppColors.sky2, AppColors.sky],
+                ),
+                boxShadow: isActive ? AppShadows.accentGlow : AppShadows.card,
+              ),
+              child: const Icon(Icons.auto_awesome_rounded,
+                  size: 24, color: Colors.white),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: labelColor,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
                 fontSize: 11,
                 letterSpacing: 0.2,
               ),

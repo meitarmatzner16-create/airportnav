@@ -70,6 +70,9 @@ final detectedAirportProvider = StateProvider<String>((ref) => 'JFK');
 // --- User's selected flight ---
 final selectedFlightProvider = StateProvider<Flight?>((ref) => null);
 
+// --- Home board inline search query (separate from the Search tab's query) ---
+final homeSearchProvider = StateProvider<String>((ref) => '');
+
 // --- Upcoming flights at the detected airport within 3.5 hours ---
 final upcomingFlightsProvider = Provider<List<Flight>>((ref) {
   final airportCode = ref.watch(detectedAirportProvider);

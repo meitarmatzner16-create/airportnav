@@ -60,7 +60,7 @@ class AssistantEntryCard extends StatelessWidget {
                             'Ask Assistant',
                             style: theme.textTheme.titleLarge?.copyWith(
                               color: textColor,
-                              fontWeight: FontWeight.w700,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
                           const SizedBox(height: 2),

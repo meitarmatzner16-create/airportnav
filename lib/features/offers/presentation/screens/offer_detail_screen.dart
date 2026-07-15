@@ -161,7 +161,7 @@ class OfferDetailScreen extends ConsumerWidget {
                           offer.promoCode!,
                           style: theme.textTheme.headlineSmall?.copyWith(
                             color: isDark ? AppColors.dSky : AppColors.ink,
-                            fontWeight: FontWeight.w800,
+                            fontWeight: FontWeight.w600,
                             letterSpacing: 2,
                           ),
                         ),

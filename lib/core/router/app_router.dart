@@ -8,7 +8,6 @@ import '../../features/map/presentation/screens/route_navigation_screen.dart';
 import '../../features/offers/presentation/screens/offers_screen.dart';
 import '../../features/more/presentation/more_screen.dart';
 import '../../features/voice_chat/presentation/screens/voice_chat_screen.dart';
-import '../../features/flight/presentation/screens/flight_search_screen.dart';
 import '../../features/flight/presentation/screens/flight_detail_screen.dart';
 import '../../features/flight/presentation/screens/boarding_pass_screen.dart';
 import '../../features/flight/presentation/screens/flights_board_screen.dart';
@@ -46,10 +45,6 @@ final routerProvider = Provider<GoRouter>((ref) {
               child: HomeScreen(),
             ),
             routes: [
-              GoRoute(
-                path: 'flight-search',
-                builder: (context, state) => const FlightSearchScreen(),
-              ),
               GoRoute(
                 path: 'flight/:flightId',
                 builder: (context, state) => FlightDetailScreen(

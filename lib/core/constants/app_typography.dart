@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// AirportNav type: Manrope (display/UI + tabular flight data), Inter (long-form body).
+/// AirportNav type: Nunito (display/UI + tabular flight data), Inter (long-form body).
 class AppTypography {
   AppTypography._();
 
   /// Tabular "data" style for flight numbers, times, gates, and codes.
-  /// Unified onto Manrope — tabular figures keep digits column-aligned, so the
+  /// Unified onto Nunito — tabular figures keep digits column-aligned, so the
   /// app uses just two families. Name kept as `mono` to avoid call-site churn.
-  static TextStyle mono({double fontSize = 14, FontWeight weight = FontWeight.w700, Color? color}) =>
-      GoogleFonts.manrope(
+  static TextStyle mono({double fontSize = 14, FontWeight weight = FontWeight.w600, Color? color}) =>
+      GoogleFonts.nunito(
         fontSize: fontSize,
         fontWeight: weight,
         color: color,
@@ -17,21 +17,21 @@ class AppTypography {
         fontFeatures: const [FontFeature.tabularFigures()],
       );
 
-  static TextStyle _d(double s, {double sp = -0.4, FontWeight w = FontWeight.w700, double h = 1.15}) =>
-      GoogleFonts.manrope(fontSize: s, fontWeight: w, letterSpacing: sp, height: h);
+  static TextStyle _d(double s, {double sp = -0.4, FontWeight w = FontWeight.w600, double h = 1.15}) =>
+      GoogleFonts.nunito(fontSize: s, fontWeight: w, letterSpacing: sp, height: h);
   static TextStyle _ui(double s, {double sp = 0, FontWeight w = FontWeight.w600}) =>
-      GoogleFonts.manrope(fontSize: s, fontWeight: w, letterSpacing: sp);
+      GoogleFonts.nunito(fontSize: s, fontWeight: w, letterSpacing: sp);
   static TextStyle _body(double s, {double sp = 0, FontWeight w = FontWeight.w400, double h = 1.5}) =>
       GoogleFonts.inter(fontSize: s, fontWeight: w, letterSpacing: sp, height: h);
 
   static TextTheme get textTheme => TextTheme(
-        displayLarge: _d(36, sp: -0.3, w: FontWeight.w700, h: 1.1),
+        displayLarge: _d(36, sp: -0.3, w: FontWeight.w600, h: 1.1),
         displayMedium: _d(30, sp: -0.3),
         displaySmall: _d(24, sp: -0.4),
         headlineLarge: _d(22, sp: -0.3, h: 1.25),
-        headlineMedium: _ui(18, sp: -0.2, w: FontWeight.w700),
-        headlineSmall: _ui(17, sp: -0.2, w: FontWeight.w700),
-        titleLarge: _ui(16, sp: -0.1, w: FontWeight.w700),
+        headlineMedium: _ui(18, sp: -0.2, w: FontWeight.w600),
+        headlineSmall: _ui(17, sp: -0.2, w: FontWeight.w600),
+        titleLarge: _ui(16, sp: -0.1, w: FontWeight.w600),
         titleMedium: _ui(14, w: FontWeight.w600),
         titleSmall: _ui(12, sp: 0.2, w: FontWeight.w600),
         bodyLarge: _body(16),

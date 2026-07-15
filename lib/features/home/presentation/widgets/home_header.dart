@@ -39,7 +39,7 @@ class HomeHeader extends StatelessWidget {
                 'AirportNav',
                 style: theme.textTheme.displaySmall?.copyWith(
                   color: titleColor,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 2),

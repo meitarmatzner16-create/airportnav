@@ -46,7 +46,7 @@ class HomeHeroBanner extends StatelessWidget {
                     'Everything in the airport.\nFinally, in one place.',
                     style: theme.textTheme.headlineSmall?.copyWith(
                       color: titleColor,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w600,
                       height: 1.25,
                     ),
                   ),

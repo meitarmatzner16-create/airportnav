@@ -89,7 +89,7 @@ class UpcomingFlightCard extends StatelessWidget {
                                 '${flight.arrivalCity} (${flight.arrivalAirport})',
                                 style: theme.textTheme.headlineMedium?.copyWith(
                                   color: textColor,
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.w600,
                                 ),
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -99,7 +99,7 @@ class UpcomingFlightCard extends StatelessWidget {
                                 flight.flightNumber,
                                 style: AppTypography.mono(
                                   fontSize: 12.5,
-                                  weight: FontWeight.w700,
+                                  weight: FontWeight.w600,
                                   color: mutedColor,
                                 ),
                               ),
@@ -118,7 +118,7 @@ class UpcomingFlightCard extends StatelessWidget {
                               boardsInLabel,
                               style: theme.textTheme.headlineMedium?.copyWith(
                                 color: textColor,
-                                fontWeight: FontWeight.w800,
+                                fontWeight: FontWeight.w600,
                                 fontSize: 20,
                               ),
                             ),
@@ -202,7 +202,7 @@ class _Stat extends StatelessWidget {
             value,
             style: theme.textTheme.titleMedium?.copyWith(
               color: textColor,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w600,
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

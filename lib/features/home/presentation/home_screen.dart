@@ -31,6 +31,16 @@ class HomeScreen extends ConsumerWidget {
     final upcoming = ref.watch(upcomingFlightsProvider);
     final selected = ref.watch(selectedFlightProvider);
     final displayFlight = _displayFlight(selected, upcoming);
+    final query = ref.watch(homeSearchProvider).trim().toLowerCase();
+    final departures = query.isEmpty
+        ? upcoming
+        : upcoming
+            .where((f) =>
+                f.flightNumber.toLowerCase().contains(query) ||
+                f.arrivalCity.toLowerCase().contains(query) ||
+                f.arrivalAirport.toLowerCase().contains(query) ||
+                f.airline.toLowerCase().contains(query))
+            .toList();
 
     void snack(String message) {
       ScaffoldMessenger.of(context)
@@ -63,7 +73,8 @@ class HomeScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: _gutter),
               child: HomeSearchBar(
                 hint: 'Search flight, destination or airline',
-                onTap: () => context.push('/home/flight-search'),
+                onChanged: (v) =>
+                    ref.read(homeSearchProvider.notifier).state = v,
                 onScan: () => snack('Boarding-pass scan is coming soon.'),
               ),
             ),
@@ -111,7 +122,7 @@ class HomeScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: _gutter),
               child: LiveDeparturesSection(
-                flights: upcoming,
+                flights: departures,
                 selectedFlightId: displayFlight?.id,
                 onSelect: (f) =>
                     ref.read(selectedFlightProvider.notifier).state = f,

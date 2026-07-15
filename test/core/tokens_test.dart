@@ -16,9 +16,9 @@ void main() {
     expect(AppColors.primary, AppColors.ink);      // brand/dark
     expect(AppColors.background, AppColors.paper);
   });
-  testWidgets('display uses Poppins, body uses Inter', (tester) async {
-    expect(AppTypography.textTheme.headlineMedium!.fontFamily, contains('Manrope'));
+  testWidgets('display + data use Nunito, body uses Inter', (tester) async {
+    expect(AppTypography.textTheme.headlineMedium!.fontFamily, contains('Nunito'));
     expect(AppTypography.textTheme.bodyMedium!.fontFamily, contains('Inter'));
-    expect(AppTypography.mono(fontSize: 14).fontFamily, contains('Space'));
+    expect(AppTypography.mono(fontSize: 14).fontFamily, contains('Nunito'));
   });
 }
