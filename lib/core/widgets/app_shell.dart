@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:airport_nav/core/constants/app_colors.dart';
 import 'package:airport_nav/core/constants/app_spacing.dart';
-import 'package:airport_nav/core/theme/app_theme.dart';
 
-/// Bottom-tab shell. The Assistant tab (index 2) is rendered as a raised
-/// gradient pill so it reads as the visually central feature of the app.
+/// Bottom-tab shell. Four flat, equal-weight tabs (Home / Map / Flights /
+/// Assistant); the active tab gets a soft blue highlight pill.
 class AppShell extends StatelessWidget {
   final Widget child;
   const AppShell({super.key, required this.child});
@@ -13,34 +12,27 @@ class AppShell extends StatelessWidget {
   static const _tabs = <_NavItem>[
     _NavItem(
       route: '/home',
-      icon: Icons.flight_outlined,
-      activeIcon: Icons.flight,
+      icon: Icons.home_outlined,
+      activeIcon: Icons.home_rounded,
       label: 'Home',
     ),
     _NavItem(
-      route: '/offers',
-      icon: Icons.local_offer_outlined,
-      activeIcon: Icons.local_offer,
-      label: 'Offers',
+      route: '/map',
+      icon: Icons.map_outlined,
+      activeIcon: Icons.map_rounded,
+      label: 'Map',
+    ),
+    _NavItem(
+      route: '/flights',
+      icon: Icons.flight_outlined,
+      activeIcon: Icons.flight_rounded,
+      label: 'Flights',
     ),
     _NavItem(
       route: '/voice-chat',
-      icon: Icons.auto_awesome,
-      activeIcon: Icons.auto_awesome,
+      icon: Icons.auto_awesome_outlined,
+      activeIcon: Icons.auto_awesome_rounded,
       label: 'Assistant',
-      isHero: true,
-    ),
-    _NavItem(
-      route: '/venues',
-      icon: Icons.search_outlined,
-      activeIcon: Icons.search,
-      label: 'Venues',
-    ),
-    _NavItem(
-      route: '/more',
-      icon: Icons.menu_outlined,
-      activeIcon: Icons.menu,
-      label: 'More',
     ),
   ];
 
@@ -49,7 +41,7 @@ class AppShell extends StatelessWidget {
     for (var i = 0; i < _tabs.length; i++) {
       if (location.startsWith(_tabs[i].route)) return i;
     }
-    return 0;
+    return -1; // non-tab shell route (e.g. /venues, /more): no active tab
   }
 
   @override
@@ -78,7 +70,7 @@ class AppShell extends StatelessWidget {
         child: SafeArea(
           top: false,
           child: SizedBox(
-            height: 68,
+            height: 64,
             child: Row(
               children: List.generate(_tabs.length, (i) {
                 final tab = _tabs[i];
@@ -103,14 +95,12 @@ class _NavItem {
   final IconData icon;
   final IconData activeIcon;
   final String label;
-  final bool isHero;
 
   const _NavItem({
     required this.route,
     required this.icon,
     required this.activeIcon,
     required this.label,
-    this.isHero = false,
   });
 }
 
@@ -127,122 +117,51 @@ class _NavTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (item.isHero) {
-      return _AssistantTab(isActive: isActive, onTap: onTap, label: item.label);
-    }
-    return _StandardTab(item: item, isActive: isActive, onTap: onTap);
-  }
-}
-
-class _StandardTab extends StatelessWidget {
-  final _NavItem item;
-  final bool isActive;
-  final VoidCallback onTap;
-
-  const _StandardTab({
-    required this.item,
-    required this.isActive,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final activeColor = AppColors.accent;
-    final inactiveColor = isDark
-        ? AppColors.darkOnSurfaceVariant
-        : AppColors.onSurfaceVariant;
+    final activeColor = isDark ? AppColors.dSky : AppColors.sky;
+    final inactiveColor =
+        isDark ? AppColors.darkOnSurfaceVariant : AppColors.onSurfaceVariant;
     final color = isActive ? activeColor : inactiveColor;
 
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 180),
-            transitionBuilder: (child, anim) =>
-                ScaleTransition(scale: anim, child: child),
-            child: Icon(
-              isActive ? item.activeIcon : item.icon,
-              key: ValueKey(isActive),
-              size: 24,
-              color: color,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            item.label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: color,
-              fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
-              fontSize: 11,
-              letterSpacing: 0.2,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _AssistantTab extends StatelessWidget {
-  final bool isActive;
-  final VoidCallback onTap;
-  final String label;
-
-  const _AssistantTab({
-    required this.isActive,
-    required this.onTap,
-    required this.label,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final inactiveLabel = isDark
-        ? AppColors.darkOnSurfaceVariant
-        : AppColors.onSurfaceVariant;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          AnimatedContainer(
-            duration: const Duration(milliseconds: 220),
-            curve: Curves.easeOut,
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isActive ? AppColors.accent : AppColors.accentAlpha10,
-              border: Border.all(
-                color: isActive ? AppColors.accent : AppColors.accentAlpha20,
-                width: 1,
+      child: Semantics(
+        selected: isActive,
+        button: true,
+        label: item.label,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              curve: Curves.easeOut,
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+              decoration: BoxDecoration(
+                color: isActive
+                    ? (isDark ? AppColors.skyAlpha15 : AppColors.skyTint)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
               ),
-              boxShadow: isActive ? AppShadows.accentGlow : null,
+              child: Icon(
+                isActive ? item.activeIcon : item.icon,
+                size: 24,
+                color: color,
+              ),
             ),
-            child: Icon(
-              Icons.auto_awesome,
-              size: 20,
-              color: isActive ? Colors.white : AppColors.accent,
+            const SizedBox(height: 4),
+            Text(
+              item.label,
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: color,
+                fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                fontSize: 11,
+                letterSpacing: 0.2,
+              ),
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: isActive ? AppColors.accent : inactiveLabel,
-              fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
-              letterSpacing: 0.2,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

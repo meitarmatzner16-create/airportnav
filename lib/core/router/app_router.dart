@@ -27,20 +27,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/onboarding',
         builder: (context, state) => const OnboardingScreen(),
       ),
-      // Map as a standalone route (pushed from Venues "View Map" button)
-      GoRoute(
-        path: '/map',
-        builder: (context, state) => const AirportMapScreen(),
-      ),
-      // Full-screen boarding pass (pushed from the Home boarding-pass card tap)
+      // Full-screen boarding pass (pushed from the Home upcoming-flight card)
       GoRoute(
         path: '/boarding-pass',
         builder: (context, state) => const BoardingPassScreen(),
-      ),
-      // Flights board — pick / change active flight (no bottom nav shell)
-      GoRoute(
-        path: '/flights',
-        builder: (context, state) => const FlightsBoardScreen(),
       ),
       // Guided route navigation (pushed from RoutePlanCard / Active plan card)
       GoRoute(
@@ -68,16 +58,31 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
+          // Map tab (was a standalone route; now lives in the tab shell)
           GoRoute(
-            path: '/offers',
+            path: '/map',
             pageBuilder: (context, state) => const NoTransitionPage(
-              child: OffersScreen(),
+              child: AirportMapScreen(),
+            ),
+          ),
+          // Flights tab — live board / pick active flight
+          GoRoute(
+            path: '/flights',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: FlightsBoardScreen(),
             ),
           ),
           GoRoute(
             path: '/voice-chat',
             pageBuilder: (context, state) => const NoTransitionPage(
               child: VoiceChatScreen(),
+            ),
+          ),
+          // Non-tab shell routes — reachable from Home / profile, keep the bar.
+          GoRoute(
+            path: '/offers',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: OffersScreen(),
             ),
           ),
           GoRoute(

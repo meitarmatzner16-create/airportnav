@@ -1,12 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Sky Pass type: Manrope (display/UI — calm, even), Inter (long-form body), Space Mono (data).
+/// AirportNav type: Manrope (display/UI + tabular flight data), Inter (long-form body).
 class AppTypography {
   AppTypography._();
 
+  /// Tabular "data" style for flight numbers, times, gates, and codes.
+  /// Unified onto Manrope — tabular figures keep digits column-aligned, so the
+  /// app uses just two families. Name kept as `mono` to avoid call-site churn.
   static TextStyle mono({double fontSize = 14, FontWeight weight = FontWeight.w700, Color? color}) =>
-      GoogleFonts.spaceMono(fontSize: fontSize, fontWeight: weight, color: color, letterSpacing: 0);
+      GoogleFonts.manrope(
+        fontSize: fontSize,
+        fontWeight: weight,
+        color: color,
+        letterSpacing: 0,
+        fontFeatures: const [FontFeature.tabularFigures()],
+      );
 
   static TextStyle _d(double s, {double sp = -0.4, FontWeight w = FontWeight.w700, double h = 1.15}) =>
       GoogleFonts.manrope(fontSize: s, fontWeight: w, letterSpacing: sp, height: h);
