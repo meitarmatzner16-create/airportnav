@@ -68,7 +68,7 @@ class ShopDetailScreen extends ConsumerWidget {
   /// Returns [chipBg, chipFg] using Sky Pass tokens.
   static (Color, Color) _chipColors(String category, bool isDark) {
     return switch (category) {
-      'luxury' => (AppColors.goldAlpha15, isDark ? AppColors.dGold : AppColors.goldText),
+      'luxury' => (AppColors.inkAlpha10, isDark ? AppColors.dText : AppColors.ink),
       'dining' => (AppColors.skyAlpha10, isDark ? AppColors.dSky : AppColors.sky),
       'retail' => (AppColors.inkAlpha10, isDark ? AppColors.dText : AppColors.ink),
       _ => (AppColors.skyAlpha15, isDark ? AppColors.dSky : AppColors.sky2),

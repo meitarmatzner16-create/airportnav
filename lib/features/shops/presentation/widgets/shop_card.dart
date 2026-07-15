@@ -53,7 +53,7 @@ class ShopCard extends StatelessWidget {
       'retail' => (AppColors.inkAlpha10, isDark ? AppColors.dText : AppColors.ink),
       'duty_free' => (AppColors.skyAlpha15, isDark ? AppColors.dSky : AppColors.sky2),
       'convenience' => (AppColors.skyAlpha10, isDark ? AppColors.dSky : AppColors.sky),
-      'luxury' => (AppColors.goldAlpha15, isDark ? AppColors.dGold : AppColors.goldText),
+      'luxury' => (AppColors.inkAlpha10, isDark ? AppColors.dText : AppColors.ink),
       'electronics' => (AppColors.skyAlpha15, isDark ? AppColors.dSky : AppColors.sky),
       _ => (AppColors.inkAlpha10, isDark ? AppColors.dMuted : AppColors.muted),
     };

@@ -58,7 +58,7 @@ class LoungeDetailScreen extends ConsumerWidget {
       'priority_pass' => (AppColors.successAlpha15, isDark ? AppColors.dSky : AppColors.gradientLoungeStart),
       'airline_lounge' => (AppColors.inkAlpha10, isDark ? AppColors.dText : AppColors.ink),
       'pay_per_use' => (AppColors.skyAlpha10, isDark ? AppColors.dSky : AppColors.sky),
-      'membership' => (AppColors.goldAlpha15, isDark ? AppColors.dGold : AppColors.goldText),
+      'membership' => (AppColors.inkAlpha10, isDark ? AppColors.dText : AppColors.ink),
       _ => (AppColors.skyAlpha15, isDark ? AppColors.dSky : AppColors.sky2),
     };
   }

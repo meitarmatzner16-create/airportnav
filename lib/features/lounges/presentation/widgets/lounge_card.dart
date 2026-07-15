@@ -53,10 +53,10 @@ class LoungeCard extends StatelessWidget {
           isDark ? AppColors.dSky : AppColors.sky,
         ),
       'membership' => (
-          AppColors.goldAlpha15,
-          isDark ? AppColors.dGold : AppColors.goldText,
-          AppColors.goldAlpha15,
-          isDark ? AppColors.dGold : AppColors.goldText,
+          AppColors.inkAlpha10,
+          isDark ? AppColors.dText : AppColors.ink,
+          AppColors.inkAlpha10,
+          isDark ? AppColors.dText : AppColors.ink,
         ),
       _ => (
           AppColors.skyAlpha10,

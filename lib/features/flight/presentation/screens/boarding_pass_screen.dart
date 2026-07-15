@@ -214,12 +214,12 @@ class _BoardingPassPanel extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Gold accent bar at top
+          // Sky accent bar at top (no gold)
           Container(
             height: 3,
             decoration: const BoxDecoration(
               gradient: LinearGradient(
-                colors: [AppColors.gold, AppColors.goldSoft, AppColors.gold],
+                colors: [AppColors.sky, AppColors.sky2, AppColors.sky],
               ),
             ),
           ),

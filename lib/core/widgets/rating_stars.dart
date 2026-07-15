@@ -3,8 +3,7 @@ import '../constants/app_colors.dart';
 
 /// Star rating row.
 ///
-/// Default color is `AppColors.gold` (Sky Pass palette).
-/// Pass a custom `color` to override.
+/// Default color is the accent `AppColors.sky`. Pass a custom `color` to override.
 class RatingStars extends StatelessWidget {
   final double rating;
   final double size;
@@ -19,7 +18,7 @@ class RatingStars extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final starColor = color ?? AppColors.gold;
+    final starColor = color ?? AppColors.sky;
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: List.generate(5, (index) {

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/app_colors.dart';
 
-/// Sky→sky2 gradient container with a 3px gold hairline across the top.
+/// Sky→sky2 gradient container with a 3px subtle white top highlight (no gold).
 ///
 /// `colors` defaults to [AppColors.sky, AppColors.sky2].
 /// NO perforation — that belongs to BoardingPassCard exclusively.
@@ -38,7 +38,7 @@ class GradientHero extends StatelessWidget {
               child: child,
             ),
           ),
-          // 3px gold top hairline (gradient: gold → goldSoft → gold)
+          // 3px subtle white top highlight (no gold)
           Positioned(
             top: 0,
             left: 0,
@@ -47,7 +47,11 @@ class GradientHero extends StatelessWidget {
               height: 3,
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [AppColors.gold, AppColors.goldSoft, AppColors.gold],
+                  colors: [
+                    AppColors.whiteAlpha25,
+                    AppColors.whiteAlpha80,
+                    AppColors.whiteAlpha25,
+                  ],
                 ),
               ),
             ),

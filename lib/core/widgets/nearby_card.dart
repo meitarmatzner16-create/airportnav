@@ -131,7 +131,7 @@ class NearbyCard extends StatelessWidget {
                       children: [
                         Icon(Icons.star_rounded,
                             size: 13,
-                            color: isDark ? AppColors.dGold : AppColors.gold),
+                            color: isDark ? AppColors.dSky : AppColors.sky),
                         const SizedBox(width: 3),
                         Text(
                           venue.rating.toStringAsFixed(1),
