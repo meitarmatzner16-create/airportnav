@@ -5,7 +5,7 @@ import 'package:airport_nav/core/theme/app_theme.dart';
 import 'package:airport_nav/features/offers/domain/entities/offer.dart';
 
 /// Premium minimal offer card. White card with a soft hairline border and
-/// a single accent-tinted icon disc — no per-category gradients, no
+/// a single accent-tinted icon disc - no per-category gradients, no
 /// decorative chrome. The discount itself is the visual anchor.
 class OfferCard extends StatelessWidget {
   final Offer offer;
@@ -74,7 +74,7 @@ class OfferCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Header row — accent icon disc + tiny category label
+                // Header row - accent icon disc + tiny category label
                 Row(
                   children: [
                     Container(

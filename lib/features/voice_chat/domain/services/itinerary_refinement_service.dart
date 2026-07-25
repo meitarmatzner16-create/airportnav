@@ -66,7 +66,7 @@ class RefinementResult {
 /// Given the *current* itinerary and a free-text user message, parse it
 /// into a [RefinementIntent], then apply it to produce a new [RoutePlan]
 /// plus a short confirmation line. The current plan is preserved as much
-/// as possible — only the targeted stop(s) change.
+/// as possible - only the targeted stop(s) change.
 class ItineraryRefinementService {
   static const _undoKeywords = [
     'undo',
@@ -148,7 +148,7 @@ class ItineraryRefinementService {
     if (_containsAny(norm, _undoKeywords)) return const UndoIntent();
     if (_containsAny(norm, _newPlanKeywords)) return const NewPlanIntent();
 
-    // Change duration — explicit minute count is a stronger signal than
+    // Change duration - explicit minute count is a stronger signal than
     // "instead of", which often refers to the previous duration ("30 min
     // instead of 45"). So check this first.
     final durationMatch =
@@ -166,7 +166,7 @@ class ItineraryRefinementService {
       }
     }
 
-    // Replace — "X instead of Y", "swap Y for X", etc.
+    // Replace - "X instead of Y", "swap Y for X", etc.
     if (_containsAny(norm, _replaceKeywords)) {
       final replaceMarker = _firstHit(norm, _replaceKeywords)!;
       final beforeReplace = norm.substring(0, replaceMarker.start);
@@ -197,7 +197,7 @@ class ItineraryRefinementService {
       }
     }
 
-    // Implicit add — message just mentions a category/tag/item with no
+    // Implicit add - message just mentions a category/tag/item with no
     // explicit verb but the user is clearly continuing the conversation
     // (we already have a plan). E.g. "also a coffee" → add coffee.
     final implicitTarget = _extractTarget(norm);
@@ -247,13 +247,13 @@ class ItineraryRefinementService {
     return RefinementResult(
       plan: updated,
       confirmation:
-          'Got it — set ${old.name} to $newMinutes min (was ${old.stayMinutes}).',
+          'Got it - set ${old.name} to $newMinutes min (was ${old.stayMinutes}).',
     );
   }
 
   RefinementResult? _applyRemove(RoutePlan plan, int stopIndex) {
     if (plan.stops.length <= 1) {
-      // Don't allow removing the last stop — it'd leave an empty plan.
+      // Don't allow removing the last stop - it'd leave an empty plan.
       return RefinementResult(
         plan: plan,
         confirmation:
@@ -290,7 +290,7 @@ class ItineraryRefinementService {
       return RefinementResult(
         plan: plan,
         confirmation:
-            "I couldn't find a $target spot at this airport — want to try a different category?",
+            "I couldn't find a $target spot at this airport - want to try a different category?",
       );
     }
     if (plan.stops.any((s) => s.name == stop.name)) {
@@ -404,7 +404,7 @@ class ItineraryRefinementService {
       }
     }
 
-    // Inferred fallback — if the fragment carries a category intent,
+    // Inferred fallback - if the fragment carries a category intent,
     // pick the first stop in that category.
     final inferred = VenueTaxonomy.analyzeQuery(fragment);
     if (inferred.category != null) {
@@ -541,7 +541,7 @@ class ItineraryRefinementService {
       );
     }
 
-    // Shop target — first try venues whose brand catalog matches the
+    // Shop target - first try venues whose brand catalog matches the
     // tag, then fall back to the category bucket.
     Iterable<Shop> shopMatches() {
       final byTag = shops.where((s) {

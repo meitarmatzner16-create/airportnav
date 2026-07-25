@@ -5,7 +5,7 @@ import 'package:airport_nav/core/widgets/app_card.dart';
 import 'package:airport_nav/core/widgets/rating_stars.dart';
 import 'package:airport_nav/features/lounges/domain/entities/lounge.dart';
 
-/// Sky Pass–styled lounge row card.
+/// Sky Pass-styled lounge row card.
 ///
 /// Uses [AppCard] for the white/hairline/radiusLg/soft-shadow surface.
 /// Access-type chip uses token colors. [RatingStars] gold. Public API unchanged.

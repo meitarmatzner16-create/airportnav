@@ -662,7 +662,7 @@ class OfferMockDatasource {
         title: 'JAL: 30% Off Japanese Souvenirs',
         merchant: 'Fa-So-La Tax Free',
         description:
-            'Japan Airlines passengers save 30% on traditional Japanese souvenirs — matcha sets, ceramics, and wagashi sweets.',
+            'Japan Airlines passengers save 30% on traditional Japanese souvenirs - matcha sets, ceramics, and wagashi sweets.',
         discount: '30% OFF',
         category: 'shopping',
         airportCode: 'NRT',

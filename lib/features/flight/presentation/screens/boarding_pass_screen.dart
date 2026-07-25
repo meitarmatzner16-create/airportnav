@@ -466,7 +466,7 @@ class _BoardingPassPanel extends StatelessWidget {
                     Expanded(
                       child: Meta(
                         label: 'Seat',
-                        value: '—',
+                        value: '-',
                       ),
                     ),
                   ],
@@ -477,13 +477,13 @@ class _BoardingPassPanel extends StatelessWidget {
                     Expanded(
                       child: Meta(
                         label: 'Gate',
-                        value: flight.gate ?? '—',
+                        value: flight.gate ?? '-',
                       ),
                     ),
                     Expanded(
                       child: Meta(
                         label: 'Terminal',
-                        value: flight.terminal ?? '—',
+                        value: flight.terminal ?? '-',
                       ),
                     ),
                     Expanded(

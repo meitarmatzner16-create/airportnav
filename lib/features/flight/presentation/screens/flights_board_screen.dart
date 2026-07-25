@@ -16,7 +16,7 @@ import '../providers/flight_providers.dart';
 const _gutter = AppSpacing.gutter;
 const _sectionGap = AppSpacing.sectionGap;
 
-/// Full-screen flight board — choose the active flight.
+/// Full-screen flight board - choose the active flight.
 /// Route: /flights  (top-level, no bottom nav shell)
 class FlightsBoardScreen extends ConsumerWidget {
   const FlightsBoardScreen({super.key});
@@ -130,8 +130,8 @@ class _BoardFlightCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: cardBg,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            border: Border.all(color: hairline, width: 1),
-            boxShadow: AppShadows.card,
+            border: isDark ? Border.all(color: hairline, width: 1) : null,
+            boxShadow: isDark ? null : AppShadows.card,
           ),
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.md),

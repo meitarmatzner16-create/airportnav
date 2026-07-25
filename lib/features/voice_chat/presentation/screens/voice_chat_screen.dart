@@ -222,7 +222,7 @@ class _VoiceChatScreenState extends ConsumerState<VoiceChatScreen>
             ),
           ),
 
-          // Undo strip — only when there's a previous itinerary to revert to.
+          // Undo strip - only when there's a previous itinerary to revert to.
           if (!inHeroMode)
             Consumer(
               builder: (context, ref, _) {
@@ -272,7 +272,7 @@ class _VoiceChatScreenState extends ConsumerState<VoiceChatScreen>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Hero state — shown before the user has chatted.
+// Hero state - shown before the user has chatted.
 // ─────────────────────────────────────────────────────────────────────────────
 class _HeroState extends StatelessWidget {
   final AnimationController orbController;
@@ -385,7 +385,7 @@ class _AssistantOrb extends StatelessWidget {
                   ),
                 ),
               ),
-              // Inner orb — solid accent, no gradient.
+              // Inner orb - solid accent, no gradient.
               Container(
                 width: 84,
                 height: 84,
@@ -509,7 +509,7 @@ class _ConversationState extends StatelessWidget {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Undo affordance shown above the input dock when an earlier itinerary
-// state exists. Quiet by design — neutral pill with an accent label.
+// state exists. Quiet by design - neutral pill with an accent label.
 // ─────────────────────────────────────────────────────────────────────────────
 class _UndoStrip extends StatelessWidget {
   final VoidCallback onUndo;
@@ -649,7 +649,7 @@ class _InputDock extends StatelessWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final surface = isDark ? AppColors.dSurface : AppColors.card;
-    final fieldBg = isDark ? AppColors.dSurfaceVariant : const Color(0xFFEEF1F4);
+    final fieldBg = isDark ? AppColors.dSurfaceVariant : AppColors.surfaceVariant;
     final hairline = isDark ? AppColors.dHairline : AppColors.hairline;
 
     return Container(

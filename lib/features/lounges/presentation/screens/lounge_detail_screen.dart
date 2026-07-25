@@ -13,7 +13,7 @@ import 'package:airport_nav/core/widgets/rating_stars.dart';
 import 'package:airport_nav/core/widgets/state_views.dart';
 import 'package:airport_nav/features/lounges/presentation/providers/lounge_providers.dart';
 
-/// Sky Pass–styled lounge detail screen.
+/// Sky Pass-styled lounge detail screen.
 ///
 /// Header: [GradientHero] (access-type tinted via token map) + lounge icon watermark.
 /// Body: name (headlineLarge ink) · access-type chip + [RatingStars] + mono rating ·

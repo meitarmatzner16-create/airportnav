@@ -335,11 +335,11 @@ class RoutePlannerService {
 
   String getGreeting(String airportCode) {
     return "Hi! I'm your airport assistant for $airportCode. "
-        "Tell me what you'd like to do — eat a burger, visit duty-free, "
+        "Tell me what you'd like to do - eat a burger, visit duty-free, "
         "see luxury bag shops, find a lounge, or anything else. "
         "I'll build your route based on top-rated spots with exact navigation!\n\n"
         "You can specify your timing too: "
-        "\"eat burger for 30 min and see bags for 15 min\" — "
+        "\"eat burger for 30 min and see bags for 15 min\" - "
         "or I'll give you my best time estimates.";
   }
 

@@ -12,8 +12,8 @@ import '../../features/flight/domain/entities/flight.dart';
 ///
 /// Layout:
 ///   [Header row]  "YOUR FLIGHT TODAY" · flight + airline  |  status pill
-///   [Route row]   FROM (32 Poppins) — dashed arc + plane — TO (32 Poppins)
-///   [Perforation] notch–dashed–notch separator
+///   [Route row]   FROM (32 Poppins) - dashed arc + plane - TO (32 Poppins)
+///   [Perforation] notch-dashed-notch separator
 ///   [Footer row]  Gate · Boards · Seat  + QR glyph
 class BoardingPassCard extends StatelessWidget {
   final Flight flight;
@@ -231,7 +231,7 @@ class BoardingPassCard extends StatelessWidget {
                     value: timeFormat.format(boardingTime),
                   ),
                   const SizedBox(width: 24),
-                  const Meta(label: 'Seat', value: '—'),
+                  const Meta(label: 'Seat', value: '-'),
                   const Spacer(),
                   Icon(
                     Icons.qr_code_rounded,

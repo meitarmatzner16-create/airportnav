@@ -8,7 +8,7 @@ import '../../../../core/widgets/app_card.dart';
 import '../../domain/entities/flight.dart';
 import 'flight_status_badge.dart';
 
-/// Sky Pass–styled flight row card.
+/// Sky Pass-styled flight row card.
 ///
 /// Uses AppCard surface (white/dSurface, hairline border, card shadow).
 /// Flight number and times rendered in .mono.

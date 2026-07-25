@@ -9,7 +9,7 @@ import '../../../../core/widgets/state_views.dart';
 import '../providers/flight_providers.dart';
 import '../widgets/flight_card.dart';
 
-/// Sky Pass–styled flight search screen.
+/// Sky Pass-styled flight search screen.
 ///
 /// Token SearchBarWidget + FlightCard list (AppCard aesthetic + StatusBadge).
 /// EmptyState for no results. All hardcoded colors/padding replaced with tokens.

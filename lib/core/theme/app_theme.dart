@@ -10,8 +10,8 @@ class AppShadows {
   AppShadows._();
 
   static const card = [
-    BoxShadow(color: AppColors.shadowSoft, blurRadius: 1, offset: Offset(0, 1)),
-    BoxShadow(color: AppColors.shadow, blurRadius: 12, offset: Offset(0, 4)),
+    BoxShadow(color: Color(0x0A000000), blurRadius: 2, offset: Offset(0, 1)),
+    BoxShadow(color: Color(0x12000000), blurRadius: 18, offset: Offset(0, 7)),
   ];
 
   static const cardHover = [

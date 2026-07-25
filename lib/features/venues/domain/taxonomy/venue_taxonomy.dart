@@ -6,7 +6,7 @@
 ///   - [VenueTagDef]: subcategory keyword (burgers, sushi, streetwear…).
 ///   - [BrandDef]: known brand → category + tags + (optional) logo domain.
 ///
-/// Adding a new venue type later means adding entries here — nothing in the
+/// Adding a new venue type later means adding entries here - nothing in the
 /// search service or UI should need to change.
 library;
 
@@ -1022,7 +1022,7 @@ class VenueTaxonomy {
   static String? logoDomainFor(String brandName) =>
       findBrand(brandName)?.domain;
 
-  /// Items the venue is known to sell — derived from the brand catalog.
+  /// Items the venue is known to sell - derived from the brand catalog.
   /// Returns an empty list when the venue isn't a recognized brand.
   static List<String> deriveItemsForVenue({required String name}) {
     final brand = findBrand(name);
@@ -1057,7 +1057,7 @@ class VenueTaxonomy {
       out.add(style);
     }
 
-    // Extra hints (lounge amenities, etc.) — only keep ones we recognize.
+    // Extra hints (lounge amenities, etc.) - only keep ones we recognize.
     for (final h in extraHints) {
       if (_tagByKey.containsKey(h)) {
         out.add(h);
@@ -1077,7 +1077,7 @@ class VenueTaxonomy {
     final norm = _normalize(query);
     if (norm.isEmpty) return const QueryIntent();
 
-    // 1. Brand match — user typed a recognizable brand name.
+    // 1. Brand match - user typed a recognizable brand name.
     final brand = _findBrandInQuery(norm);
 
     final inferredTags = <String>{};
@@ -1089,7 +1089,7 @@ class VenueTaxonomy {
       inferredTags.addAll(brand.tags);
     }
 
-    // 2. Item match — query word appears in a brand's items list.
+    // 2. Item match - query word appears in a brand's items list.
     //    Also harvest category + tags from those brands.
     for (final entry in _itemMatches) {
       if (_containsWord(norm, entry.key)) {
@@ -1101,7 +1101,7 @@ class VenueTaxonomy {
       }
     }
 
-    // 3. Tag aliases — direct subcategory keywords.
+    // 3. Tag aliases - direct subcategory keywords.
     for (final entry in _tagAliases) {
       if (entry.key.isEmpty) continue;
       if (_containsWord(norm, entry.key)) {
@@ -1109,7 +1109,7 @@ class VenueTaxonomy {
       }
     }
 
-    // 4. Category aliases — only when nothing stronger has fired.
+    // 4. Category aliases - only when nothing stronger has fired.
     if (inferredCategory == null) {
       for (final entry in _categoryAliases) {
         if (entry.key.isEmpty) continue;

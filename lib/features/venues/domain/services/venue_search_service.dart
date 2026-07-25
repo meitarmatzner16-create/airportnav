@@ -5,7 +5,7 @@ import 'package:airport_nav/features/venues/domain/taxonomy/venue_taxonomy.dart'
 ///
 /// Match layers (each enriches the result rather than replacing it):
 ///   1. Name match → goes into [matches] verbatim.
-///   2. Item match → "burger", "sushi", "fries" — strongest similarity weight.
+///   2. Item match → "burger", "sushi", "fries" - strongest similarity weight.
 ///   3. Tag match → "burgers" tag, "italian" tag, etc.
 ///   4. Category match → "dining", "luxury", etc.
 ///
@@ -87,7 +87,7 @@ class VenueSearchService {
     final matchedTags = <String>{};
     final matchedItems = <String>{};
 
-    // Item match — strongest signal: the venue literally sells this thing.
+    // Item match - strongest signal: the venue literally sells this thing.
     for (final item in intent.items) {
       if (venue.items.contains(item)) {
         score += 4.0;

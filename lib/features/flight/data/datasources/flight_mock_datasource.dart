@@ -5,7 +5,7 @@ class FlightMockDatasource {
     final now = DateTime.now();
 
     return [
-      // JFK "Live Departures" board — mirrors the AirportNav home mockup.
+      // JFK "Live Departures" board - mirrors the AirportNav home mockup.
       // Relative times keep the board + countdowns live; all within ~3.5h.
       Flight(
         id: 'fl-001',

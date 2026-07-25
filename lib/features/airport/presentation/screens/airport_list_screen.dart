@@ -10,7 +10,7 @@ import 'package:airport_nav/core/widgets/state_views.dart';
 import 'package:airport_nav/features/airport/domain/entities/airport.dart';
 import 'package:airport_nav/features/airport/presentation/providers/airport_providers.dart';
 
-/// Sky Pass–styled airport list screen.
+/// Sky Pass-styled airport list screen.
 ///
 /// Token SearchBarWidget + a list of AppCard airport rows.
 /// IATA code in .mono, EmptyState when no airports match.

@@ -14,7 +14,7 @@ String airlineCodeOf(String flightNumber) {
 /// Brand color for an airline code, kept within a calm blue family so the
 /// board stays cohesive with the friendly-blue accent. Falls back to sky.
 ///
-/// These are simple solid brand tints — we deliberately do **not** reproduce
+/// These are simple solid brand tints - we deliberately do **not** reproduce
 /// any airline's actual logo artwork.
 Color airlineColor(String code) {
   switch (code) {

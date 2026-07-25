@@ -89,7 +89,7 @@ class VoiceChatNotifier extends StateNotifier<List<ChatMessage>> {
     }
   }
 
-  /// Imperative undo — used by the explicit "Undo" UI affordance.
+  /// Imperative undo - used by the explicit "Undo" UI affordance.
   void undo() => _applyUndo();
 
   void resetChat() {
@@ -163,7 +163,7 @@ class VoiceChatNotifier extends StateNotifier<List<ChatMessage>> {
       state = [
         ...state,
         _botMsg(
-          "I didn't quite follow that — could you rephrase the change?",
+          "I didn't quite follow that - could you rephrase the change?",
         ),
       ];
       return;
@@ -180,7 +180,7 @@ class VoiceChatNotifier extends StateNotifier<List<ChatMessage>> {
     if (previous == null) {
       state = [
         ...state,
-        _botMsg('Nothing to undo yet — this is the only plan so far.'),
+        _botMsg('Nothing to undo yet - this is the only plan so far.'),
       ];
       return;
     }

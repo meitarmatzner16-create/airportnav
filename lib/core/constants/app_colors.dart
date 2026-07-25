@@ -12,13 +12,13 @@ class AppColors {
   static const skyTint = Color(0xFFEAF1FE);
   static const ink = Color(0xFF0F2350);
   static const textColor = Color(0xFF14213D);
-  static const muted = Color(0xFF677084);
+  static const muted = Color(0xFF6E727B);
   static const gold = Color(0xFFC2A05A);
   static const goldSoft = Color(0xFFE8D6AE);
   static const goldText = Color(0xFF886B2D); // gold that must carry small text (AA)
-  static const paper = Color(0xFFF8F9FA);
+  static const paper = Color(0xFFFCFCFC);
   static const card = Color(0xFFFFFFFF);
-  static const hairline = Color(0xFFE9EBEF);
+  static const hairline = Color(0xFFEDEDEF);
   static const hairlineCool = Color(0xFFE2E8F4);
 
   // ---- Semantic ----
@@ -55,11 +55,11 @@ class AppColors {
   static const secondary = sky;
   static const background = paper;
   static const surface = card;
-  static const surfaceVariant = Color(0xFFEFE9DB);
+  static const surfaceVariant = Color(0xFFF3F3F5);
   static const onSurface = textColor;
   static const onSurfaceVariant = muted;
   static const outline = Color(0xFFD8D2C4);
-  static const star = gold;
+  static const star = sky;
 
   static const darkBackground = dBg;
   static const darkSurface = dSurface;
@@ -88,7 +88,7 @@ class AppColors {
   static const shadowMedium = Color(0x1A000000);
   static const shadowSky = Color(0x593577E7); // sky-tinted hero shadow
 
-  // Legacy alpha aliases — re-pointed to Sky Pass equivalents
+  // Legacy alpha aliases - re-pointed to Sky Pass equivalents
   /// @deprecated Use [skyAlpha10] directly.
   static const accentAlpha10 = skyAlpha10;
   /// @deprecated Use [skyAlpha15] directly.

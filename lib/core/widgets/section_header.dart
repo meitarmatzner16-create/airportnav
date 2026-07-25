@@ -5,7 +5,7 @@ import '../constants/app_colors.dart';
 ///
 /// - Title: `titleLarge` (~16px), w600, ink/dText.
 /// - Optional right action: sky, ~13px, w600, ≥44px touch target.
-/// - No horizontal padding — callers wrap in their own Padding (gutter).
+/// - No horizontal padding - callers wrap in their own Padding (gutter).
 class SectionHeader extends StatelessWidget {
   final String title;
   final String? actionText;

@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/airline_tile.dart';
 import '../../../../core/widgets/section_header.dart';
 import '../../../../core/widgets/status_badge.dart';
@@ -20,7 +21,7 @@ const int _timeFlex = 20;
 const int _gateFlex = 11;
 const int _statusFlex = 24;
 
-/// "Live Departures" — a boarding-board style table. Tapping a row selects
+/// "Live Departures" - a boarding-board style table. Tapping a row selects
 /// that flight; the selected row is boxed and its tile becomes a check.
 class LiveDeparturesSection extends StatelessWidget {
   final List<Flight> flights;
@@ -57,7 +58,8 @@ class LiveDeparturesSection extends StatelessWidget {
           decoration: BoxDecoration(
             color: cardBg,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            border: Border.all(color: hairline, width: 1),
+            border: isDark ? Border.all(color: hairline, width: 1) : null,
+            boxShadow: isDark ? null : AppShadows.card,
           ),
           clipBehavior: Clip.antiAlias,
           child: Column(
@@ -185,7 +187,7 @@ class _DeparturesRow extends StatelessWidget {
                 const TextStyle()),
         dataCell(time, _timeFlex,
             style: AppTypography.mono(fontSize: 10.5, color: mutedColor)),
-        dataCell(flight.gate ?? '—', _gateFlex,
+        dataCell(flight.gate ?? '-', _gateFlex,
             style: AppTypography.mono(
                 fontSize: 10.5, weight: FontWeight.w600, color: textColor)),
         Expanded(

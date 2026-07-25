@@ -5,6 +5,7 @@ import 'package:airport_nav/features/flight/presentation/providers/flight_provid
 import 'package:airport_nav/features/venues/domain/entities/venue.dart';
 import 'package:airport_nav/features/venues/domain/services/venue_search_service.dart';
 import 'package:airport_nav/features/venues/domain/taxonomy/venue_taxonomy.dart';
+import 'package:airport_nav/features/venues/domain/catalog/venue_details_catalog.dart';
 
 /// Search query state
 final venueSearchQueryProvider = StateProvider<String>((ref) => '');
@@ -72,7 +73,7 @@ final allVenuesProvider = Provider<List<Venue>>((ref) {
   }
 
   venues.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
-  return venues;
+  return venues.map(enrichVenue).toList();
 });
 
 /// Venues grouped by first letter for the alphabetical browse
@@ -86,7 +87,7 @@ final venuesByLetterProvider = Provider<Map<String, List<Venue>>>((ref) {
   return grouped;
 });
 
-/// Full search result — exposes matches, suggestions, and the parsed intent.
+/// Full search result - exposes matches, suggestions, and the parsed intent.
 final venueSearchProvider = Provider<VenueSearchResult>((ref) {
   final query = ref.watch(venueSearchQueryProvider);
   final venues = ref.watch(allVenuesProvider);

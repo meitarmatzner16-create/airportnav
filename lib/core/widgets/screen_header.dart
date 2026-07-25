@@ -3,7 +3,7 @@ import '../constants/app_colors.dart';
 import '../constants/app_spacing.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
-// TonalPill — sky-tint background, sky text, radiusFull, ≥44px touch target.
+// TonalPill - sky-tint background, sky text, radiusFull, ≥44px touch target.
 // Used for header action buttons ("Flights", "← Home", airport chips, etc.)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -71,18 +71,18 @@ class TonalPill extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ScreenHeader — the canonical title block from the Home dashboard.
+// ScreenHeader - the canonical title block from the Home dashboard.
 // Every screen that needs a header should use this widget.
 // ─────────────────────────────────────────────────────────────────────────────
 
 /// Canonical screen header block matching the Home dashboard style.
 ///
 /// Layout (top → bottom inside 24px gutters, 8px top pad):
-///   [optional] greeting / eyebrow   — bodyMedium 14, muted
-///   title                            — displaySmall 28, w700 −0.6 tracking, ink/dText
-///   [optional] subtitle / meta       — bodyMedium 14, muted
+///   [optional] greeting / eyebrow   - bodyMedium 14, muted
+///   title                            - displaySmall 28, w700 −0.6 tracking, ink/dText
+///   [optional] subtitle / meta       - bodyMedium 14, muted
 ///
-/// [actions] are right-aligned in a Row alongside the title — pass
+/// [actions] are right-aligned in a Row alongside the title - pass
 /// [TonalPill] widgets for the header action chips.
 ///
 /// The widget does NOT add its own Padding; callers place it directly at the

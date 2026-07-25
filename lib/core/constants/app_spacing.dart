@@ -14,12 +14,12 @@ class AppSpacing {
   static const double smMd = 12;
   static const double mdLg = 20;
 
-  /// Default horizontal screen content padding — the "EL AL" gutter that
+  /// Default horizontal screen content padding - the "EL AL" gutter that
   /// gives the layout breathing room across every screen.
   static const double gutter = 24;
 
   /// Vertical breathing room between major sections within a screen.
-  static const double sectionGap = 28;
+  static const double sectionGap = 32;
 
   // Border radius
   static const double radiusXs = 8;

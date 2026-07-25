@@ -4,11 +4,6 @@ import '../constants/app_colors.dart';
 import '../constants/app_spacing.dart';
 import '../../features/venues/domain/entities/venue.dart';
 
-// Neutral placeholder bg
-const _surface2 = Color(0xFFEEF1F4);
-// Muted tertiary (ink @ ~60%)
-const _muted2 = Color(0xFF9AA1B0);
-
 /// Horizontally-scrolled venue card used in the "Near your gate" section.
 /// Fixed width: 192px. Radius: 18px (radiusXl).
 class NearbyCard extends StatelessWidget {
@@ -29,7 +24,7 @@ class NearbyCard extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final cardBg = isDark ? AppColors.dSurface : AppColors.card;
     final hairline = isDark ? AppColors.dHairline : AppColors.hairline;
-    final placeholderBg = isDark ? AppColors.dSurfaceVariant : _surface2;
+    final placeholderBg = isDark ? AppColors.dSurfaceVariant : AppColors.surfaceVariant;
 
     return GestureDetector(
       onTap: onTap,
@@ -63,7 +58,7 @@ class NearbyCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Walk pill – top-left
+                    // Walk pill - top-left
                     Positioned(
                       top: 10,
                       left: 10,
@@ -145,7 +140,7 @@ class NearbyCard extends StatelessWidget {
                           ' · ${_estimateDuration(venue.category)}m',
                           style: theme.textTheme.labelSmall?.copyWith(
                             fontSize: 11.5,
-                            color: _muted2,
+                            color: AppColors.muted,
                           ),
                         ),
                       ],

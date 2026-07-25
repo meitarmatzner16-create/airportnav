@@ -4,11 +4,12 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/airline_tile.dart';
 import '../../../../core/widgets/section_header.dart';
 import '../../../flight/domain/entities/flight.dart';
 
-/// Rough gate-to-walk estimate (mock) — near gates (A) are closer than far (D).
+/// Rough gate-to-walk estimate (mock) - near gates (A) are closer than far (D).
 int estimatedWalkMinutes(String? gate) {
   if (gate == null || gate.isEmpty) return 10;
   switch (gate[0].toUpperCase()) {
@@ -25,7 +26,7 @@ int estimatedWalkMinutes(String? gate) {
   }
 }
 
-/// "Your Upcoming Flight" — prominent summary for the selected flight:
+/// "Your Upcoming Flight" - prominent summary for the selected flight:
 /// destination, boards-in countdown, and a four-up stat row.
 class UpcomingFlightCard extends StatelessWidget {
   final Flight flight;
@@ -69,7 +70,8 @@ class UpcomingFlightCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: cardBg,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                border: Border.all(color: hairline, width: 1),
+                border: isDark ? Border.all(color: hairline, width: 1) : null,
+                boxShadow: isDark ? null : AppShadows.card,
               ),
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.md),
@@ -143,7 +145,7 @@ class UpcomingFlightCard extends StatelessWidget {
                         _Stat(
                           icon: Icons.meeting_room_outlined,
                           label: 'Gate',
-                          value: flight.gate ?? '—',
+                          value: flight.gate ?? '-',
                         ),
                         _Stat(
                           icon: Icons.schedule_rounded,
@@ -158,7 +160,7 @@ class UpcomingFlightCard extends StatelessWidget {
                         _Stat(
                           icon: Icons.apartment_rounded,
                           label: 'Terminal',
-                          value: 'T${flight.terminal ?? '—'}',
+                          value: 'T${flight.terminal ?? '-'}',
                         ),
                       ],
                     ),

@@ -17,7 +17,7 @@ import 'widgets/upcoming_flight_card.dart';
 const _gutter = AppSpacing.gutter;
 const _sectionGap = AppSpacing.sectionGap;
 
-/// AirportNav home — a live departures board that turns a chosen flight into
+/// AirportNav home - a live departures board that turns a chosen flight into
 /// personalized navigation, quick actions, and an assistant entry.
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -31,16 +31,6 @@ class HomeScreen extends ConsumerWidget {
     final upcoming = ref.watch(upcomingFlightsProvider);
     final selected = ref.watch(selectedFlightProvider);
     final displayFlight = _displayFlight(selected, upcoming);
-    final query = ref.watch(homeSearchProvider).trim().toLowerCase();
-    final departures = query.isEmpty
-        ? upcoming
-        : upcoming
-            .where((f) =>
-                f.flightNumber.toLowerCase().contains(query) ||
-                f.arrivalCity.toLowerCase().contains(query) ||
-                f.arrivalAirport.toLowerCase().contains(query) ||
-                f.airline.toLowerCase().contains(query))
-            .toList();
 
     void snack(String message) {
       ScaffoldMessenger.of(context)
@@ -73,8 +63,9 @@ class HomeScreen extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: _gutter),
               child: HomeSearchBar(
                 hint: 'Search flight, destination or airline',
-                onChanged: (v) =>
-                    ref.read(homeSearchProvider.notifier).state = v,
+                flights: upcoming,
+                onSelected: (f) =>
+                    ref.read(selectedFlightProvider.notifier).state = f,
                 onScan: () => snack('Boarding-pass scan is coming soon.'),
               ),
             ),
@@ -106,13 +97,13 @@ class HomeScreen extends ConsumerWidget {
                     icon: Icons.restaurant_rounded,
                     title: 'Food & Drinks',
                     subtitle: 'Near your gate',
-                    onTap: () => context.go('/venues'),
+                    onTap: () => context.go('/explore'),
                   ),
                   QuickStartItem(
                     icon: Icons.shopping_bag_outlined,
                     title: 'Shops',
                     subtitle: 'On your route',
-                    onTap: () => context.go('/venues'),
+                    onTap: () => context.go('/explore'),
                   ),
                 ],
               ),
@@ -122,7 +113,7 @@ class HomeScreen extends ConsumerWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: _gutter),
               child: LiveDeparturesSection(
-                flights: departures,
+                flights: upcoming,
                 selectedFlightId: displayFlight?.id,
                 onSelect: (f) =>
                     ref.read(selectedFlightProvider.notifier).state = f,

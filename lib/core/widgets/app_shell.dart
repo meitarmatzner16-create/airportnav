@@ -18,11 +18,11 @@ class AppShell extends StatelessWidget {
       label: 'Home',
     ),
     _NavItem(
-      // Search tab opens the venues (food & drinks / shops) directory search.
-      route: '/venues',
+      // Explore tab: browse food, coffee, lounges & shops with rich detail.
+      route: '/explore',
       icon: Icons.search_outlined,
       activeIcon: Icons.search_rounded,
-      label: 'Search',
+      label: 'Explore',
     ),
     _NavItem(
       route: '/voice-chat',
@@ -50,7 +50,7 @@ class AppShell extends StatelessWidget {
     for (var i = 0; i < _tabs.length; i++) {
       if (location.startsWith(_tabs[i].route)) return i;
     }
-    return -1; // non-tab shell route (e.g. /venues, /more): no active tab
+    return -1; // non-tab shell route (e.g. /offers, /more): no active tab
   }
 
   @override

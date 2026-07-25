@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/section_header.dart';
 
 /// "What would you like to do?" → a wide entry into the assistant.
@@ -35,7 +36,8 @@ class AssistantEntryCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: cardBg,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                border: Border.all(color: hairline, width: 1),
+                border: isDark ? Border.all(color: hairline, width: 1) : null,
+                boxShadow: isDark ? null : AppShadows.card,
               ),
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.md),
@@ -65,7 +67,7 @@ class AssistantEntryCard extends StatelessWidget {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            'Build a route, find services, get help — just ask.',
+                            'Build a route, find services, get help - just ask.',
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: mutedColor,
                               height: 1.35,

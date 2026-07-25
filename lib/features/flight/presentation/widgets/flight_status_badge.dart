@@ -3,7 +3,7 @@ import '../../../../core/widgets/status_badge.dart';
 
 /// Thin shim that delegates to the kit-level [StatusBadge].
 ///
-/// Public API is unchanged — any screen that constructs [FlightStatusBadge]
+/// Public API is unchanged - any screen that constructs [FlightStatusBadge]
 /// continues to compile without modification.
 class FlightStatusBadge extends StatelessWidget {
   final String status;

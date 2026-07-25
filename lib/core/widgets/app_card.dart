@@ -34,17 +34,18 @@ class _AppCardState extends State<AppCard> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardBg = isDark ? AppColors.dSurface : AppColors.card;
-    final borderColor = widget.selected
-        ? AppColors.sky
-        : (isDark ? AppColors.dHairline : AppColors.hairline);
-    final borderWidth = widget.selected ? 1.5 : 1.0;
-
+    // Light: shadow-only float (no border) for a clean, un-gridded look.
+    // Dark: faint border for separation (shadows read poorly on dark).
     final content = Container(
       decoration: BoxDecoration(
         color: cardBg,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: borderColor, width: borderWidth),
-        boxShadow: AppShadows.card,
+        border: widget.selected
+            ? Border.all(color: AppColors.sky, width: 1.5)
+            : (isDark
+                ? Border.all(color: AppColors.dHairline, width: 1)
+                : null),
+        boxShadow: isDark ? null : AppShadows.card,
       ),
       clipBehavior: Clip.hardEdge,
       padding: widget.padding ?? const EdgeInsets.all(AppSpacing.md),

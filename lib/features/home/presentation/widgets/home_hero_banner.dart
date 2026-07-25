@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/theme/app_theme.dart';
 
 /// Value-proposition banner: a calm neutral card with a headline, supporting
 /// line, and a faint airport line-illustration bleeding off the right edge.
@@ -14,15 +15,17 @@ class HomeHeroBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final fill = isDark ? AppColors.dSurface : const Color(0xFFF1F3F6);
+    final fill = isDark ? AppColors.dSurface : AppColors.card;
     final titleColor = isDark ? AppColors.dText : AppColors.ink;
     final bodyColor = isDark ? AppColors.dMuted : AppColors.muted;
-    final artColor = isDark ? AppColors.dHairline : const Color(0xFFCED4DE);
+    final artColor = isDark ? AppColors.dHairline : const Color(0xFFD7D8DC);
 
     return Container(
       decoration: BoxDecoration(
         color: fill,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        border: isDark ? Border.all(color: AppColors.dHairline, width: 1) : null,
+        boxShadow: isDark ? null : AppShadows.card,
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(
@@ -43,7 +46,7 @@ class HomeHeroBanner extends StatelessWidget {
                 SizedBox(
                   width: 210,
                   child: Text(
-                    'Everything in the airport.\nFinally, in one place.',
+                    'Finally, Everything in the airport\nin one place.',
                     style: theme.textTheme.headlineSmall?.copyWith(
                       color: titleColor,
                       fontWeight: FontWeight.w600,

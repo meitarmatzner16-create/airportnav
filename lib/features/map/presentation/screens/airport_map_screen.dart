@@ -262,7 +262,7 @@ class _AirportMapScreenState extends ConsumerState<AirportMapScreen> {
                         ),
                       ),
 
-                      // Navigation info bar — AppCard-style sky banner
+                      // Navigation info bar - AppCard-style sky banner
                       if (activeNavPath != null)
                         Positioned(
                           top: 0,

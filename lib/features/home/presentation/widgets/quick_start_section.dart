@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/section_header.dart';
 
 /// A single Quick Start action.
@@ -19,7 +20,7 @@ class QuickStartItem {
   });
 }
 
-/// "Quick Start" — a title plus a row of four equal action cards.
+/// "Quick Start" - a title plus a row of four equal action cards.
 class QuickStartSection extends StatelessWidget {
   final List<QuickStartItem> items;
 
@@ -74,7 +75,8 @@ class _QuickStartCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: fill,
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            border: Border.all(color: border, width: 1),
+            border: isDark ? Border.all(color: border, width: 1) : null,
+            boxShadow: isDark ? null : AppShadows.card,
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(

@@ -4,7 +4,7 @@ import '../constants/app_colors.dart';
 /// Sky→sky2 gradient container with a 3px subtle white top highlight (no gold).
 ///
 /// `colors` defaults to [AppColors.sky, AppColors.sky2].
-/// NO perforation — that belongs to BoardingPassCard exclusively.
+/// NO perforation - that belongs to BoardingPassCard exclusively.
 class GradientHero extends StatelessWidget {
   final Widget child;
   final List<Color>? colors;

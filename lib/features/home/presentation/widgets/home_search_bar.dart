@@ -1,48 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/app_typography.dart';
+import '../../../../core/widgets/airline_tile.dart';
+import '../../../flight/domain/entities/flight.dart';
 
-/// Live search field on Home. Filters the departures board as you type;
-/// shows a scan affordance when empty and a clear button once text is entered.
-class HomeSearchBar extends StatefulWidget {
+/// Home search: a regular search field with a live suggestions dropdown.
+/// Typing filters flights by number / destination / airline; picking one from
+/// the dropdown makes it the active flight.
+class HomeSearchBar extends StatelessWidget {
   final String hint;
-  final ValueChanged<String> onChanged;
+  final List<Flight> flights;
+  final ValueChanged<Flight> onSelected;
   final VoidCallback onScan;
 
   const HomeSearchBar({
     super.key,
     required this.hint,
-    required this.onChanged,
+    required this.flights,
+    required this.onSelected,
     required this.onScan,
   });
 
   @override
-  State<HomeSearchBar> createState() => _HomeSearchBarState();
+  Widget build(BuildContext context) {
+    return Autocomplete<Flight>(
+      displayStringForOption: (f) => '${f.flightNumber} · ${f.arrivalCity}',
+      optionsBuilder: (TextEditingValue value) {
+        final q = value.text.trim().toLowerCase();
+        if (q.isEmpty) return const Iterable<Flight>.empty();
+        return flights.where((f) =>
+            f.flightNumber.toLowerCase().contains(q) ||
+            f.arrivalCity.toLowerCase().contains(q) ||
+            f.arrivalAirport.toLowerCase().contains(q) ||
+            f.airline.toLowerCase().contains(q));
+      },
+      onSelected: onSelected,
+      fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+        return _SearchField(
+          controller: controller,
+          focusNode: focusNode,
+          hint: hint,
+          onScan: onScan,
+        );
+      },
+      optionsViewBuilder: (context, onSelected, options) {
+        return _SuggestionsOverlay(
+          options: options.toList(),
+          onSelected: onSelected,
+        );
+      },
+    );
+  }
 }
 
-class _HomeSearchBarState extends State<HomeSearchBar> {
-  final _controller = TextEditingController();
-  final _focusNode = FocusNode();
+class _SearchField extends StatelessWidget {
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final String hint;
+  final VoidCallback onScan;
 
-  @override
-  void initState() {
-    super.initState();
-    _controller.addListener(_handleChange);
-    _focusNode.addListener(() => setState(() {}));
-  }
-
-  void _handleChange() {
-    setState(() {});
-    widget.onChanged(_controller.text);
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    _focusNode.dispose();
-    super.dispose();
-  }
+  const _SearchField({
+    required this.controller,
+    required this.focusNode,
+    required this.hint,
+    required this.onScan,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -52,56 +77,132 @@ class _HomeSearchBarState extends State<HomeSearchBar> {
     final hairline = isDark ? AppColors.dHairline : AppColors.hairline;
     final iconColor = isDark ? AppColors.dMuted : AppColors.muted;
     final textColor = isDark ? AppColors.dText : AppColors.ink;
-    final focused = _focusNode.hasFocus;
-    final hasText = _controller.text.isNotEmpty;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: fill,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(
-          color: focused ? AppColors.sky : hairline,
-          width: focused ? 1.5 : 1,
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.only(left: AppSpacing.md, right: 6),
-        child: Row(
-          children: [
-            Icon(Icons.search_rounded, size: 22, color: iconColor),
-            const SizedBox(width: AppSpacing.smMd),
-            Expanded(
-              child: TextField(
-                controller: _controller,
-                focusNode: _focusNode,
-                textInputAction: TextInputAction.search,
-                style: theme.textTheme.bodyMedium?.copyWith(color: textColor),
-                cursorColor: AppColors.sky,
-                decoration: InputDecoration(
-                  isDense: true,
-                  border: InputBorder.none,
-                  hintText: widget.hint,
-                  hintStyle:
-                      theme.textTheme.bodyMedium?.copyWith(color: iconColor),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 14),
+    OutlineInputBorder border(Color c, double w) => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          borderSide: BorderSide(color: c, width: w),
+        );
+
+    return TextField(
+      controller: controller,
+      focusNode: focusNode,
+      textInputAction: TextInputAction.search,
+      style: theme.textTheme.bodyMedium?.copyWith(color: textColor),
+      cursorColor: AppColors.sky,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: fill,
+        isDense: true,
+        hintText: hint,
+        hintStyle: theme.textTheme.bodyMedium?.copyWith(color: iconColor),
+        prefixIcon: Icon(Icons.search_rounded, size: 22, color: iconColor),
+        suffixIcon: ValueListenableBuilder<TextEditingValue>(
+          valueListenable: controller,
+          builder: (context, value, _) => value.text.isEmpty
+              ? IconButton(
+                  icon: Icon(Icons.qr_code_scanner_rounded,
+                      size: 22, color: iconColor),
+                  tooltip: 'Scan boarding pass',
+                  onPressed: onScan,
+                )
+              : IconButton(
+                  icon: Icon(Icons.close_rounded, size: 20, color: iconColor),
+                  tooltip: 'Clear',
+                  onPressed: controller.clear,
                 ),
-              ),
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 15),
+        border: border(hairline, 1),
+        enabledBorder: border(hairline, 1),
+        focusedBorder: border(AppColors.sky, 1.5),
+      ),
+    );
+  }
+}
+
+class _SuggestionsOverlay extends StatelessWidget {
+  final List<Flight> options;
+  final void Function(Flight) onSelected;
+
+  const _SuggestionsOverlay({required this.options, required this.onSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final cardBg = isDark ? AppColors.dSurface : AppColors.card;
+    final hairline = isDark ? AppColors.dHairline : AppColors.hairline;
+    final textColor = isDark ? AppColors.dText : AppColors.ink;
+    final mutedColor = isDark ? AppColors.dMuted : AppColors.muted;
+    final width = MediaQuery.of(context).size.width - AppSpacing.gutter * 2;
+    final clock = DateFormat('h:mm a');
+
+    return Align(
+      alignment: Alignment.topLeft,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 6),
+        child: Material(
+          elevation: 6,
+          shadowColor: AppColors.shadowMedium,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          child: Container(
+            width: width,
+            constraints: const BoxConstraints(maxHeight: 264),
+            decoration: BoxDecoration(
+              color: cardBg,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              border: Border.all(color: hairline, width: 1),
             ),
-            hasText
-                ? IconButton(
-                    icon: Icon(Icons.close_rounded, size: 20, color: iconColor),
-                    splashRadius: 20,
-                    tooltip: 'Clear',
-                    onPressed: () => _controller.clear(),
-                  )
-                : IconButton(
-                    icon: Icon(Icons.qr_code_scanner_rounded,
-                        size: 22, color: iconColor),
-                    splashRadius: 20,
-                    tooltip: 'Scan boarding pass',
-                    onPressed: widget.onScan,
+            clipBehavior: Clip.antiAlias,
+            child: ListView.separated(
+              padding: EdgeInsets.zero,
+              shrinkWrap: true,
+              itemCount: options.length,
+              separatorBuilder: (_, _) => Divider(height: 1, color: hairline),
+              itemBuilder: (context, i) {
+                final f = options[i];
+                return InkWell(
+                  onTap: () => onSelected(f),
+                  child: Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    child: Row(
+                      children: [
+                        AirlineTile(flightNumber: f.flightNumber, size: 30),
+                        const SizedBox(width: AppSpacing.smMd),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${f.arrivalCity} (${f.arrivalAirport})',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                    color: textColor,
+                                    fontWeight: FontWeight.w600),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                '${f.flightNumber} · ${f.airline}',
+                                style: theme.textTheme.labelSmall
+                                    ?.copyWith(color: mutedColor),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        Text(clock.format(f.departureTime),
+                            style: AppTypography.mono(
+                                fontSize: 12, color: mutedColor)),
+                      ],
+                    ),
                   ),
-          ],
+                );
+              },
+            ),
+          ),
         ),
       ),
     );

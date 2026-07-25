@@ -12,7 +12,7 @@ import 'package:airport_nav/core/widgets/rating_stars.dart';
 import 'package:airport_nav/core/widgets/state_views.dart';
 import 'package:airport_nav/features/shops/presentation/providers/shop_providers.dart';
 
-/// Sky Pass–styled shop detail screen.
+/// Sky Pass-styled shop detail screen.
 ///
 /// Header: [GradientHero] (category-tinted via token map) + large icon watermark.
 /// Body: name (headlineLarge ink) · category chip + [RatingStars] + mono rating ·

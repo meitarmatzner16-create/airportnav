@@ -9,7 +9,7 @@ import 'package:airport_nav/core/widgets/state_views.dart';
 import 'package:airport_nav/features/shops/presentation/providers/shop_providers.dart';
 import 'package:airport_nav/features/shops/presentation/widgets/shop_card.dart';
 
-/// Sky Pass–styled shop directory screen.
+/// Sky Pass-styled shop directory screen.
 ///
 /// Token search bar + category chips + AppCard list.
 /// LoadingState shimmer and EmptyState when no shops match.

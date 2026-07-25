@@ -102,7 +102,7 @@ class RoutePlanCard extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // Header — neutral row with title and a single accent pill.
+            // Header - neutral row with title and a single accent pill.
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.md,
@@ -150,7 +150,7 @@ class RoutePlanCard extends ConsumerWidget {
               ),
             ),
             Container(height: 1, color: hairline),
-            // "View in map" — full-width primary button
+            // "View in map" - full-width primary button
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 AppSpacing.md,

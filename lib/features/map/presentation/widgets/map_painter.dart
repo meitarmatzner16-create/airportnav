@@ -12,30 +12,30 @@ class MapPainter extends CustomPainter {
     final scaleX = size.width / floor.width;
     final scaleY = size.height / floor.height;
 
-    // Background — paper token
+    // Background - paper token
     final bgPaint = Paint()..color = AppColors.paper;
     canvas.drawRect(
       Rect.fromLTWH(0, 0, size.width, size.height),
       bgPaint,
     );
 
-    // Wall outlines — hairlineCool token
+    // Wall outlines - hairlineCool token
     final wallPaint = Paint()
       ..color = AppColors.hairlineCool
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
-    // Room fill — skyTint token
+    // Room fill - skyTint token
     final roomFill = Paint()
       ..color = AppColors.skyTint
       ..style = PaintingStyle.fill;
 
-    // Corridor fill — card (white) token
+    // Corridor fill - card (white) token
     final corridorPaint = Paint()
       ..color = AppColors.card
       ..style = PaintingStyle.fill;
 
-    // Gate area — skyAlpha10 token
+    // Gate area - skyAlpha10 token
     final gateAreaPaint = Paint()
       ..color = AppColors.skyAlpha10
       ..style = PaintingStyle.fill;
@@ -105,7 +105,7 @@ class MapPainter extends CustomPainter {
     _drawRoom(canvas, 730, floor.height * 0.42, 120, floor.height * 0.16,
         scaleX, scaleY, roomFill, wallPaint);
 
-    // Draw grid lines for orientation (subtle) — hairline at 50% alpha
+    // Draw grid lines for orientation (subtle) - hairline at 50% alpha
     final gridPaint = Paint()
       ..color = AppColors.hairline.withAlpha(0x80)
       ..strokeWidth = 0.5;

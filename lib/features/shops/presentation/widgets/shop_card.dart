@@ -5,7 +5,7 @@ import 'package:airport_nav/core/widgets/app_card.dart';
 import 'package:airport_nav/core/widgets/rating_stars.dart';
 import 'package:airport_nav/features/shops/domain/entities/shop.dart';
 
-/// Sky Pass–styled shop row card.
+/// Sky Pass-styled shop row card.
 ///
 /// Uses [AppCard] (white, hairline, radiusLg, soft shadow).
 /// Category chip uses token colors. [RatingStars] uses gold.

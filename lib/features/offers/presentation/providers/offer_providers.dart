@@ -31,7 +31,7 @@ final filteredOffersProvider = Provider<List<Offer>>((ref) {
   if (airline != null) {
     offers = offers.where((o) => o.airline == null || o.airline == airline).toList();
   } else {
-    // No flight selected — only show generic offers (no airline filter)
+    // No flight selected - only show generic offers (no airline filter)
     offers = offers.where((o) => o.airline == null).toList();
   }
 

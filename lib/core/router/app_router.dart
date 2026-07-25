@@ -11,7 +11,8 @@ import '../../features/voice_chat/presentation/screens/voice_chat_screen.dart';
 import '../../features/flight/presentation/screens/flight_detail_screen.dart';
 import '../../features/flight/presentation/screens/boarding_pass_screen.dart';
 import '../../features/flight/presentation/screens/flights_board_screen.dart';
-import '../../features/venues/presentation/screens/venues_screen.dart';
+import '../../features/venues/presentation/screens/explore_screen.dart';
+import '../../features/venues/presentation/screens/venue_detail_screen.dart';
 import '../widgets/app_shell.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -35,6 +36,13 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/navigate',
         builder: (context, state) => const RouteNavigationScreen(),
+      ),
+      // Full-screen venue detail (pushed from Explore)
+      GoRoute(
+        path: '/explore/venue/:id',
+        builder: (context, state) => VenueDetailScreen(
+          venueId: state.pathParameters['id']!,
+        ),
       ),
       ShellRoute(
         builder: (context, state, child) => AppShell(child: child),
@@ -60,7 +68,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               child: AirportMapScreen(),
             ),
           ),
-          // Flights tab — live board / pick active flight
+          // Flights tab - live board / pick active flight
           GoRoute(
             path: '/flights',
             pageBuilder: (context, state) => const NoTransitionPage(
@@ -73,7 +81,7 @@ final routerProvider = Provider<GoRouter>((ref) {
               child: VoiceChatScreen(),
             ),
           ),
-          // Non-tab shell routes — reachable from Home / profile, keep the bar.
+          // Non-tab shell routes - reachable from Home / profile, keep the bar.
           GoRoute(
             path: '/offers',
             pageBuilder: (context, state) => const NoTransitionPage(
@@ -81,9 +89,9 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           ),
           GoRoute(
-            path: '/venues',
+            path: '/explore',
             pageBuilder: (context, state) => const NoTransitionPage(
-              child: VenuesScreen(),
+              child: ExploreScreen(),
             ),
           ),
           GoRoute(

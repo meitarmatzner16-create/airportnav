@@ -294,7 +294,7 @@ class _RouteNavigationScreenState extends ConsumerState<RouteNavigationScreen>
 
             // ── Map area ──────────────────────────────────────────────
             // Always render the map canvas. When the real floor plan is
-            // unavailable (e.g. stop on floor 3 but mock only has floors 1–2)
+            // unavailable (e.g. stop on floor 3 but mock only has floors 1-2)
             // we fall back to a schematic canvas with synthetic stop positions.
             Expanded(
               child: _MapArea(
@@ -466,7 +466,7 @@ class _RouteNavigationScreenState extends ConsumerState<RouteNavigationScreen>
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Map Area — draws the floor with route polyline + animated markers.
+// Map Area - draws the floor with route polyline + animated markers.
 // When [floor] is null the real floor plan is unavailable (e.g. stop on a
 // floor the mock data doesn't define). In that case we render a schematic
 // fallback canvas of [fallbackWidth]×[fallbackHeight] and still draw the
@@ -522,7 +522,7 @@ class _MapArea extends StatelessWidget {
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              // Floor plan background — real plan when available, schematic otherwise.
+              // Floor plan background - real plan when available, schematic otherwise.
               Positioned.fill(
                 child: floor != null
                     ? CustomPaint(
@@ -630,8 +630,8 @@ class _MapArea extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Schematic background — shown when the real floor plan is unavailable.
-// Draws a clean grid canvas with a subtle "Floor N — schematic view" label,
+// Schematic background - shown when the real floor plan is unavailable.
+// Draws a clean grid canvas with a subtle "Floor N - schematic view" label,
 // using Sky Pass tokens so it's light/dark aware.
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -672,7 +672,7 @@ class _SchematicBackground extends StatelessWidget {
               borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
             ),
             child: Text(
-              'Floor $floorNumber — schematic view',
+              'Floor $floorNumber - schematic view',
               style: theme.textTheme.labelSmall?.copyWith(
                 color: isDark ? AppColors.dSky : AppColors.sky,
                 fontWeight: FontWeight.w600,
@@ -1111,7 +1111,7 @@ class _ArrivedBar extends StatelessWidget {
         ),
         const SizedBox(height: AppSpacing.smMd),
         Semantics(
-          label: 'Done — end navigation',
+          label: 'Done - end navigation',
           button: true,
           child: PrimaryButton(
             label: 'Done',

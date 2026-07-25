@@ -7,7 +7,7 @@ import 'package:airport_nav/core/widgets/state_views.dart';
 import 'package:airport_nav/features/lounges/presentation/providers/lounge_providers.dart';
 import 'package:airport_nav/features/lounges/presentation/widgets/lounge_card.dart';
 
-/// Sky Pass–styled lounge list screen.
+/// Sky Pass-styled lounge list screen.
 ///
 /// Uses [LoadingState] shimmer when data is pending, [EmptyState] with a
 /// weekend icon when no lounges exist, and a scrolling list of [LoungeCard]s
