@@ -110,12 +110,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                             _focusNode.unfocus();
                           },
                         )
-                      : IconButton(
-                          icon: const Icon(Icons.mic_none_rounded, size: 20),
-                          color: AppColors.sky,
-                          tooltip: 'Ask the Assistant',
-                          onPressed: () => context.push('/voice-chat'),
-                        ),
+                      : null,
                 ),
               ),
             ),

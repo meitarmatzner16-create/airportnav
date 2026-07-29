@@ -145,12 +145,9 @@ class _AdaptiveSection extends StatelessWidget {
                         .textTheme
                         .bodyMedium
                         ?.copyWith(color: AppColors.muted))
-                : Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      for (final a in venue.amenities) _AmenityChip(amenity: a),
-                    ],
+                : _AmenityGroups(
+                    amenities: venue.amenities,
+                    notes: venue.amenityNotes,
                   ),
           ),
           if (venue.access != null) _AccessBlock(access: venue.access!),
@@ -260,29 +257,63 @@ class _StatRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         border: Border.all(color: AppColors.hairline, width: 1),
       ),
-      child: Row(
-        children: [
-          _StatCell(
-            icon: Icons.directions_walk_rounded,
-            value: venue.walkMinutes != null ? '${venue.walkMinutes}m' : '-',
-            label: 'Walk',
-          ),
-          _cellDivider(),
-          _StatCell(
-            icon: Icons.schedule_rounded,
-            value:
-                venue.avgVisitMinutes != null ? '${venue.avgVisitMinutes}m' : '-',
-            label: 'Avg visit',
-          ),
-          _cellDivider(),
-          _StatCell(
-            icon: Icons.meeting_room_rounded,
-            value: venue.nearestGate ?? '-',
-            label: 'Nearest',
-          ),
-        ],
-      ),
+      child: venue.type == VenueType.lounge
+          // A lounge is judged on cost and opening hours, not on how long the
+          // average person lingers or which gate is nearest.
+          ? Row(
+              children: [
+                _StatCell(
+                  icon: Icons.directions_walk_rounded,
+                  value:
+                      venue.walkMinutes != null ? '${venue.walkMinutes}m' : '-',
+                  label: 'Walk',
+                ),
+                _cellDivider(),
+                _StatCell(
+                  icon: Icons.confirmation_number_rounded,
+                  value: venue.access?.entryFrom ?? 'Members',
+                  label: 'Entry',
+                ),
+                _cellDivider(),
+                _StatCell(
+                  icon: Icons.schedule_rounded,
+                  value: _closingTime(venue.openingHours),
+                  label: 'Open till',
+                ),
+              ],
+            )
+          : Row(
+              children: [
+                _StatCell(
+                  icon: Icons.directions_walk_rounded,
+                  value:
+                      venue.walkMinutes != null ? '${venue.walkMinutes}m' : '-',
+                  label: 'Walk',
+                ),
+                _cellDivider(),
+                _StatCell(
+                  icon: Icons.schedule_rounded,
+                  value: venue.avgVisitMinutes != null
+                      ? '${venue.avgVisitMinutes}m'
+                      : '-',
+                  label: 'Avg visit',
+                ),
+                _cellDivider(),
+                _StatCell(
+                  icon: Icons.meeting_room_rounded,
+                  value: venue.nearestGate ?? '-',
+                  label: 'Nearest',
+                ),
+              ],
+            ),
     );
+  }
+
+  /// "6:00 AM - 11:00 PM" -> "11:00 PM". Falls back to the raw string.
+  static String _closingTime(String hours) {
+    final parts = hours.split('-');
+    if (parts.length == 2) return parts[1].trim();
+    return hours.trim();
   }
 
   Widget _cellDivider() =>
@@ -315,29 +346,98 @@ class _StatCell extends StatelessWidget {
   }
 }
 
-class _AmenityChip extends StatelessWidget {
-  final Amenity amenity;
-  const _AmenityChip({required this.amenity});
+/// Amenities grouped by the question they answer (rest / food / work /
+/// getting around), with the physical detail under each - "4 suites, towels
+/// provided" rather than just a tick next to "Showers".
+class _AmenityGroups extends StatelessWidget {
+  final Set<Amenity> amenities;
+  final Map<Amenity, String> notes;
+
+  const _AmenityGroups({required this.amenities, required this.notes});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final byGroup = <AmenityGroup, List<Amenity>>{};
+    for (final a in amenities) {
+      byGroup.putIfAbsent(AmenityInfo.groupOf(a), () => []).add(a);
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (final g in AmenityGroup.values)
+          if (byGroup[g] != null) ...[
+            Padding(
+              padding: const EdgeInsets.only(top: 4, bottom: 8),
+              child: Text(
+                g.label,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: AppColors.sky,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.7,
+                  fontSize: 10.5,
+                ),
+              ),
+            ),
+            for (final a in byGroup[g]!)
+              _AmenityRow(amenity: a, note: notes[a]),
+            const SizedBox(height: 14),
+          ],
+      ],
+    );
+  }
+}
+
+class _AmenityRow extends StatelessWidget {
+  final Amenity amenity;
+  final String? note;
+
+  const _AmenityRow({required this.amenity, this.note});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final info = AmenityInfo.of(amenity);
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-      decoration: BoxDecoration(
-        color: AppColors.skyTint,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-      ),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 9),
       child: Row(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(info.icon, size: 16, color: AppColors.sky),
-          const SizedBox(width: 7),
-          Text(info.label,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          Container(
+            width: 30,
+            height: 30,
+            decoration: BoxDecoration(
+              color: AppColors.skyTint,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+            ),
+            child: Icon(info.icon, size: 16, color: AppColors.sky),
+          ),
+          const SizedBox(width: 11),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  info.label,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 14,
                     color: AppColors.ink,
-                    fontWeight: FontWeight.w600,
-                  )),
+                  ),
+                ),
+                if (note != null)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 1),
+                    child: Text(
+                      note!,
+                      style: theme.textTheme.bodySmall
+                          ?.copyWith(color: AppColors.muted, height: 1.35),
+                    ),
+                  ),
+              ],
+            ),
+          ),
         ],
       ),
     );

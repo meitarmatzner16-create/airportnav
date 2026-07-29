@@ -27,18 +27,20 @@ class AssistantEntryCard extends StatelessWidget {
       children: [
         const SectionHeader(title: 'What would you like to do?'),
         const SizedBox(height: AppSpacing.smMd),
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
+        // Shadow on the outer Container so it follows the rounded corners.
+        Container(
+          decoration: BoxDecoration(
+            color: cardBg,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            child: Ink(
-              decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                border: isDark ? Border.all(color: hairline, width: 1) : null,
-                boxShadow: isDark ? null : AppShadows.card,
-              ),
+            border: isDark ? Border.all(color: hairline, width: 1) : null,
+            boxShadow: isDark ? null : AppShadows.card,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: onTap,
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 child: Row(

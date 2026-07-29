@@ -83,26 +83,22 @@ class HomeScreen extends ConsumerWidget {
                 items: [
                   QuickStartItem(
                     icon: Icons.flight_rounded,
-                    title: 'Find My Flight',
-                    subtitle: 'See live departures',
+                    label: 'Find My Flight',
                     onTap: () => context.go('/flights'),
                   ),
                   QuickStartItem(
                     icon: Icons.near_me_rounded,
-                    title: 'Navigate',
-                    subtitle: 'Get to your gate',
+                    label: 'Navigate',
                     onTap: () => context.go('/map'),
                   ),
                   QuickStartItem(
                     icon: Icons.restaurant_rounded,
-                    title: 'Food & Drinks',
-                    subtitle: 'Near your gate',
+                    label: 'Food & Drinks',
                     onTap: () => context.go('/explore'),
                   ),
                   QuickStartItem(
                     icon: Icons.shopping_bag_outlined,
-                    title: 'Shops',
-                    subtitle: 'On your route',
+                    label: 'Shops',
                     onTap: () => context.go('/explore'),
                   ),
                 ],

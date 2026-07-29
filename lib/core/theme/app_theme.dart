@@ -10,8 +10,11 @@ class AppShadows {
   AppShadows._();
 
   static const card = [
-    BoxShadow(color: Color(0x0A000000), blurRadius: 2, offset: Offset(0, 1)),
-    BoxShadow(color: Color(0x12000000), blurRadius: 18, offset: Offset(0, 7)),
+    // Soft, near-symmetric wrap so every corner (incl. the top) is rounded,
+    // not pointy - a small offset keeps a gentle downward float.
+    BoxShadow(color: Color(0x0D0F2350), blurRadius: 14, offset: Offset(0, 3)),
+    // Deep, very soft ambient for lift; negative spread hugs the corners.
+    BoxShadow(color: Color(0x0A0F2350), blurRadius: 26, spreadRadius: -6, offset: Offset(0, 12)),
   ];
 
   static const cardHover = [

@@ -9,6 +9,7 @@ class VenueDetailsPatch {
   final int? reviewCount;
   final PriceLevel? priceLevel;
   final Set<Amenity>? amenities;
+  final Map<Amenity, String>? amenityNotes;
   final VenueAccess? access;
   final List<VenueHighlight>? highlights;
   final BestTimeWindow? bestTime;
@@ -20,6 +21,7 @@ class VenueDetailsPatch {
     this.reviewCount,
     this.priceLevel,
     this.amenities,
+    this.amenityNotes,
     this.access,
     this.highlights,
     this.bestTime,
@@ -44,6 +46,7 @@ Venue enrichVenue(Venue v) {
     reviewCount: patch?.reviewCount,
     priceLevel: patch?.priceLevel,
     amenities: patch?.amenities,
+    amenityNotes: patch?.amenityNotes,
     access: patch?.access,
     highlights: patch?.highlights,
     bestTime: patch?.bestTime,
@@ -65,15 +68,30 @@ const Map<String, VenueDetailsPatch> venueDetailsCatalog = {
     amenities: {
       Amenity.wifi,
       Amenity.powerOutlets,
+      Amenity.phoneBooth,
+      Amenity.businessCentre,
       Amenity.buffet,
       Amenity.alcohol,
       Amenity.barista,
       Amenity.quietZone,
+      Amenity.vegetarian,
       Amenity.wheelchair,
+      Amenity.luggageStorage,
+    },
+    amenityNotes: {
+      Amenity.buffet: 'Hot breakfast till 11am, soup and salad after',
+      Amenity.alcohol: 'Complimentary house beer and wine, premium paid',
+      Amenity.barista: 'Self-serve espresso machines',
+      Amenity.phoneBooth: '2 sound-proofed booths, first come',
+      Amenity.businessCentre: 'Printer, scanner, 4 desks',
+      Amenity.quietZone: 'Reading room at the back, no calls',
+      Amenity.vegetarian: 'Veg options at the buffet, no dedicated vegan menu',
+      Amenity.luggageStorage: 'Staffed rack by reception',
     },
     access: VenueAccess(
       rules: ['AA First / Business', 'Admirals Club members', 'One World Sapphire'],
-      entryCost: r'$79 day pass',
+      entryCost: r'$79 day pass at the door',
+      entryFrom: r'$79',
     ),
     bestTime: BestTimeWindow(
         start: '8:40', end: '9:20', reason: 'Calm before the mid-morning bank - easy seating'),
@@ -88,18 +106,37 @@ const Map<String, VenueDetailsPatch> venueDetailsCatalog = {
     amenities: {
       Amenity.shower,
       Amenity.napRoom,
+      Amenity.quietZone,
       Amenity.wifi,
       Amenity.powerOutlets,
+      Amenity.phoneBooth,
+      Amenity.alaCarte,
       Amenity.buffet,
       Amenity.alcohol,
       Amenity.barista,
-      Amenity.quietZone,
       Amenity.vegan,
+      Amenity.vegetarian,
       Amenity.wheelchair,
+      Amenity.prayerRoom,
+      Amenity.luggageStorage,
+    },
+    amenityNotes: {
+      Amenity.shower: '4 suites, towels and products provided, ask reception',
+      Amenity.napRoom: '6 nap pods, 90 min max, book at the desk',
+      Amenity.quietZone: 'Separate silent room, no calls',
+      Amenity.alaCarte: 'Chef menu, table service, seasonal',
+      Amenity.buffet: 'Hot buffet all day plus a salad bar',
+      Amenity.alcohol: 'Full cocktail bar, complimentary',
+      Amenity.barista: 'Staffed espresso bar',
+      Amenity.vegan: 'Dedicated vegan dishes, labelled at the buffet',
+      Amenity.phoneBooth: '3 booths with power and desk',
+      Amenity.prayerRoom: 'Multi-faith room next to the entrance',
+      Amenity.luggageStorage: 'Lockers, large cases welcome',
     },
     access: VenueAccess(
       rules: ['Amex Platinum / Centurion', 'Priority Pass select'],
-      entryCost: r'$59 walk-in',
+      entryCost: r'$59 walk-in when capacity allows',
+      entryFrom: r'$59',
     ),
     bestTime: BestTimeWindow(
         start: '9:10', end: '9:40', reason: 'Before the rush - shortest shower-suite wait'),

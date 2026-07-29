@@ -5,17 +5,15 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/section_header.dart';
 
-/// A single Quick Start action.
+/// A single Quick Start action - an icon and a short label.
 class QuickStartItem {
   final IconData icon;
-  final String title;
-  final String subtitle;
+  final String label;
   final VoidCallback onTap;
 
   const QuickStartItem({
     required this.icon,
-    required this.title,
-    required this.subtitle,
+    required this.label,
     required this.onTap,
   });
 }
@@ -64,49 +62,43 @@ class _QuickStartCard extends StatelessWidget {
     final border = isDark ? AppColors.dHairline : AppColors.hairline;
     final iconColor = isDark ? AppColors.dText : AppColors.ink;
     final titleColor = isDark ? AppColors.dText : AppColors.ink;
-    final subColor = isDark ? AppColors.dMuted : AppColors.muted;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: item.onTap,
+    // The shadow lives on an outer Container, not on an `Ink` decoration.
+    // `Ink` paints into the parent Material's canvas, where the shadow does
+    // not follow the rounded clip and the corners read as square.
+    return Container(
+      decoration: BoxDecoration(
+        color: fill,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: fill,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            border: isDark ? Border.all(color: border, width: 1) : null,
-            boxShadow: isDark ? null : AppShadows.card,
-          ),
+        border: isDark ? Border.all(color: border, width: 1) : null,
+        boxShadow: isDark ? null : AppShadows.card,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: item.onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 10,
-              vertical: AppSpacing.smMd,
+              vertical: AppSpacing.md,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Icon(item.icon, size: 24, color: iconColor),
                 const SizedBox(height: 14),
                 Text(
-                  item.title,
+                  item.label,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelMedium?.copyWith(
+                  style: theme.textTheme.titleMedium?.copyWith(
                     color: titleColor,
-                    fontWeight: FontWeight.w600,
-                    height: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  item.subtitle,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.labelSmall?.copyWith(
-                    color: subColor,
-                    fontWeight: FontWeight.w400,
-                    height: 1.2,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 13,
+                    height: 1.25,
                   ),
                 ),
               ],

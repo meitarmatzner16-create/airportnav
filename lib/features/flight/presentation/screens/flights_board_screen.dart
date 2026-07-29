@@ -7,7 +7,6 @@ import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/screen_header.dart';
 import '../../../../core/widgets/state_views.dart';
 import '../../../../core/widgets/status_badge.dart';
 import '../../domain/entities/flight.dart';
@@ -27,6 +26,7 @@ class FlightsBoardScreen extends ConsumerWidget {
     final isDark = theme.brightness == Brightness.dark;
     final detectedAirport = ref.watch(detectedAirportProvider);
     final upcomingFlights = ref.watch(upcomingFlightsProvider);
+    final selectedFlight = ref.watch(selectedFlightProvider);
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.dBg : AppColors.paper,
@@ -34,24 +34,34 @@ class FlightsBoardScreen extends ConsumerWidget {
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
-            // ── Title block ──────────────────────────────────────────
-            ScreenHeader(
-              greeting: _timeGreeting(),
-              title: 'Departing soon',
-              subtitle: 'Pick your flight and we\'ll tailor your routes, map, and nearby venues to it.',
-              bottomPadding: _sectionGap,
-              actions: [
-                TonalPill(
-                  label: 'Home',
-                  icon: Icons.arrow_back_ios_new_rounded,
-                  onTap: () => context.go('/home'),
-                ),
-                TonalPill(
-                  label: detectedAirport,
-                  icon: Icons.gps_fixed_rounded,
-                ),
-              ],
+            // ── Header - same shape as Home / Explore / Map ──────────
+            Padding(
+              padding: const EdgeInsets.fromLTRB(_gutter, 12, _gutter, 0),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Departing soon',
+                            style: theme.textTheme.displaySmall),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${upcomingFlights.length} flights · $detectedAirport · next 3.5h',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall
+                              ?.copyWith(color: AppColors.muted),
+                        ),
+                      ],
+                    ),
+                  ),
+                  _AirportChip(code: detectedAirport),
+                ],
+              ),
             ),
+            const SizedBox(height: _sectionGap),
 
             // ── Flight list or empty state ───────────────────────────
             if (upcomingFlights.isEmpty)
@@ -71,9 +81,26 @@ class FlightsBoardScreen extends ConsumerWidget {
                   child: _BoardFlightCard(
                     flight: flight,
                     isDark: isDark,
+                    selected: flight.id == selectedFlight?.id,
+                    // Select in place so the choice is visibly confirmed -
+                    // navigating away immediately meant the user never saw it
+                    // land. The snackbar offers the way onward.
                     onTap: () {
                       ref.read(selectedFlightProvider.notifier).state = flight;
-                      context.go('/home');
+                      ScaffoldMessenger.of(context)
+                        ..hideCurrentSnackBar()
+                        ..showSnackBar(
+                          SnackBar(
+                            content: Text(
+                                '${flight.flightNumber} is now your flight'),
+                            duration: const Duration(seconds: 3),
+                            action: SnackBarAction(
+                              label: 'View',
+                              textColor: Colors.white,
+                              onPressed: () => context.go('/home'),
+                            ),
+                          ),
+                        );
                     },
                   ),
                 ),
@@ -85,11 +112,38 @@ class FlightsBoardScreen extends ConsumerWidget {
     );
   }
 
-  static String _timeGreeting() {
-    final hour = DateTime.now().hour;
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
-    return 'Good evening';
+}
+
+/// Airport indicator, styled to match the chip on the Map header.
+class _AirportChip extends StatelessWidget {
+  final String code;
+  const _AirportChip({required this.code});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 42,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+        border: Border.all(color: AppColors.hairline, width: 1),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.gps_fixed_rounded, size: 15, color: AppColors.muted),
+          const SizedBox(width: 6),
+          Text(
+            code,
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  color: AppColors.ink,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -100,12 +154,14 @@ class FlightsBoardScreen extends ConsumerWidget {
 class _BoardFlightCard extends StatelessWidget {
   final Flight flight;
   final bool isDark;
+  final bool selected;
   final VoidCallback onTap;
 
   const _BoardFlightCard({
     required this.flight,
     required this.isDark,
     required this.onTap,
+    this.selected = false,
   });
 
   @override
@@ -118,21 +174,28 @@ class _BoardFlightCard extends StatelessWidget {
         ? '${minutesUntil ~/ 60}h ${minutesUntil % 60}m'
         : '${minutesUntil}m';
     final urgent = minutesUntil <= 60;
-    final cardBg = isDark ? AppColors.dSurface : AppColors.card;
+    final cardBg = selected
+        ? (isDark ? AppColors.skyAlpha15 : AppColors.skyTint)
+        : (isDark ? AppColors.dSurface : AppColors.card);
     final hairline = isDark ? AppColors.dHairline : AppColors.hairline;
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
+    // Shadow on the outer Container so it follows the rounded corners -
+    // an `Ink` decoration paints into the Material canvas and squares off.
+    return Container(
+      decoration: BoxDecoration(
+        color: cardBg,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        child: Ink(
-          decoration: BoxDecoration(
-            color: cardBg,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            border: isDark ? Border.all(color: hairline, width: 1) : null,
-            boxShadow: isDark ? null : AppShadows.card,
-          ),
+        border: selected
+            ? Border.all(color: AppColors.sky, width: 2)
+            : (isDark ? Border.all(color: hairline, width: 1) : null),
+        boxShadow: isDark ? null : AppShadows.card,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.all(AppSpacing.md),
             child: Column(
@@ -144,14 +207,21 @@ class _BoardFlightCard extends StatelessWidget {
                       width: 36,
                       height: 36,
                       decoration: BoxDecoration(
-                        color: isDark
-                            ? AppColors.skyAlpha15
-                            : AppColors.skyAlpha10,
+                        color: selected
+                            ? AppColors.sky
+                            : (isDark
+                                ? AppColors.skyAlpha15
+                                : AppColors.skyAlpha10),
                         borderRadius:
                             BorderRadius.circular(AppSpacing.radiusSm),
                       ),
-                      child: Icon(Icons.flight_rounded,
-                          color: isDark ? AppColors.dSky : AppColors.sky,
+                      child: Icon(
+                          selected
+                              ? Icons.check_rounded
+                              : Icons.flight_rounded,
+                          color: selected
+                              ? Colors.white
+                              : (isDark ? AppColors.dSky : AppColors.sky),
                           size: 18),
                     ),
                     const SizedBox(width: AppSpacing.smMd),
@@ -291,7 +361,7 @@ class _BoardFlightCard extends StatelessWidget {
 
                 const SizedBox(height: AppSpacing.smMd),
 
-                // ── Footer row: gate + "Select →" ────────────────────
+                // ── Footer row: gate + select / selected state ───────
                 Row(
                   children: [
                     if (flight.gate != null) ...[
@@ -309,24 +379,50 @@ class _BoardFlightCard extends StatelessWidget {
                       const SizedBox(width: AppSpacing.smMd),
                     ],
                     const Spacer(),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Select',
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: isDark ? AppColors.dSky : AppColors.sky,
-                            fontWeight: FontWeight.w700,
+                    if (selected)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: AppColors.sky,
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusFull),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.check_rounded,
+                                color: Colors.white, size: 13),
+                            const SizedBox(width: 4),
+                            Text(
+                              'Your flight',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
+                        ),
+                      )
+                    else
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Select',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: isDark ? AppColors.dSky : AppColors.sky,
+                              fontWeight: FontWeight.w700,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 2),
-                        Icon(
-                          Icons.chevron_right_rounded,
-                          color: isDark ? AppColors.dSky : AppColors.sky,
-                          size: 16,
-                        ),
-                      ],
-                    ),
+                          const SizedBox(width: 2),
+                          Icon(
+                            Icons.chevron_right_rounded,
+                            color: isDark ? AppColors.dSky : AppColors.sky,
+                            size: 16,
+                          ),
+                        ],
+                      ),
                   ],
                 ),
               ],

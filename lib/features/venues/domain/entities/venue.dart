@@ -28,6 +28,11 @@ class Venue {
   final PriceLevel? priceLevel;
   final bool isOpenNow;
   final Set<Amenity> amenities;
+
+  /// Optional physical detail per amenity - "4 suites, towels provided",
+  /// "6 pods, 90 min max". This is the answer to "does it actually have
+  /// showers, and how many".
+  final Map<Amenity, String> amenityNotes;
   final VenueAccess? access;
   final List<VenueHighlight> highlights;
   final BestTimeWindow? bestTime;
@@ -57,6 +62,7 @@ class Venue {
     this.priceLevel,
     this.isOpenNow = true,
     this.amenities = const {},
+    this.amenityNotes = const {},
     this.access,
     this.highlights = const [],
     this.bestTime,
@@ -77,6 +83,7 @@ class Venue {
     PriceLevel? priceLevel,
     bool? isOpenNow,
     Set<Amenity>? amenities,
+    Map<Amenity, String>? amenityNotes,
     VenueAccess? access,
     List<VenueHighlight>? highlights,
     BestTimeWindow? bestTime,
@@ -106,6 +113,7 @@ class Venue {
         priceLevel: priceLevel ?? this.priceLevel,
         isOpenNow: isOpenNow ?? this.isOpenNow,
         amenities: amenities ?? this.amenities,
+        amenityNotes: amenityNotes ?? this.amenityNotes,
         access: access ?? this.access,
         highlights: highlights ?? this.highlights,
         bestTime: bestTime ?? this.bestTime,

@@ -27,10 +27,26 @@ enum Amenity {
   halal,
   alcohol,
   buffet,
+  alaCarte,
   barista,
+  phoneBooth,
+  businessCentre,
   wheelchair,
   prayerRoom,
   luggageStorage,
+}
+
+/// Amenities group into the four questions a traveller actually asks:
+/// can I rest, can I eat, can I work, can I get in.
+enum AmenityGroup { rest, food, work, access }
+
+extension AmenityGroupX on AmenityGroup {
+  String get label => switch (this) {
+        AmenityGroup.rest => 'REST',
+        AmenityGroup.food => 'FOOD & DRINK',
+        AmenityGroup.work => 'WORK',
+        AmenityGroup.access => 'GETTING AROUND',
+      };
 }
 
 /// Icon + label for an [Amenity]. Exhaustive switch so a new value forces
@@ -57,13 +73,47 @@ class AmenityInfo {
         Amenity.alcohol => const AmenityInfo(Icons.local_bar_rounded, 'Bar'),
         Amenity.buffet =>
           const AmenityInfo(Icons.dinner_dining_rounded, 'Buffet'),
+        Amenity.alaCarte =>
+          const AmenityInfo(Icons.room_service_rounded, 'A la carte'),
         Amenity.barista => const AmenityInfo(Icons.coffee_rounded, 'Barista'),
+        Amenity.phoneBooth =>
+          const AmenityInfo(Icons.phone_in_talk_rounded, 'Phone booths'),
+        Amenity.businessCentre =>
+          const AmenityInfo(Icons.print_rounded, 'Business centre'),
         Amenity.wheelchair =>
           const AmenityInfo(Icons.accessible_rounded, 'Step-free'),
         Amenity.prayerRoom =>
           const AmenityInfo(Icons.self_improvement_rounded, 'Prayer room'),
         Amenity.luggageStorage =>
           const AmenityInfo(Icons.luggage_rounded, 'Bag storage'),
+      };
+
+  /// Which question this amenity answers. Exhaustive so a new value forces
+  /// a decision here rather than silently landing in a default bucket.
+  static AmenityGroup groupOf(Amenity a) => switch (a) {
+        Amenity.shower ||
+        Amenity.showerPaid ||
+        Amenity.napRoom ||
+        Amenity.quietZone ||
+        Amenity.kidsArea =>
+          AmenityGroup.rest,
+        Amenity.vegan ||
+        Amenity.vegetarian ||
+        Amenity.halal ||
+        Amenity.alcohol ||
+        Amenity.buffet ||
+        Amenity.alaCarte ||
+        Amenity.barista =>
+          AmenityGroup.food,
+        Amenity.wifi ||
+        Amenity.powerOutlets ||
+        Amenity.phoneBooth ||
+        Amenity.businessCentre =>
+          AmenityGroup.work,
+        Amenity.wheelchair ||
+        Amenity.prayerRoom ||
+        Amenity.luggageStorage =>
+          AmenityGroup.access,
       };
 }
 
@@ -79,7 +129,12 @@ class VenueHighlight {
 class VenueAccess {
   final List<String> rules; // ["Priority Pass", "Business / First"]
   final String? entryCost; // "$59 walk-in"
-  const VenueAccess({this.rules = const [], this.entryCost});
+
+  /// Short form for the stat row, e.g. "$59". `entryCost` is the full
+  /// sentence; this is what fits in a 3-up stat cell.
+  final String? entryFrom;
+
+  const VenueAccess({this.rules = const [], this.entryCost, this.entryFrom});
 }
 
 /// "Best time for you" window.

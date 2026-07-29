@@ -61,18 +61,21 @@ class UpcomingFlightCard extends StatelessWidget {
       children: [
         const SectionHeader(title: 'Your Upcoming Flight'),
         const SizedBox(height: AppSpacing.smMd),
-        Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: onTap,
+        // Shadow on the outer Container so it follows the rounded corners -
+        // an `Ink` decoration paints into the Material canvas and squares off.
+        Container(
+          decoration: BoxDecoration(
+            color: cardBg,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            child: Ink(
-              decoration: BoxDecoration(
-                color: cardBg,
-                borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                border: isDark ? Border.all(color: hairline, width: 1) : null,
-                boxShadow: isDark ? null : AppShadows.card,
-              ),
+            border: isDark ? Border.all(color: hairline, width: 1) : null,
+            boxShadow: isDark ? null : AppShadows.card,
+          ),
+          child: Material(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+            clipBehavior: Clip.antiAlias,
+            child: InkWell(
+              onTap: onTap,
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.md),
                 child: Column(
@@ -139,7 +142,7 @@ class UpcomingFlightCard extends StatelessWidget {
                           const EdgeInsets.symmetric(vertical: AppSpacing.md),
                       child: Divider(height: 1, color: hairline),
                     ),
-                    // ── Bottom: four stats ────────────────────────────
+                    // ── Bottom: 2x2 stat grid ─────────────────────────
                     Row(
                       children: [
                         _Stat(
@@ -147,16 +150,23 @@ class UpcomingFlightCard extends StatelessWidget {
                           label: 'Gate',
                           value: flight.gate ?? '-',
                         ),
+                        const SizedBox(width: 12),
                         _Stat(
                           icon: Icons.schedule_rounded,
                           label: 'Departs',
                           value: clock.format(flight.departureTime),
                         ),
+                      ],
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
                         _Stat(
                           icon: Icons.directions_walk_rounded,
-                          label: 'Est. Walk',
+                          label: 'Est. walk',
                           value: '${estimatedWalkMinutes(flight.gate)} min',
                         ),
+                        const SizedBox(width: 12),
                         _Stat(
                           icon: Icons.apartment_rounded,
                           label: 'Terminal',
@@ -192,22 +202,34 @@ class _Stat extends StatelessWidget {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 18, color: mutedColor),
-          const SizedBox(height: 6),
-          Text(label,
-              style: theme.textTheme.labelSmall?.copyWith(color: mutedColor),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis),
-          const SizedBox(height: 1),
+          // Icon sits inline beside the label so the value carries the weight.
+          Row(
+            children: [
+              Icon(icon, size: 14, color: mutedColor),
+              const SizedBox(width: 5),
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelSmall
+                      ?.copyWith(color: mutedColor, fontSize: 11),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 3),
           Text(
             value,
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: textColor,
-              fontWeight: FontWeight.w600,
-            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.titleLarge?.copyWith(
+              color: textColor,
+              fontWeight: FontWeight.w700,
+              fontSize: 18,
+            ),
           ),
         ],
       ),

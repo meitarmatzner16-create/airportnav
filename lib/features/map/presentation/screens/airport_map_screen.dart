@@ -39,47 +39,66 @@ class _AirportMapScreenState extends ConsumerState<AirportMapScreen> {
     final searchResults = ref.watch(mapSearchResultsProvider);
     final theme = Theme.of(context);
 
+    final isDark = theme.brightness == Brightness.dark;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Airport Map'),
-        elevation: AppSpacing.appBarElevation,
-        actions: [
-          // Airport selector
-          DropdownButton<String>(
-            value: selectedAirport,
-            underline: const SizedBox(),
-            icon: const Icon(Icons.arrow_drop_down),
-            items: _airports
-                .map((code) => DropdownMenuItem(
-                      value: code,
-                      child: Text(code,
-                          style: const TextStyle(fontWeight: FontWeight.w600)),
-                    ))
-                .toList(),
-            onChanged: (value) {
-              if (value != null) {
-                ref.read(selectedMapAirportProvider.notifier).state = value;
-                ref.read(selectedFloorIndexProvider.notifier).state = 0;
-                ref.read(selectedPoiProvider.notifier).state = null;
-                ref.read(navigationFromPoiProvider.notifier).state = null;
-                ref.read(navigationToPoiProvider.notifier).state = null;
-              }
-            },
-          ),
-          IconButton(
-            onPressed: () => setState(() {
-              _showSearch = !_showSearch;
-              if (!_showSearch) {
-                _searchController.clear();
-                ref.read(mapSearchQueryProvider.notifier).state = '';
-              }
-            }),
-            icon: Icon(_showSearch ? Icons.close : Icons.search),
-          ),
-        ],
-      ),
-      body: Column(
+      backgroundColor: isDark ? AppColors.dBg : AppColors.paper,
+      body: SafeArea(
+        child: Column(
         children: [
+          // ── Header (consistent with Home / Explore) ──────────────
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+                AppSpacing.gutter, 12, AppSpacing.gutter, 0),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('$selectedAirport Map',
+                          style: theme.textTheme.displaySmall),
+                      const SizedBox(height: 2),
+                      Text(
+                        selectedFloor != null
+                            ? '${selectedFloor.floorName} · Terminal 4'
+                            : 'Terminal 4',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodySmall
+                            ?.copyWith(color: AppColors.muted),
+                      ),
+                    ],
+                  ),
+                ),
+                _MapAirportChip(
+                  value: selectedAirport,
+                  airports: _airports,
+                  onChanged: (value) {
+                    if (value != null) {
+                      ref.read(selectedMapAirportProvider.notifier).state = value;
+                      ref.read(selectedFloorIndexProvider.notifier).state = 0;
+                      ref.read(selectedPoiProvider.notifier).state = null;
+                      ref.read(navigationFromPoiProvider.notifier).state = null;
+                      ref.read(navigationToPoiProvider.notifier).state = null;
+                    }
+                  },
+                ),
+                const SizedBox(width: 8),
+                _MapCircleButton(
+                  icon: _showSearch ? Icons.close_rounded : Icons.search_rounded,
+                  onTap: () => setState(() {
+                    _showSearch = !_showSearch;
+                    if (!_showSearch) {
+                      _searchController.clear();
+                      ref.read(mapSearchQueryProvider.notifier).state = '';
+                    }
+                  }),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
           // Search bar
           if (_showSearch)
             Padding(
@@ -381,6 +400,7 @@ class _AirportMapScreenState extends ConsumerState<AirportMapScreen> {
                   ),
           ),
         ],
+        ),
       ),
     );
   }
@@ -406,5 +426,75 @@ class _AirportMapScreenState extends ConsumerState<AirportMapScreen> {
       default:
         return Icons.place;
     }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────
+// Header controls (consistent with Home / Explore)
+// ─────────────────────────────────────────────────────────────────────
+class _MapCircleButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  const _MapCircleButton({required this.icon, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.card,
+      shape: const CircleBorder(side: BorderSide(color: AppColors.hairline)),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          width: 42,
+          height: 42,
+          child: Icon(icon, size: 20, color: AppColors.ink),
+        ),
+      ),
+    );
+  }
+}
+
+class _MapAirportChip extends StatelessWidget {
+  final String value;
+  final List<String> airports;
+  final ValueChanged<String?> onChanged;
+  const _MapAirportChip({
+    required this.value,
+    required this.airports,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 42,
+      padding: const EdgeInsets.symmetric(horizontal: 14),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+        border: Border.all(color: AppColors.hairline, width: 1),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          isDense: true,
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          icon: const Padding(
+            padding: EdgeInsets.only(left: 2),
+            child: Icon(Icons.keyboard_arrow_down_rounded,
+                size: 18, color: AppColors.muted),
+          ),
+          items: airports
+              .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+              .toList(),
+          onChanged: onChanged,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: AppColors.ink,
+                fontWeight: FontWeight.w700,
+              ),
+        ),
+      ),
+    );
   }
 }
