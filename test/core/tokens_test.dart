@@ -16,6 +16,18 @@ void main() {
     expect(AppColors.primary, AppColors.ink);      // brand/dark
     expect(AppColors.background, AppColors.paper);
   });
+  test('amber accent family + delayed status are exact', () {
+    expect(AppColors.amber, const Color(0xFFFFB020));
+    expect(AppColors.amberTint, const Color(0xFFFFF4E0));
+    expect(AppColors.amberText, const Color(0xFF8A5A00));
+    expect(AppColors.amberAlpha15, const Color(0x26FFB020));
+    // Delayed must NOT be the brand amber - it re-points to orange so the
+    // accent never reads as "something is wrong".
+    expect(AppColors.statusDelayed, const Color(0xFFF5731F));
+    expect(AppColors.statusDelayed, isNot(AppColors.amber));
+    // `warning` keeps its original value for genuine warning semantics.
+    expect(AppColors.warning, const Color(0xFFE8A93B));
+  });
   testWidgets('every text role resolves to a single Nunito family', (tester) async {
     expect(AppTypography.textTheme.displayLarge!.fontFamily, contains('Nunito'));
     expect(AppTypography.textTheme.headlineMedium!.fontFamily, contains('Nunito'));

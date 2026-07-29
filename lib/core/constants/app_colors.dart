@@ -27,9 +27,21 @@ class AppColors {
   static const error = Color(0xFFE5484D);
   static const info = sky;
 
+  // ---- Brand accent: amber means "your path" ----
+  // Shapes, strokes and dots only. Amber TEXT must use `amberText` -
+  // #FFB020 on white is ~1.9:1 contrast and fails WCAG AA for small text.
+  static const amber = Color(0xFFFFB020);
+  static const amberSoft = Color(0xFFFFD489);
+  static const amberTint = Color(0xFFFFF4E0);
+  static const amberText = Color(0xFF8A5A00);
+
   // Flight status
   static const statusOnTime = success;
-  static const statusDelayed = warning;
+
+  /// Delayed flights use a distinctly orange tone. It deliberately does NOT
+  /// reuse `warning` (#E8A93B), which is nearly identical to the brand amber
+  /// and made the accent read as an error wherever it appeared.
+  static const statusDelayed = Color(0xFFF5731F);
   static const statusCancelled = error;
   static const statusBoarding = sky;
   static const statusScheduled = muted;
@@ -81,6 +93,8 @@ class AppColors {
   static const successAlpha15 = Color(0x261FA971);
   static const warningAlpha15 = Color(0x26E8A93B);
   static const errorAlpha15 = Color(0x26E5484D);
+  static const amberAlpha15 = Color(0x26FFB020);
+  static const statusDelayedAlpha15 = Color(0x26F5731F);
 
   // Shadows
   static const shadowSoft = Color(0x08000000);

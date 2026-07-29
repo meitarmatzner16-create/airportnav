@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/branding/app_logo.dart';
 import '../../../core/constants/app_colors.dart';
-import '../../../core/constants/app_spacing.dart';
+import '../data/onboarding_prefs.dart';
 
+/// Brand moment: the pass lands, the route runs across it, the plane lifts off
+/// the end of that route, and the wordmark rises.
+///
+/// Driven by ONE forward controller with a status listener - deliberately no
+/// `repeat()` and no `Future.delayed`, both of which leaked timers and broke
+/// the app smoke test.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -13,28 +20,45 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _haloController;
+  late final AnimationController _c;
+  late final Animation<double> _tile;
+  late final Animation<double> _route;
+  late final Animation<double> _plane;
+  late final Animation<double> _word;
+
+  static const _kLogoSize = 116.0;
 
   @override
   void initState() {
     super.initState();
-    _haloController = AnimationController(
+    _c = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 2400),
-    )..repeat(reverse: true);
-    _navigateAfterDelay();
+      duration: const Duration(milliseconds: 1700),
+    );
+
+    Animation<double> beat(double begin, double end, Curve curve) =>
+        CurvedAnimation(parent: _c, curve: Interval(begin, end, curve: curve));
+
+    _tile = beat(0.00, 0.21, Curves.easeOutCubic); // 0-350ms
+    _route = beat(0.18, 0.53, Curves.easeOut); // 300-900ms
+    _plane = beat(0.41, 0.68, Curves.easeOutCubic); // 700-1150ms
+    _word = beat(0.59, 0.88, Curves.easeOut); // 1000-1500ms
+
+    _c.addStatusListener(_onDone);
+    _c.forward();
   }
 
-  Future<void> _navigateAfterDelay() async {
-    await Future.delayed(const Duration(seconds: 2));
-    if (mounted) {
-      context.go('/onboarding');
-    }
+  Future<void> _onDone(AnimationStatus status) async {
+    if (status != AnimationStatus.completed) return;
+    final seen = await OnboardingPrefs.seen();
+    if (!mounted) return;
+    context.go(seen ? '/home' : '/onboarding');
   }
 
   @override
   void dispose() {
-    _haloController.dispose();
+    _c.removeStatusListener(_onDone);
+    _c.dispose();
     super.dispose();
   }
 
@@ -42,96 +66,54 @@ class _SplashScreenState extends State<SplashScreen>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      body: Container(
-        width: double.infinity,
-        height: double.infinity,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [AppColors.primaryDark, AppColors.primary, AppColors.primaryLight],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
-        ),
-        child: Center(
-          child: TweenAnimationBuilder<double>(
-            tween: Tween(begin: 0.0, end: 1.0),
-            duration: const Duration(milliseconds: 1100),
-            curve: Curves.easeOutCubic,
-            builder: (context, value, child) {
-              return Opacity(
-                opacity: value.clamp(0.0, 1.0),
-                child: Transform.translate(
-                  offset: Offset(0, 16 * (1 - value)),
-                  child: child,
-                ),
-              );
-            },
-            child: Column(
+      backgroundColor: AppColors.paper,
+      body: Center(
+        child: AnimatedBuilder(
+          animation: _c,
+          builder: (context, _) {
+            return Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                AnimatedBuilder(
-                  animation: _haloController,
-                  builder: (context, _) {
-                    final t = Curves.easeInOut.transform(_haloController.value);
-                    return SizedBox(
-                      width: 160,
-                      height: 160,
-                      child: Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          Container(
-                            width: 160 - (t * 6),
-                            height: 160 - (t * 6),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppColors.whiteAlpha15,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.accent.withValues(alpha: 0.30 + t * 0.1),
-                                  blurRadius: 50,
-                                  spreadRadius: 8 + (t * 6),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            width: 100,
-                            height: 100,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppColors.accent,
-                            ),
-                            child: const Icon(
-                              Icons.flight_rounded,
-                              size: 50,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                ),
-                const SizedBox(height: AppSpacing.xl),
-                Text(
-                  'AirportNav',
-                  style: theme.textTheme.displayMedium?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.5,
+                // Soft sky glow behind the mark.
+                Container(
+                  width: _kLogoSize * 2.1,
+                  height: _kLogoSize * 2.1,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(colors: [
+                      AppColors.skyTint.withValues(alpha: 0.85 * _tile.value),
+                      AppColors.paper.withValues(alpha: 0),
+                    ]),
+                  ),
+                  child: Transform.scale(
+                    scale: 0.86 + (0.14 * _tile.value),
+                    child: AppLogo(
+                      size: _kLogoSize,
+                      tileProgress: _tile.value,
+                      routeProgress: _route.value,
+                      planeProgress: _plane.value,
+                    ),
                   ),
                 ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  'Navigate with confidence',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: AppColors.whiteAlpha80,
-                    letterSpacing: 0.2,
+                const SizedBox(height: 12),
+                Transform.translate(
+                  offset: Offset(0, 8 * (1 - _word.value)),
+                  child: Opacity(
+                    opacity: _word.value,
+                    child: Text(
+                      'AirportNav',
+                      style: theme.textTheme.displaySmall?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.4,
+                        color: AppColors.ink,
+                      ),
+                    ),
                   ),
                 ),
               ],
-            ),
-          ),
+            );
+          },
         ),
       ),
     );

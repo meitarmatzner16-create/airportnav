@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/branding/app_logo.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 
-/// Home top bar: "AirportNav" wordmark + airport selector on the left,
-/// notifications + profile icon buttons on the right.
+/// Home top bar: the mark + "AirportNav" wordmark + airport selector on the
+/// left, notifications + profile icon buttons on the right.
 class HomeHeader extends StatelessWidget {
   final String airport;
   final List<String> airports;
@@ -31,6 +32,11 @@ class HomeHeader extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const Padding(
+          padding: EdgeInsets.only(top: 2),
+          child: AppLogo(size: 30),
+        ),
+        const SizedBox(width: 10),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,

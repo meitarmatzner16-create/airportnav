@@ -74,9 +74,9 @@ class StatusBadge extends StatelessWidget {
         ),
       'delayed' => (
           delayMinutes != null ? 'Delayed +${delayMinutes}m' : 'Delayed',
-          AppColors.warning,
-          AppColors.warning,
-          AppColors.warningAlpha15,
+          AppColors.statusDelayed,
+          AppColors.statusDelayed,
+          AppColors.statusDelayedAlpha15,
         ),
       'cancelled' => (
           'Cancelled',
