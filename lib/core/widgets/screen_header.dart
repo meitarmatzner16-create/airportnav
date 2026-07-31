@@ -77,13 +77,16 @@ class TonalPill extends StatelessWidget {
 
 /// Canonical screen header block matching the Home dashboard style.
 ///
-/// Layout (top → bottom inside 24px gutters, 8px top pad):
+/// Layout (top → bottom inside 24px gutters, 12px top pad):
 ///   [optional] greeting / eyebrow   - bodyMedium 14, muted
-///   title                            - displaySmall 28, w700 −0.6 tracking, ink/dText
+///   title  ......................  [actions]
 ///   [optional] subtitle / meta       - bodyMedium 14, muted
 ///
-/// [actions] are right-aligned in a Row alongside the title - pass
-/// [TonalPill] widgets for the header action chips.
+/// [actions] sit on the same row as the title, top-aligned with it - pass
+/// [TonalPill] widgets for the header action chips. They deliberately do NOT
+/// occupy a row of their own: a 44px action row above the title would push it
+/// ~44px lower than the hand-rolled headers on Explore and Flights, and the
+/// title's y-position is the thing that reads as "consistent" across screens.
 ///
 /// The widget does NOT add its own Padding; callers place it directly at the
 /// top of a ListView/Column, respecting the 24px gutter via [horizontalPadding].
@@ -96,7 +99,9 @@ class ScreenHeader extends StatelessWidget {
   /// Horizontal padding applied to the outer container. Default: 24 (gutter).
   final double horizontalPadding;
 
-  /// Top padding inside the header block. Default: 8.
+  /// Top padding inside the header block. Default: 12, matching the
+  /// hand-rolled headers on Explore and Flights so every screen title starts
+  /// at the same y.
   final double topPadding;
 
   /// Bottom padding below the header block. Default: 24.
@@ -109,7 +114,7 @@ class ScreenHeader extends StatelessWidget {
     this.subtitle,
     this.actions = const [],
     this.horizontalPadding = AppSpacing.gutter,
-    this.topPadding = 8,
+    this.topPadding = 12,
     this.bottomPadding = AppSpacing.lg,
   });
 
@@ -129,58 +134,58 @@ class ScreenHeader extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ── Greeting / eyebrow + right-aligned actions row ──────────
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Greeting (if provided) takes leftmost space
-              if (greeting != null)
-                Expanded(
-                  child: Text(
-                    greeting!,
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      fontSize: 14,
-                      color: AppColors.muted,
-                    ),
-                  ),
-                )
-              else
-                const Spacer(),
-              // Right-aligned action pills
-              if (actions.isNotEmpty) ...[
-                ...actions.map(
-                  (a) => Padding(
-                    padding: const EdgeInsets.only(left: 8),
-                    child: a,
-                  ),
-                ),
-              ],
-            ],
-          ),
-
-          // ── Title ─────────────────────────────────────────────────
-          const SizedBox(height: 4),
-          Text(
-            title,
-            style: theme.textTheme.displaySmall?.copyWith(
-              fontSize: 28,
-              fontWeight: FontWeight.w700,
-              letterSpacing: -0.6,
-              color: titleColor,
-            ),
-          ),
-
-          // ── Subtitle / meta ────────────────────────────────────────
-          if (subtitle != null) ...[
-            const SizedBox(height: 6),
+          // ── Greeting / eyebrow ─────────────────────────────────────
+          if (greeting != null) ...[
             Text(
-              subtitle!,
+              greeting!,
               style: theme.textTheme.bodyMedium?.copyWith(
                 fontSize: 14,
                 color: AppColors.muted,
               ),
             ),
+            const SizedBox(height: 4),
           ],
+
+          // ── Title + subtitle, with actions beside them ─────────────
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: theme.textTheme.displaySmall?.copyWith(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.6,
+                        color: titleColor,
+                      ),
+                    ),
+                    if (subtitle != null) ...[
+                      const SizedBox(height: 6),
+                      Text(
+                        subtitle!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          fontSize: 14,
+                          color: AppColors.muted,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              ...actions.map(
+                (a) => Padding(
+                  padding: const EdgeInsets.only(left: 8),
+                  child: a,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
