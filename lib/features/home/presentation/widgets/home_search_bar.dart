@@ -10,18 +10,20 @@ import '../../../flight/domain/entities/flight.dart';
 /// Home search: a regular search field with a live suggestions dropdown.
 /// Typing filters flights by number / destination / airline; picking one from
 /// the dropdown makes it the active flight.
+///
+/// Deliberately has no barcode scanner. The product does not handle boarding
+/// passes - travellers keep showing the physical one at the gate. What
+/// AirportNav digitises is the information the airport only prints on walls.
 class HomeSearchBar extends StatelessWidget {
   final String hint;
   final List<Flight> flights;
   final ValueChanged<Flight> onSelected;
-  final VoidCallback onScan;
 
   const HomeSearchBar({
     super.key,
     required this.hint,
     required this.flights,
     required this.onSelected,
-    required this.onScan,
   });
 
   @override
@@ -43,7 +45,6 @@ class HomeSearchBar extends StatelessWidget {
           controller: controller,
           focusNode: focusNode,
           hint: hint,
-          onScan: onScan,
         );
       },
       optionsViewBuilder: (context, onSelected, options) {
@@ -60,13 +61,11 @@ class _SearchField extends StatelessWidget {
   final TextEditingController controller;
   final FocusNode focusNode;
   final String hint;
-  final VoidCallback onScan;
 
   const _SearchField({
     required this.controller,
     required this.focusNode,
     required this.hint,
-    required this.onScan,
   });
 
   @override
@@ -99,12 +98,9 @@ class _SearchField extends StatelessWidget {
         suffixIcon: ValueListenableBuilder<TextEditingValue>(
           valueListenable: controller,
           builder: (context, value, _) => value.text.isEmpty
-              ? IconButton(
-                  icon: Icon(Icons.qr_code_scanner_rounded,
-                      size: 22, color: iconColor),
-                  tooltip: 'Scan boarding pass',
-                  onPressed: onScan,
-                )
+              // Fixed-size placeholder so the field does not change height
+              // when the clear button appears.
+              ? const SizedBox(width: 48, height: 48)
               : IconButton(
                   icon: Icon(Icons.close_rounded, size: 20, color: iconColor),
                   tooltip: 'Clear',

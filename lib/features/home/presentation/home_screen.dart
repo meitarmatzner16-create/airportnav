@@ -66,7 +66,6 @@ class HomeScreen extends ConsumerWidget {
                 flights: upcoming,
                 onSelected: (f) =>
                     ref.read(selectedFlightProvider.notifier).state = f,
-                onScan: () => snack('Boarding-pass scan is coming soon.'),
               ),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -123,7 +122,9 @@ class HomeScreen extends ConsumerWidget {
                 padding: const EdgeInsets.symmetric(horizontal: _gutter),
                 child: UpcomingFlightCard(
                   flight: displayFlight,
-                  onTap: () => context.push('/boarding-pass'),
+                  // Opens the flight's own detail, not a boarding pass - the
+                  // app tells you about your flight, it does not carry it.
+                  onTap: () => context.push('/home/flight/${displayFlight.id}'),
                 ),
               ),
               const SizedBox(height: _sectionGap),
