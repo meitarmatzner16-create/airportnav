@@ -85,24 +85,6 @@ final upcomingFlightsProvider = Provider<List<Flight>>((ref) {
     ..sort((a, b) => a.departureTime.compareTo(b.departureTime));
 });
 
-// --- Time until boarding for the selected flight ---
-final timeUntilBoardingProvider = Provider<Duration?>((ref) {
-  final flight = ref.watch(selectedFlightProvider);
-  if (flight == null) return null;
-  final boardingTime =
-      flight.departureTime.subtract(const Duration(minutes: 30));
-  final now = DateTime.now();
-  final diff = boardingTime.difference(now);
-  return diff.isNegative ? Duration.zero : diff;
-});
-
-// --- Available time for the user (time until they need to be at gate) ---
-final availableTimeMinutesProvider = Provider<int?>((ref) {
-  final flight = ref.watch(selectedFlightProvider);
-  if (flight == null) return null;
-  final gateTime =
-      flight.departureTime.subtract(const Duration(minutes: 15));
-  final now = DateTime.now();
-  final diff = gateTime.difference(now).inMinutes;
-  return diff < 0 ? 0 : diff;
-});
+// Boarding and gate-close derivations live in the journey domain
+// (kBoardingLead / kGateCloseLead) - the two providers that duplicated them
+// here had no call sites and carried different offsets.
