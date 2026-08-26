@@ -109,6 +109,99 @@ Journey buildDepartingJourney({
   );
 }
 
+JourneyStep _connectionStep() => const JourneyStep(
+      kind: StepKind.flight,
+      title: 'Which flights connect?',
+      where: 'Pick the flight you came in on and the one you leave on.',
+    );
+
+/// The connecting spine. Same shape as departing, but the first two steps are
+/// getting off one aircraft and crossing the airport rather than checking in.
+/// Both flights must be chosen before the journey can move off step one.
+Journey buildConnectingJourney({
+  required DateTime pinnedNow,
+  Flight? flight,
+  Flight? inbound,
+  int tick = 0,
+}) {
+  if (flight == null || inbound == null) {
+    return Journey(
+      stage: JourneyStage.connecting,
+      flight: flight,
+      inboundFlight: inbound,
+      steps: [_connectionStep()],
+      currentIndex: 0,
+      pinnedNow: pinnedNow,
+    );
+  }
+
+  final term = terminalLabel(flight.terminal);
+  final inTerm = terminalLabel(inbound.terminal);
+  final disrupted = tick >= kDisruptionTick;
+  final gate = disrupted ? _kMovedGate : (flight.gate ?? '-');
+
+  final steps = <JourneyStep>[
+    _connectionStep(),
+    JourneyStep(
+      kind: StepKind.arrive,
+      title: 'Get off and follow Transfers',
+      where: '$inTerm · arrivals level',
+      note: 'Landed on ${inbound.flightNumber} at gate ${inbound.gate ?? '-'}',
+      walkMinutes: 5,
+    ),
+    JourneyStep(
+      kind: StepKind.transfer,
+      title: 'Cross to $term',
+      where: 'AirTrain · 2 stops',
+      note: 'Runs every 4 minutes',
+      queueMinutes: driftedQueue(StepKind.transfer, 7, tick),
+      walkMinutes: 6,
+    ),
+    JourneyStep(
+      kind: StepKind.security,
+      title: 'Transfer security',
+      where: '$term · Connections checkpoint',
+      note: 'Shorter than the main hall - connecting passengers only',
+      deadline: flight.departureTime.subtract(const Duration(minutes: 45)),
+      queueMinutes: driftedQueue(StepKind.security, 10, tick),
+      walkMinutes: 3,
+    ),
+    JourneyStep(
+      kind: StepKind.gate,
+      title: 'Gate $gate',
+      where: '$term · Concourse ${gate.isEmpty ? '-' : gate[0]}',
+      deadline: flight.departureTime.subtract(kBoardingLead),
+      walkMinutes: _walkToGate(gate),
+    ),
+    JourneyStep(
+      kind: StepKind.boarding,
+      title: 'Boarding',
+      where: 'Gate $gate · Group 4',
+      note: 'Gate closes 15 min before departure',
+      deadline: flight.departureTime.subtract(kGateCloseLead),
+    ),
+  ];
+
+  return Journey(
+    stage: JourneyStage.connecting,
+    flight: flight,
+    inboundFlight: inbound,
+    steps: steps,
+    currentIndex: indexForTick(steps.length, tick, startIndex: 1),
+    pinnedNow: pinnedNow,
+    disruption: disrupted
+        ? Disruption(
+            kind: DisruptionKind.gateChange,
+            affectedStep: StepKind.gate,
+            headline: 'Gate changed to $_kMovedGate',
+            detail:
+                'Moved from ${flight.gate ?? '-'}. Tight connection - go straight there.',
+            newGate: _kMovedGate,
+          )
+        : null,
+  );
+}
+
 /// Rough gate-to-walk estimate. Near concourses are closer than far ones.
 int _walkToGate(String gate) {
   if (gate.isEmpty) return 10;

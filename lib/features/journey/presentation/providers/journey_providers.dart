@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../flight/domain/entities/flight.dart';
 import '../../../flight/presentation/providers/flight_providers.dart';
 import '../../data/journey_mock.dart';
 import '../../domain/entities/journey.dart';
@@ -11,6 +12,10 @@ import '../../domain/journey_clock.dart';
 /// Which stage the traveller told us they are in. Null means Home has not been
 /// answered yet - the app deliberately cannot infer this from a flight.
 final journeyStageProvider = StateProvider<JourneyStage?>((ref) => null);
+
+/// The flight the traveller arrived on. Connecting only - the "I arrived on"
+/// column of the connection picker writes it.
+final selectedInboundFlightProvider = StateProvider<Flight?>((ref) => null);
 
 /// The raw tick counter. Kept separate from the timer so tests can set it.
 final journeyTickValueProvider = StateProvider<int>((ref) => 0);
@@ -52,9 +57,12 @@ final journeyProvider = Provider<Journey?>((ref) {
   return switch (stage) {
     JourneyStage.departing =>
       buildDepartingJourney(pinnedNow: pinnedNow, flight: flight, tick: tick),
-    // Connecting gets its own spine in the connecting-flights task.
-    JourneyStage.connecting =>
-      buildDepartingJourney(pinnedNow: pinnedNow, flight: flight, tick: tick),
+    JourneyStage.connecting => buildConnectingJourney(
+        pinnedNow: pinnedNow,
+        flight: flight,
+        inbound: ref.watch(selectedInboundFlightProvider),
+        tick: tick,
+      ),
   };
 });
 

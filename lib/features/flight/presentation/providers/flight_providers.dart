@@ -85,6 +85,26 @@ final upcomingFlightsProvider = Provider<List<Flight>>((ref) {
     ..sort((a, b) => a.departureTime.compareTo(b.departureTime));
 });
 
+// --- Flights arriving at the detected airport around now ---
+// Feeds the connecting picker's "I arrived on" column: landed in the last
+// hour or landing within four. The long-haul arrivals that land tonight are
+// deliberately excluded - nobody is connecting from a flight that has not
+// landed yet by hours.
+final arrivingFlightsProvider = Provider<List<Flight>>((ref) {
+  final airportCode = ref.watch(detectedAirportProvider);
+  final allFlights = ref.watch(allFlightsProvider);
+  final now = DateTime.now();
+  final from = now.subtract(const Duration(hours: 1));
+  final until = now.add(const Duration(hours: 4));
+
+  return allFlights.where((f) {
+    return f.arrivalAirport == airportCode &&
+        f.arrivalTime.isAfter(from) &&
+        f.arrivalTime.isBefore(until);
+  }).toList()
+    ..sort((a, b) => a.arrivalTime.compareTo(b.arrivalTime));
+});
+
 // Boarding and gate-close derivations live in the journey domain
 // (kBoardingLead / kGateCloseLead) - the two providers that duplicated them
 // here had no call sites and carried different offsets.

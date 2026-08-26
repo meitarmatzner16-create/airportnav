@@ -126,6 +126,36 @@ void main() {
     expect(find.text('Change flight ›'), findsNothing);
   });
 
+  testWidgets('connecting step one shows the two board columns', (t) async {
+    t.view.physicalSize = const Size(375, 1400);
+    t.view.devicePixelRatio = 1.0;
+    addTearDown(t.view.resetPhysicalSize);
+    addTearDown(t.view.resetDevicePixelRatio);
+
+    final awaiting = Journey(
+      stage: JourneyStage.connecting,
+      currentIndex: 0,
+      pinnedNow: _now,
+      steps: const [
+        JourneyStep(
+          kind: StepKind.flight,
+          title: 'Which flights connect?',
+          where: 'Pick the flight you came in on and the one you leave on.',
+        ),
+      ],
+    );
+
+    await t.pumpWidget(_app(awaiting));
+    await t.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('Which flights connect?'), findsOneWidget);
+    expect(find.text('I ARRIVED ON'), findsOneWidget);
+    expect(find.text('MY NEXT FLIGHT'), findsOneWidget);
+    // The authored inbound flights populate the arrivals column.
+    expect(find.text('AA 106'), findsOneWidget);
+    expect(t.takeException(), isNull);
+  });
+
   testWidgets('with no journey it invites you to pick a stage', (t) async {
     await t.pumpWidget(_app(null));
     await t.pump(const Duration(milliseconds: 200));

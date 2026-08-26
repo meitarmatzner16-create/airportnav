@@ -247,6 +247,57 @@ class FlightMockDatasource {
         gate: '31',
         terminal: 'Terminal 1',
       ),
+
+      // ── Inbound flights that can actually connect ──────────────────
+      // Every pre-existing JFK arrival lands hours after the last JFK
+      // departure has gone, so no connection could be formed. These three
+      // land inside the departure window on purpose.
+      Flight(
+        id: 'fl-016',
+        flightNumber: 'AA 106',
+        airline: 'American Airlines',
+        airlineLogo: 'assets/airlines/aa.png',
+        departureAirport: 'LHR',
+        departureCity: 'London',
+        arrivalAirport: 'JFK',
+        arrivalCity: 'New York',
+        departureTime: now.subtract(const Duration(hours: 6)),
+        arrivalTime: now.add(const Duration(minutes: 15)),
+        status: 'landed',
+        gate: 'A5',
+        terminal: '8',
+      ),
+      Flight(
+        id: 'fl-017',
+        flightNumber: 'BA 117',
+        airline: 'British Airways',
+        airlineLogo: 'assets/airlines/ba.png',
+        departureAirport: 'LHR',
+        departureCity: 'London',
+        arrivalAirport: 'JFK',
+        arrivalCity: 'New York',
+        departureTime: now.subtract(const Duration(hours: 7)),
+        arrivalTime: now.add(const Duration(minutes: 35)),
+        status: 'on_time',
+        gate: 'A7',
+        terminal: '7',
+      ),
+      Flight(
+        id: 'fl-018',
+        flightNumber: 'IB 6251',
+        airline: 'Iberia',
+        airlineLogo: 'assets/airlines/ib.png',
+        departureAirport: 'MAD',
+        departureCity: 'Madrid',
+        arrivalAirport: 'JFK',
+        arrivalCity: 'New York',
+        departureTime: now.subtract(const Duration(hours: 8)),
+        arrivalTime: now.add(const Duration(minutes: 50)),
+        status: 'delayed',
+        gate: 'A3',
+        terminal: '4',
+        delayMinutes: 20,
+      ),
     ];
   }
 }

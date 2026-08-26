@@ -60,7 +60,9 @@ class JourneyScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppSpacing.md),
                   if (journey.awaitingFlight)
-                    _FlightPicker(journey: journey)
+                    journey.stage == JourneyStage.connecting
+                        ? _ConnectionPicker(journey: journey)
+                        : _FlightPicker(journey: journey)
                   else
                     _StepBody(journey: journey),
                   const SizedBox(height: AppSpacing.xxl),
@@ -103,7 +105,9 @@ class _Header extends StatelessWidget {
               const SizedBox(height: 3),
               Text(
                 flight == null
-                    ? 'Departing'
+                    ? (journey.stage == JourneyStage.connecting
+                        ? 'Connecting'
+                        : 'Departing')
                     : '${flight.flightNumber} · ${flight.arrivalCity}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -278,6 +282,226 @@ class _FlightRow extends StatelessWidget {
                         style:
                             theme.textTheme.labelSmall?.copyWith(color: muted)),
                   ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Step one of a connection: two columns of the board, side by side.
+/// Left is the flight you came in on; right is the one you leave on.
+/// The journey builds itself the moment both are chosen.
+class _ConnectionPicker extends ConsumerWidget {
+  final Journey journey;
+  const _ConnectionPicker({required this.journey});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final muted = isDark ? AppColors.dMuted : AppColors.muted;
+    final arrivals = ref.watch(arrivingFlightsProvider);
+    final departures = ref.watch(upcomingFlightsProvider);
+    final step = journey.currentStep;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: _gutter),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Step 1 of ${journey.steps.length}',
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: isDark ? AppColors.dSky : AppColors.sky,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.1,
+            ),
+          ),
+          const SizedBox(height: 5),
+          Text(step.title, style: theme.textTheme.titleLarge),
+          const SizedBox(height: 2),
+          Text(step.where,
+              style: theme.textTheme.bodySmall?.copyWith(color: muted)),
+          const SizedBox(height: AppSpacing.md),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _PickColumn(
+                  header: 'I arrived on',
+                  flights: arrivals,
+                  selectedId: journey.inboundFlight?.id,
+                  isArrival: true,
+                  emptyMessage: 'No recent arrivals here.',
+                  onPick: (f) => ref
+                      .read(selectedInboundFlightProvider.notifier)
+                      .state = f,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: _PickColumn(
+                  header: 'My next flight',
+                  flights: departures,
+                  selectedId: journey.flight?.id,
+                  isArrival: false,
+                  emptyMessage: 'No departures soon.',
+                  onPick: (f) =>
+                      ref.read(selectedFlightProvider.notifier).state = f,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PickColumn extends StatelessWidget {
+  final String header;
+  final List<Flight> flights;
+  final String? selectedId;
+  final bool isArrival;
+  final String emptyMessage;
+  final void Function(Flight) onPick;
+
+  const _PickColumn({
+    required this.header,
+    required this.flights,
+    required this.selectedId,
+    required this.isArrival,
+    required this.emptyMessage,
+    required this.onPick,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final muted = isDark ? AppColors.dMuted : AppColors.muted;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          header.toUpperCase(),
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: muted,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 1.1,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        if (flights.isEmpty)
+          Text(emptyMessage,
+              style: theme.textTheme.bodySmall?.copyWith(color: muted))
+        else
+          for (final f in flights) ...[
+            _MiniFlightTile(
+              flight: f,
+              selected: f.id == selectedId,
+              isArrival: isArrival,
+              onTap: () => onPick(f),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+      ],
+    );
+  }
+}
+
+/// A board row squeezed to half-width: airline tile, number, place, time.
+class _MiniFlightTile extends StatelessWidget {
+  final Flight flight;
+  final bool selected;
+  final bool isArrival;
+  final VoidCallback onTap;
+
+  const _MiniFlightTile({
+    required this.flight,
+    required this.selected,
+    required this.isArrival,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final muted = isDark ? AppColors.dMuted : AppColors.muted;
+    final textColor = isDark ? AppColors.dText : AppColors.ink;
+    final sky = isDark ? AppColors.dSky : AppColors.sky;
+    final clock = DateFormat('H:mm');
+    final place = isArrival
+        ? 'from ${flight.departureCity}'
+        : 'to ${flight.arrivalCity}';
+    final time = isArrival ? flight.arrivalTime : flight.departureTime;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: selected
+            ? (isDark ? AppColors.skyAlpha15 : AppColors.skyTint)
+            : (isDark ? AppColors.dSurface : AppColors.card),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: selected
+            ? Border.all(color: sky, width: 2)
+            : Border.all(
+                color: isDark ? AppColors.dHairline : AppColors.hairline,
+                width: 1,
+              ),
+        boxShadow: isDark ? null : AppShadows.card,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.sm),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    AirlineTile(flightNumber: flight.flightNumber, size: 22),
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        flight.flightNumber,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.mono(
+                          fontSize: 11,
+                          weight: FontWeight.w700,
+                          color: textColor,
+                        ),
+                      ),
+                    ),
+                    if (selected)
+                      Icon(Icons.check_circle_rounded, size: 15, color: sky),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  place,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: textColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  '${isArrival ? 'lands' : 'departs'} ${clock.format(time)}',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelSmall?.copyWith(color: muted),
                 ),
               ],
             ),
