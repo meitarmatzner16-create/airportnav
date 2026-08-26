@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// AirportNav type: Nunito across the whole app - one friendly, rounded family.
-/// Display, UI, body, and tabular flight data all resolve to Nunito so every
+/// AirportNav type: Poppins across the whole app - one clean geometric family.
+/// Display, UI, body, and tabular flight data all resolve to Poppins so every
 /// screen matches; `mono` just adds tabular figures for column-aligned data.
 class AppTypography {
   AppTypography._();
 
   /// Tabular "data" style for flight numbers, times, gates, and codes.
-  /// Nunito + tabular figures keep digits column-aligned. Name kept as `mono`
-  /// for call-site stability - the app is a single Nunito family throughout.
+  /// Poppins + tabular figures keep digits column-aligned. Name kept as `mono`
+  /// for call-site stability - the app is a single Poppins family throughout.
   static TextStyle mono({double fontSize = 14, FontWeight weight = FontWeight.w600, Color? color}) =>
-      GoogleFonts.nunito(
+      GoogleFonts.poppins(
         fontSize: fontSize,
         fontWeight: weight,
         color: color,
@@ -20,11 +20,11 @@ class AppTypography {
       );
 
   static TextStyle _d(double s, {double sp = -0.4, FontWeight w = FontWeight.w600, double h = 1.15}) =>
-      GoogleFonts.nunito(fontSize: s, fontWeight: w, letterSpacing: sp, height: h);
+      GoogleFonts.poppins(fontSize: s, fontWeight: w, letterSpacing: sp, height: h);
   static TextStyle _ui(double s, {double sp = 0, FontWeight w = FontWeight.w600}) =>
-      GoogleFonts.nunito(fontSize: s, fontWeight: w, letterSpacing: sp);
+      GoogleFonts.poppins(fontSize: s, fontWeight: w, letterSpacing: sp);
   static TextStyle _body(double s, {double sp = 0, FontWeight w = FontWeight.w400, double h = 1.5}) =>
-      GoogleFonts.nunito(fontSize: s, fontWeight: w, letterSpacing: sp, height: h);
+      GoogleFonts.poppins(fontSize: s, fontWeight: w, letterSpacing: sp, height: h);
 
   static TextTheme get textTheme => TextTheme(
         displayLarge: _d(36, sp: -0.3, w: FontWeight.w600, h: 1.1),

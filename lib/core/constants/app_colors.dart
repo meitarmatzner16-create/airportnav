@@ -16,7 +16,9 @@ class AppColors {
   static const gold = Color(0xFFC2A05A);
   static const goldSoft = Color(0xFFE8D6AE);
   static const goldText = Color(0xFF886B2D); // gold that must carry small text (AA)
-  static const paper = Color(0xFFFCFCFC);
+  /// Pure white canvas - cards sit on it with soft shadows rather than a
+  /// tinted background doing the separation.
+  static const paper = Color(0xFFFFFFFF);
   static const card = Color(0xFFFFFFFF);
   static const hairline = Color(0xFFEDEDEF);
   static const hairlineCool = Color(0xFFE2E8F4);

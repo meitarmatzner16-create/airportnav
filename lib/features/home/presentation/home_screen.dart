@@ -58,23 +58,23 @@ class HomeScreen extends ConsumerWidget {
                 onProfile: () => context.go('/more'),
               ),
             ),
-            const SizedBox(height: AppSpacing.lg),
+            const SizedBox(height: AppSpacing.xl),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: _gutter),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Hey there', style: theme.textTheme.displaySmall),
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 6),
                   Text(
                     "Let's get you where you need to go.\nWhat are you doing today?",
                     style: theme.textTheme.bodyMedium
-                        ?.copyWith(color: muted, height: 1.45),
+                        ?.copyWith(color: muted, height: 1.5),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: AppSpacing.md),
+            const SizedBox(height: AppSpacing.mdLg),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: _gutter),
               child: StageCard(
@@ -87,7 +87,7 @@ class HomeScreen extends ConsumerWidget {
                 onTap: () => start(JourneyStage.departing),
               ),
             ),
-            const SizedBox(height: AppSpacing.smMd),
+            const SizedBox(height: AppSpacing.md),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: _gutter),
               child: StageCard(
@@ -100,7 +100,7 @@ class HomeScreen extends ConsumerWidget {
                 onTap: () => start(JourneyStage.connecting),
               ),
             ),
-            const SizedBox(height: AppSpacing.smMd),
+            const SizedBox(height: AppSpacing.md),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: _gutter),
               child: StageCard(

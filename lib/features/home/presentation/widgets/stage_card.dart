@@ -56,7 +56,7 @@ class StageCard extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           child: Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
+            padding: const EdgeInsets.all(AppSpacing.mdLg),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

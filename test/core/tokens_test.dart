@@ -9,7 +9,8 @@ void main() {
     expect(AppColors.sky, const Color(0xFF3577E7));
     expect(AppColors.ink, const Color(0xFF0F2350));
     expect(AppColors.gold, const Color(0xFFC2A05A));
-    expect(AppColors.paper, const Color(0xFFFCFCFC));
+    // Pure white canvas - cards separate with shadows, not a tinted page.
+    expect(AppColors.paper, const Color(0xFFFFFFFF));
   });
   test('legacy names are re-pointed to Sky Pass', () {
     expect(AppColors.accent, AppColors.sky);       // interactive
@@ -28,12 +29,12 @@ void main() {
     // `warning` keeps its original value for genuine warning semantics.
     expect(AppColors.warning, const Color(0xFFE8A93B));
   });
-  testWidgets('every text role resolves to a single Nunito family', (tester) async {
-    expect(AppTypography.textTheme.displayLarge!.fontFamily, contains('Nunito'));
-    expect(AppTypography.textTheme.headlineMedium!.fontFamily, contains('Nunito'));
-    expect(AppTypography.textTheme.bodyLarge!.fontFamily, contains('Nunito'));
-    expect(AppTypography.textTheme.bodyMedium!.fontFamily, contains('Nunito'));
-    expect(AppTypography.textTheme.labelSmall!.fontFamily, contains('Nunito'));
-    expect(AppTypography.mono(fontSize: 14).fontFamily, contains('Nunito'));
+  testWidgets('every text role resolves to a single Poppins family', (tester) async {
+    expect(AppTypography.textTheme.displayLarge!.fontFamily, contains('Poppins'));
+    expect(AppTypography.textTheme.headlineMedium!.fontFamily, contains('Poppins'));
+    expect(AppTypography.textTheme.bodyLarge!.fontFamily, contains('Poppins'));
+    expect(AppTypography.textTheme.bodyMedium!.fontFamily, contains('Poppins'));
+    expect(AppTypography.textTheme.labelSmall!.fontFamily, contains('Poppins'));
+    expect(AppTypography.mono(fontSize: 14).fontFamily, contains('Poppins'));
   });
 }
