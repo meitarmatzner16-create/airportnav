@@ -31,6 +31,31 @@ class Flight {
     this.delayMinutes,
   });
 
+  /// A gate change has to be applied somewhere. The mock repository rebuilds
+  /// its list on every call, so the journey holds a modified copy instead.
+  Flight copyWith({
+    String? gate,
+    String? terminal,
+    String? status,
+    int? delayMinutes,
+  }) =>
+      Flight(
+        id: id,
+        flightNumber: flightNumber,
+        airline: airline,
+        airlineLogo: airlineLogo,
+        departureAirport: departureAirport,
+        departureCity: departureCity,
+        arrivalAirport: arrivalAirport,
+        arrivalCity: arrivalCity,
+        departureTime: departureTime,
+        arrivalTime: arrivalTime,
+        status: status ?? this.status,
+        gate: gate ?? this.gate,
+        terminal: terminal ?? this.terminal,
+        delayMinutes: delayMinutes ?? this.delayMinutes,
+      );
+
   factory Flight.fromJson(Map<String, dynamic> json) {
     return Flight(
       id: json['id'] as String,
