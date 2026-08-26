@@ -109,7 +109,21 @@ void main() {
     expect(find.text('THEN'), findsOneWidget);
     expect(find.text('Gate C18'), findsWidgets);
     expect(find.text('AA 2468 · Chicago'), findsOneWidget);
+    // The board must stay reachable - travellers change their minds.
+    expect(find.text('Change flight ›'), findsOneWidget);
     expect(t.takeException(), isNull);
+  });
+
+  testWidgets('no change-flight link before a flight is chosen', (t) async {
+    t.view.physicalSize = const Size(375, 1400);
+    t.view.devicePixelRatio = 1.0;
+    addTearDown(t.view.resetPhysicalSize);
+    addTearDown(t.view.resetDevicePixelRatio);
+
+    await t.pumpWidget(_app(_awaiting()));
+    await t.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('Change flight ›'), findsNothing);
   });
 
   testWidgets('with no journey it invites you to pick a stage', (t) async {

@@ -118,6 +118,21 @@ class _Header extends StatelessWidget {
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodySmall?.copyWith(color: muted),
               ),
+              // The board stays one tap away - people change their minds,
+              // and committing to a flight forever would punish them for it.
+              if (flight != null) ...[
+                const SizedBox(height: 4),
+                InkWell(
+                  onTap: () => context.push('/flights'),
+                  child: Text(
+                    'Change flight ›',
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: isDark ? AppColors.dSky : AppColors.sky,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),

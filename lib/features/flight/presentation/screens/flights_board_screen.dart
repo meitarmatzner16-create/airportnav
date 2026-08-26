@@ -44,6 +44,20 @@ class FlightsBoardScreen extends ConsumerWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        // Pushed from the journey now, so it needs a way back.
+                        InkWell(
+                          onTap: () => context.canPop()
+                              ? context.pop()
+                              : context.go('/journey'),
+                          child: Text(
+                            '‹ Back',
+                            style: theme.textTheme.labelLarge?.copyWith(
+                              color: isDark ? AppColors.dSky : AppColors.sky,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 3),
                         Text('Departing soon',
                             style: theme.textTheme.displaySmall),
                         const SizedBox(height: 2),
@@ -95,9 +109,11 @@ class FlightsBoardScreen extends ConsumerWidget {
                                 '${flight.flightNumber} is now your flight'),
                             duration: const Duration(seconds: 3),
                             action: SnackBarAction(
-                              label: 'View',
+                              label: 'Back to trip',
                               textColor: Colors.white,
-                              onPressed: () => context.go('/home'),
+                              onPressed: () => context.canPop()
+                                  ? context.pop()
+                                  : context.go('/journey'),
                             ),
                           ),
                         );
