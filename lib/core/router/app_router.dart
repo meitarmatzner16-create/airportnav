@@ -10,6 +10,8 @@ import '../../features/more/presentation/more_screen.dart';
 import '../../features/voice_chat/presentation/screens/voice_chat_screen.dart';
 import '../../features/flight/presentation/screens/flight_detail_screen.dart';
 import '../../features/flight/presentation/screens/flights_board_screen.dart';
+import '../../features/journey/presentation/screens/journey_screen.dart';
+import '../../features/journey/presentation/screens/journey_steps_screen.dart';
 import '../../features/venues/presentation/screens/explore_screen.dart';
 import '../../features/venues/presentation/screens/venue_detail_screen.dart';
 import '../widgets/app_shell.dart';
@@ -62,12 +64,24 @@ final routerProvider = Provider<GoRouter>((ref) {
               child: AirportMapScreen(),
             ),
           ),
-          // Flights tab - live board / pick active flight
+          // Reached from the journey's first step, not from the tab bar.
+          // builder (not NoTransitionPage) so a push animates normally.
           GoRoute(
             path: '/flights',
+            builder: (context, state) => const FlightsBoardScreen(),
+          ),
+          // Trip tab - the journey, wherever you are in it.
+          GoRoute(
+            path: '/journey',
             pageBuilder: (context, state) => const NoTransitionPage(
-              child: FlightsBoardScreen(),
+              child: JourneyScreen(),
             ),
+            routes: [
+              GoRoute(
+                path: 'steps',
+                builder: (context, state) => const JourneyStepsScreen(),
+              ),
+            ],
           ),
           GoRoute(
             path: '/voice-chat',

@@ -32,10 +32,11 @@ class AppShell extends StatelessWidget {
       isHero: true,
     ),
     _NavItem(
-      route: '/flights',
-      icon: Icons.flight_outlined,
-      activeIcon: Icons.flight_rounded,
-      label: 'Flights',
+      // Trip: return me to my journey, wherever I am in it.
+      route: '/journey',
+      icon: Icons.explore_outlined,
+      activeIcon: Icons.explore_rounded,
+      label: 'Trip',
     ),
     _NavItem(
       route: '/map',

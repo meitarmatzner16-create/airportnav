@@ -49,11 +49,9 @@ class Journey {
 
   bool get isAtGate => currentStep.kind == StepKind.boarding;
 
-  DateTime? get boardingTime =>
-      flight == null ? null : flight!.departureTime.subtract(kBoardingLead);
+  DateTime? get boardingTime => flight?.departureTime.subtract(kBoardingLead);
 
-  DateTime? get gateClosesAt =>
-      flight == null ? null : flight!.departureTime.subtract(kGateCloseLead);
+  DateTime? get gateClosesAt => flight?.departureTime.subtract(kGateCloseLead);
 
   /// Minutes still to be spent queueing and walking, from the current step on.
   Duration get remainingProcessTime => Duration(
@@ -65,9 +63,7 @@ class Journey {
   DateTime get projectedGateArrival => pinnedNow.add(remainingProcessTime);
 
   /// The number no sign in the building can give you. Negative means behind.
-  Duration? get freeTime => boardingTime == null
-      ? null
-      : boardingTime!.difference(projectedGateArrival);
+  Duration? get freeTime => boardingTime?.difference(projectedGateArrival);
 
   /// Honours a gate-change disruption so the banner and the cards never
   /// disagree about which gate you are walking to.

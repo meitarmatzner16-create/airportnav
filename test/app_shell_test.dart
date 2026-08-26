@@ -19,7 +19,7 @@ void main() {
         ShellRoute(
           builder: (context, state, child) => AppShell(child: child),
           routes: [
-            for (final p in ['/home', '/explore', '/voice-chat', '/flights', '/map'])
+            for (final p in ['/home', '/explore', '/voice-chat', '/journey', '/map'])
               GoRoute(
                 path: p,
                 builder: (_, _) => const Scaffold(body: SizedBox.shrink()),
@@ -36,7 +36,7 @@ void main() {
 
     expect(tester.takeException(), isNull);
     // All five tab labels render.
-    for (final label in ['Home', 'Explore', 'Assistant', 'Flights', 'Map']) {
+    for (final label in ['Home', 'Explore', 'Assistant', 'Trip', 'Map']) {
       expect(find.text(label), findsOneWidget);
     }
   });

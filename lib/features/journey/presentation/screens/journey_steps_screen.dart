@@ -5,7 +5,6 @@ import 'package:intl/intl.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/app_typography.dart';
-import '../../domain/entities/journey.dart';
 import '../../domain/entities/journey_step.dart';
 import '../providers/journey_providers.dart';
 
