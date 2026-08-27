@@ -110,12 +110,7 @@ class HomeScreen extends ConsumerWidget {
                 title: 'Arrived',
                 description: "I've landed and want services or transport.",
                 tint: AppColors.successAlpha15,
-                onTap: () {
-                  ScaffoldMessenger.of(context)
-                    ..hideCurrentSnackBar()
-                    ..showSnackBar(const SnackBar(
-                        content: Text('Arrived is coming next.')));
-                },
+                onTap: () => context.push('/arrived'),
               ),
             ),
             const SizedBox(height: _sectionGap),

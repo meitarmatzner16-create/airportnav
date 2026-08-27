@@ -10,6 +10,8 @@ import '../../features/more/presentation/more_screen.dart';
 import '../../features/voice_chat/presentation/screens/voice_chat_screen.dart';
 import '../../features/flight/presentation/screens/flight_detail_screen.dart';
 import '../../features/flight/presentation/screens/flights_board_screen.dart';
+import '../../features/arrived/presentation/screens/arrived_options_screen.dart';
+import '../../features/arrived/presentation/screens/arrived_screen.dart';
 import '../../features/journey/presentation/screens/journey_screen.dart';
 import '../../features/journey/presentation/screens/journey_steps_screen.dart';
 import '../../features/venues/presentation/screens/explore_screen.dart';
@@ -69,6 +71,17 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/flights',
             builder: (context, state) => const FlightsBoardScreen(),
+          ),
+          // Arrived - a directory, not a journey. Pushed from the Home card.
+          GoRoute(
+            path: '/arrived',
+            builder: (context, state) => const ArrivedScreen(),
+            routes: [
+              GoRoute(
+                path: 'options',
+                builder: (context, state) => const ArrivedOptionsScreen(),
+              ),
+            ],
           ),
           // Trip tab - the journey, wherever you are in it.
           GoRoute(

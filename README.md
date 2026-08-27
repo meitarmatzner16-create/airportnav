@@ -39,6 +39,7 @@ inversion:
 | **Journey** | "What do I do right now?" | A spine from choosing your flight to boarding. Each step carries where, by when, queue plus walk minutes, and what changed - with live queue drift and a scripted gate change |
 | **Connecting** | "Can I make my connection?" | Step one is the board twice: the flight you came in on and the one you leave on. The journey builds itself the moment both are tapped |
 | **Trip** | "Take me back to my journey" | One tab, one job - returns you to wherever you are in the airport |
+| **Arrived** | "I've landed - now what?" | Ways out first, services second: exit, baggage, transport and lounges with walk times |
 | **Explore** | "Where can I eat, rest, work, shop?" | Venue catalog enriched with the physical facts: price band, opening hours, walk time, amenities |
 | **Venue detail** | "Is it worth the walk?" | Lounges show entry cost, showers, nap pods, food style and phone booths - grouped as rest / food / work / access |
 | **Map** | "How do I get there?" | Vector terminal map with the route drawn as a dashed path, start and end marked |
