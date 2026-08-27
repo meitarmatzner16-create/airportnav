@@ -35,20 +35,25 @@ inversion:
 
 | Screen | What it answers | How the information gets there |
 | --- | --- | --- |
-| **Home** | "What do I need right now?" | Detected airport plus your selected flight drive every card on the page |
-| **Flights** | "Which flight is mine?" | Live departures board - tap once and the whole app personalises around that flight |
+| **Home** | "What am I doing today?" | The one question the app cannot infer: departing, connecting or arrived. The active stage carries your live step, gate and boarding time |
+| **Journey** | "What do I do right now?" | A spine from choosing your flight to boarding. Each step carries where, by when, queue plus walk minutes, and what changed - with live queue drift and a scripted gate change |
+| **Connecting** | "Can I make my connection?" | Step one is the board twice: the flight you came in on and the one you leave on. The journey builds itself the moment both are tapped |
+| **Trip** | "Take me back to my journey" | One tab, one job - returns you to wherever you are in the airport |
 | **Explore** | "Where can I eat, rest, work, shop?" | Venue catalog enriched with the physical facts: price band, opening hours, walk time, amenities |
 | **Venue detail** | "Is it worth the walk?" | Lounges show entry cost, showers, nap pods, food style and phone booths - grouped as rest / food / work / access |
 | **Map** | "How do I get there?" | Vector terminal map with the route drawn as a dashed path, start and end marked |
-| **Boarding pass** | "Where is my pass?" | Pass held in the app, ready at the gate |
 | **Assistant** | "Just tell me what to do" | Natural-language entry point that builds routes and finds services |
+
+The free-time number is the one no sign in the building can give you: the sum
+of your remaining queues and walks against your boarding time. Positive, and
+the app suggests what fits; negative, and it tells you to skip the stop.
 
 ## Design
 
 The whole app is driven by one design system - no ad-hoc colours or fonts
 anywhere in feature code.
 
-- **Type:** Nunito throughout, one family, a fixed scale in `AppTypography`
+- **Type:** Poppins throughout, one family, a fixed scale in `AppTypography`
 - **Colour:** sky blue for action, ink for text, amber reserved for wayfinding,
   orange for delays so it never collides with the accent - all in `AppColors`
 - **Brand:** "The Pass" - a boarding-pass tile with real notched geometry, a
