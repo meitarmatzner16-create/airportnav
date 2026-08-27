@@ -43,11 +43,55 @@ void main() {
     ));
     await t.pump(const Duration(milliseconds: 200));
 
+    expect(find.text('Your departure journey'), findsOneWidget);
     expect(find.text('Check in'), findsOneWidget);
+    expect(find.text('Complete'), findsOneWidget, reason: 'done steps say so');
     expect(find.text('Head to Security'), findsOneWidget);
     expect(find.text('Gate C18'), findsOneWidget);
     expect(find.text('Boarding'), findsOneWidget);
     expect(find.text('NOW'), findsOneWidget);
+    expect(t.takeException(), isNull);
+  });
+
+  testWidgets('a connection gets the plan with its checklist', (t) async {
+    t.view.physicalSize = const Size(375, 1400);
+    t.view.devicePixelRatio = 1.0;
+    addTearDown(t.view.resetPhysicalSize);
+    addTearDown(t.view.resetDevicePixelRatio);
+
+    final connecting = Journey(
+      stage: JourneyStage.connecting,
+      currentIndex: 1,
+      pinnedNow: DateTime(2026, 7, 31, 10, 3),
+      steps: const [
+        JourneyStep(kind: StepKind.flight, title: 'Flight', where: 'x'),
+        JourneyStep(
+            kind: StepKind.arrive, title: 'Follow Transfer signs', where: 'T8'),
+        JourneyStep(
+            kind: StepKind.transfer, title: 'Terminal transfer', where: 'AirTrain'),
+        JourneyStep(
+            kind: StepKind.security, title: 'Security screening', where: 'T4'),
+        JourneyStep(kind: StepKind.gate, title: 'Find Gate B23', where: 'B'),
+      ],
+    );
+
+    await t.pumpWidget(ProviderScope(
+      overrides: [journeyProvider.overrideWithValue(connecting)],
+      child: MaterialApp(
+        theme: AppTheme.light,
+        home: const JourneyStepsScreen(),
+      ),
+    ));
+    await t.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('Your connection plan'), findsOneWidget);
+    expect(find.text("You're all set!"), findsOneWidget);
+    expect(find.text('Everything looks good'), findsOneWidget);
+    // Derived from the steps, not asserted: no passport step in this spine.
+    expect(find.text('No passport control'), findsOneWidget);
+    expect(find.text('Terminal transfer needed'), findsOneWidget);
+    expect(find.text('Start Navigation'), findsOneWidget);
+    expect(find.text('Add to calendar'), findsOneWidget);
     expect(t.takeException(), isNull);
   });
 }

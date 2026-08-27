@@ -15,6 +15,7 @@ import '../../../flight/domain/entities/flight.dart';
 import '../../../flight/presentation/providers/flight_providers.dart';
 import '../../../venues/presentation/providers/venue_providers.dart';
 import '../../domain/entities/journey.dart';
+import '../../domain/entities/journey_step.dart';
 import '../providers/journey_providers.dart';
 import '../widgets/current_step_card.dart';
 import '../widgets/disruption_banner.dart';
@@ -64,6 +65,8 @@ class JourneyScreen extends ConsumerWidget {
                     journey.stage == JourneyStage.connecting
                         ? _ConnectionPicker(journey: journey, editing: editing)
                         : _FlightPicker(journey: journey)
+                  else if (journey.stage == JourneyStage.connecting)
+                    _ConnectionBody(journey: journey)
                   else
                     _StepBody(journey: journey),
                   const SizedBox(height: AppSpacing.xxl),
@@ -109,7 +112,9 @@ class _Header extends ConsumerWidget {
                     ? (journey.stage == JourneyStage.connecting
                         ? 'Connecting'
                         : 'Departing')
-                    : '${flight.flightNumber} · ${flight.arrivalCity}',
+                    : (journey.stage == JourneyStage.connecting
+                        ? "You're connecting!"
+                        : "Great! You're departing"),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.displaySmall,
@@ -118,7 +123,7 @@ class _Header extends ConsumerWidget {
               Text(
                 flight == null
                     ? 'Choose your flight to begin'
-                    : '${flight.departureAirport} · departs ${clock.format(flight.departureTime)}',
+                    : '${flight.flightNumber} · ${flight.arrivalCity} · departs ${clock.format(flight.departureTime)}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodySmall?.copyWith(color: muted),
@@ -544,8 +549,14 @@ class _StepBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final muted = isDark ? AppColors.dMuted : AppColors.muted;
     final venues = ref.watch(allVenuesProvider);
-    final next = journey.nextStep;
+    final upcoming = [
+      for (var i = journey.currentIndex + 1; i < journey.steps.length; i++)
+        journey.steps[i],
+    ];
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: _gutter),
@@ -557,17 +568,423 @@ class _StepBody extends ConsumerWidget {
             const SizedBox(height: AppSpacing.smMd),
           ],
           CurrentStepCard(journey: journey),
-          if (next != null) ...[
-            const SizedBox(height: AppSpacing.smMd),
-            ThenCard(step: next, gate: journey.effectiveGate),
+          if (upcoming.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              'YOUR NEXT STEPS',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: muted,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.1,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            for (final s in upcoming) ...[
+              _NextStepRow(
+                step: s,
+                onTap: () => context.push('/journey/steps'),
+              ),
+              const SizedBox(height: AppSpacing.sm),
+            ],
           ],
-          const SizedBox(height: AppSpacing.lg),
+          const SizedBox(height: AppSpacing.smMd),
           FreeTimeStrip(
             freeTime: journey.freeTime,
             venues: venues,
             onTap: (v) => context.push('/explore/venue/${v.id}'),
           ),
+          const SizedBox(height: AppSpacing.smMd),
+          _NeedHelpCard(onTap: () => context.go('/voice-chat')),
         ],
+      ),
+    );
+  }
+}
+
+/// The connecting overview: how long the process takes, how long you have,
+/// then the whole connection as a numbered list.
+class _ConnectionBody extends ConsumerWidget {
+  final Journey journey;
+  const _ConnectionBody({required this.journey});
+
+  static String _hm(Duration d) {
+    final m = d.inMinutes;
+    if (m < 60) return '${m}m';
+    return '${m ~/ 60}h ${(m % 60).toString().padLeft(2, '0')}m';
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final muted = isDark ? AppColors.dMuted : AppColors.muted;
+    final textColor = isDark ? AppColors.dText : AppColors.ink;
+    final venues = ref.watch(allVenuesProvider);
+    final departsIn =
+        journey.flight!.departureTime.difference(journey.pinnedNow);
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: _gutter),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (journey.disruption != null) ...[
+            DisruptionBanner(disruption: journey.disruption!),
+            const SizedBox(height: AppSpacing.smMd),
+          ],
+          Container(
+            decoration: BoxDecoration(
+              color: isDark ? AppColors.dSurface : AppColors.card,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              border: Border.all(
+                color: isDark ? AppColors.dHairline : AppColors.hairline,
+                width: 1,
+              ),
+              boxShadow: isDark ? null : AppShadows.card,
+            ),
+            padding: const EdgeInsets.all(AppSpacing.smMd),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text('Estimated time',
+                          style: theme.textTheme.bodySmall
+                              ?.copyWith(color: muted)),
+                    ),
+                    Text(
+                      '${journey.remainingProcessTime.inMinutes} min',
+                      style: AppTypography.mono(
+                        fontSize: 14,
+                        weight: FontWeight.w700,
+                        color: AppColors.success,
+                      ),
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                  child: Divider(
+                      height: 1,
+                      color: isDark ? AppColors.dHairline : AppColors.hairline),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text('Your next flight departs in',
+                          style: theme.textTheme.bodySmall
+                              ?.copyWith(color: muted)),
+                    ),
+                    Text(
+                      _hm(departsIn),
+                      style: AppTypography.mono(
+                        fontSize: 14,
+                        weight: FontWeight.w700,
+                        color: textColor,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            'YOUR CONNECTION JOURNEY',
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: muted,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 1.1,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          for (var i = 1; i < journey.steps.length; i++) ...[
+            _NumberedStepRow(
+              number: i,
+              step: journey.steps[i],
+              status: journey.statusOf(i),
+              onTap: () => context.push('/journey/steps'),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+          ],
+          const SizedBox(height: AppSpacing.smMd),
+          FreeTimeStrip(
+            freeTime: journey.freeTime,
+            venues: venues,
+            onTap: (v) => context.push('/explore/venue/${v.id}'),
+          ),
+          const SizedBox(height: AppSpacing.smMd),
+          _NeedHelpCard(onTap: () => context.go('/voice-chat')),
+        ],
+      ),
+    );
+  }
+}
+
+/// One numbered connection step - done gets a check, now gets the accent.
+class _NumberedStepRow extends StatelessWidget {
+  final int number;
+  final JourneyStep step;
+  final StepStatus status;
+  final VoidCallback onTap;
+
+  const _NumberedStepRow({
+    required this.number,
+    required this.step,
+    required this.status,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final muted = isDark ? AppColors.dMuted : AppColors.muted;
+    final textColor = isDark ? AppColors.dText : AppColors.ink;
+    final sky = isDark ? AppColors.dSky : AppColors.sky;
+    final isDone = status == StepStatus.done;
+    final isCurrent = status == StepStatus.current;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.dSurface : AppColors.card,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: isCurrent
+            ? Border.all(color: sky, width: 2)
+            : Border.all(
+                color: isDark ? AppColors.dHairline : AppColors.hairline,
+                width: 1,
+              ),
+        boxShadow: isDark ? null : AppShadows.card,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.smMd),
+            child: Row(
+              children: [
+                Container(
+                  width: 26,
+                  height: 26,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: isDone
+                        ? AppColors.success
+                        : isCurrent
+                            ? sky
+                            : (isDark
+                                ? AppColors.dSurfaceVariant
+                                : AppColors.surfaceVariant),
+                  ),
+                  child: isDone
+                      ? const Icon(Icons.check_rounded,
+                          size: 14, color: Colors.white)
+                      : Center(
+                          child: Text(
+                            '$number',
+                            style: AppTypography.mono(
+                              fontSize: 12,
+                              weight: FontWeight.w700,
+                              color: isCurrent ? Colors.white : muted,
+                            ),
+                          ),
+                        ),
+                ),
+                const SizedBox(width: AppSpacing.smMd),
+                Expanded(
+                  child: Text(
+                    step.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      color: isDone ? muted : textColor,
+                      fontWeight: isDone ? FontWeight.w600 : FontWeight.w700,
+                    ),
+                  ),
+                ),
+                if (step.totalMinutes > 0) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    '${step.totalMinutes} min',
+                    style: AppTypography.mono(fontSize: 12, color: muted),
+                  ),
+                ],
+                const SizedBox(width: 4),
+                Icon(Icons.chevron_right_rounded, size: 18, color: muted),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// One upcoming step, quiet, with its cost and a way into the full guide.
+class _NextStepRow extends StatelessWidget {
+  final JourneyStep step;
+  final VoidCallback onTap;
+
+  const _NextStepRow({required this.step, required this.onTap});
+
+  static IconData _iconFor(StepKind kind) => switch (kind) {
+        StepKind.flight => Icons.flight_rounded,
+        StepKind.checkIn => Icons.fact_check_outlined,
+        StepKind.bagDrop => Icons.luggage_rounded,
+        StepKind.security => Icons.security_rounded,
+        StepKind.passport => Icons.badge_outlined,
+        StepKind.gate => Icons.meeting_room_outlined,
+        StepKind.boarding => Icons.flight_takeoff_rounded,
+        StepKind.arrive => Icons.flight_land_rounded,
+        StepKind.transfer => Icons.tram_rounded,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final muted = isDark ? AppColors.dMuted : AppColors.muted;
+    final textColor = isDark ? AppColors.dText : AppColors.ink;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.dSurface : AppColors.card,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(
+          color: isDark ? AppColors.dHairline : AppColors.hairline,
+          width: 1,
+        ),
+        boxShadow: isDark ? null : AppShadows.card,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.smMd),
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.skyAlpha15 : AppColors.skyTint,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                  ),
+                  child: Icon(_iconFor(step.kind),
+                      size: 18, color: isDark ? AppColors.dSky : AppColors.sky),
+                ),
+                const SizedBox(width: AppSpacing.smMd),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        step.title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: textColor,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Text(
+                        step.where,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style:
+                            theme.textTheme.bodySmall?.copyWith(color: muted),
+                      ),
+                    ],
+                  ),
+                ),
+                if (step.totalMinutes > 0) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    '${step.totalMinutes} min',
+                    style: AppTypography.mono(fontSize: 12, color: muted),
+                  ),
+                ],
+                const SizedBox(width: 4),
+                Icon(Icons.chevron_right_rounded, size: 18, color: muted),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// "Need help? Ask Airport Nav" - the assistant, one tap from any step.
+class _NeedHelpCard extends StatelessWidget {
+  final VoidCallback onTap;
+  const _NeedHelpCard({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final muted = isDark ? AppColors.dMuted : AppColors.muted;
+    final textColor = isDark ? AppColors.dText : AppColors.ink;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.dSurface : AppColors.card,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(
+          color: isDark ? AppColors.dHairline : AppColors.hairline,
+          width: 1,
+        ),
+        boxShadow: isDark ? null : AppShadows.card,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.all(AppSpacing.smMd),
+            child: Row(
+              children: [
+                Container(
+                  width: 38,
+                  height: 38,
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColors.skyAlpha15 : AppColors.skyTint,
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                  ),
+                  child: Icon(Icons.forum_outlined,
+                      size: 18, color: isDark ? AppColors.dSky : AppColors.sky),
+                ),
+                const SizedBox(width: AppSpacing.smMd),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Need help?',
+                          style: theme.textTheme.titleMedium?.copyWith(
+                            color: textColor,
+                            fontWeight: FontWeight.w700,
+                          )),
+                      Text('Ask Airport Nav',
+                          style:
+                              theme.textTheme.bodySmall?.copyWith(color: muted)),
+                    ],
+                  ),
+                ),
+                Icon(Icons.chevron_right_rounded, size: 18, color: muted),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

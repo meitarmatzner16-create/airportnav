@@ -106,9 +106,11 @@ void main() {
     await t.pump(const Duration(milliseconds: 200));
 
     expect(find.text('Head to Security'), findsOneWidget);
-    expect(find.text('THEN'), findsOneWidget);
+    expect(find.text('YOUR NEXT STEPS'), findsOneWidget);
     expect(find.text('Gate C18'), findsWidgets);
-    expect(find.text('AA 2468 · Chicago'), findsOneWidget);
+    expect(find.text("Great! You're departing"), findsOneWidget);
+    expect(find.textContaining('AA 2468'), findsWidgets);
+    expect(find.text('Need help?'), findsOneWidget);
     // The board must stay reachable - travellers change their minds.
     expect(find.text('Change flight ›'), findsOneWidget);
     expect(t.takeException(), isNull);
@@ -189,7 +191,9 @@ void main() {
     await t.pumpWidget(_app(running));
     await t.pump(const Duration(milliseconds: 200));
 
-    // Mid-journey: step body visible, and the link says flights, plural.
+    // Mid-journey: the connecting overview, and the link says flights, plural.
+    expect(find.text("You're connecting!"), findsOneWidget);
+    expect(find.text('Estimated time'), findsOneWidget);
     expect(find.text('Get off and follow Transfers'), findsOneWidget);
     expect(find.text('Change flights ›'), findsOneWidget);
 

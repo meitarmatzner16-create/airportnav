@@ -266,7 +266,31 @@ deleted, so they fail to compile rather than fail an assertion. The gate is: **t
 retired tests are removed deliberately, every other existing test passes, and the new tests
 above are green.**
 
-## 8. Out of scope
+## 8. Round two: the per-stage pages (user wireframes)
+
+The user supplied wireframes giving each stage two pages. Their structure and
+copy are adopted; the app's nav, live simulation, flight picking and visual
+style are kept. Mapping:
+
+**Departing** - `/journey` (running) becomes the overview: "Great! You're
+departing", illustration-spine card, disruption banner, the do-this-now card,
+then the remaining steps as tappable rows and a Need-help card into the
+Assistant. `/journey/steps` becomes the Departure Guide: a timeline with green
+Complete states, the current step highlighted, and a departure footer card.
+
+**Connecting** - `/journey` (running) is "You're connecting!": a summary card
+(estimated process time, departs-in), then the numbered connection journey
+with per-step minutes. `/journey/steps` becomes the Connection Plan:
+"Everything looks good" checklist derived from the actual steps (passport
+present or not, transfer needed), the remaining steps, Start Navigation into
+the existing `/navigate` route, and Add to calendar (mock).
+
+**Arrived** - new, not a step journey: `/arrived` is the welcome page with
+category shortcuts into Explore, "Popular near you" walk-time tiles, a lounge
+card and the live-updates strip. `/arrived/options` lists exits, baggage,
+transport and services. The Home card routes there instead of a snackbar.
+
+## 9. Out of scope
 
 - The Arrived stage - baggage belt, exits, ground transport
 - Real data of any kind. Journey content is authored mock, per airport
