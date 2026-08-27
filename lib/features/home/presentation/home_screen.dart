@@ -32,6 +32,8 @@ class HomeScreen extends ConsumerWidget {
 
     void start(JourneyStage stage) {
       ref.read(journeyStageProvider.notifier).state = stage;
+      // A fresh entry never lands mid-edit.
+      ref.read(flightEditingProvider.notifier).state = false;
       context.push('/journey');
     }
 

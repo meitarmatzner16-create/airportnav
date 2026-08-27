@@ -33,6 +33,7 @@ class JourneyScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final journey = ref.watch(journeyProvider);
+    final editing = ref.watch(flightEditingProvider);
 
     // Keeps the ticker alive for exactly as long as this screen is mounted.
     ref.watch(journeyTickerProvider);
@@ -59,9 +60,9 @@ class JourneyScreen extends ConsumerWidget {
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  if (journey.awaitingFlight)
+                  if (journey.awaitingFlight || editing)
                     journey.stage == JourneyStage.connecting
-                        ? _ConnectionPicker(journey: journey)
+                        ? _ConnectionPicker(journey: journey, editing: editing)
                         : _FlightPicker(journey: journey)
                   else
                     _StepBody(journey: journey),
@@ -73,12 +74,12 @@ class JourneyScreen extends ConsumerWidget {
   }
 }
 
-class _Header extends StatelessWidget {
+class _Header extends ConsumerWidget {
   final Journey journey;
   const _Header({required this.journey});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final muted = isDark ? AppColors.dMuted : AppColors.muted;
@@ -124,12 +125,23 @@ class _Header extends StatelessWidget {
               ),
               // The board stays one tap away - people change their minds,
               // and committing to a flight forever would punish them for it.
+              // A connection has TWO flights, so it reopens the two-column
+              // picker; the departures board alone could never swap the
+              // inbound.
               if (flight != null) ...[
                 const SizedBox(height: 4),
                 InkWell(
-                  onTap: () => context.push('/flights'),
+                  onTap: () {
+                    if (journey.stage == JourneyStage.connecting) {
+                      ref.read(flightEditingProvider.notifier).state = true;
+                    } else {
+                      context.push('/flights');
+                    }
+                  },
                   child: Text(
-                    'Change flight ›',
+                    journey.stage == JourneyStage.connecting
+                        ? 'Change flights ›'
+                        : 'Change flight ›',
                     style: theme.textTheme.labelLarge?.copyWith(
                       color: isDark ? AppColors.dSky : AppColors.sky,
                       fontWeight: FontWeight.w700,
@@ -297,7 +309,8 @@ class _FlightRow extends StatelessWidget {
 /// The journey builds itself the moment both are chosen.
 class _ConnectionPicker extends ConsumerWidget {
   final Journey journey;
-  const _ConnectionPicker({required this.journey});
+  final bool editing;
+  const _ConnectionPicker({required this.journey, this.editing = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -306,26 +319,39 @@ class _ConnectionPicker extends ConsumerWidget {
     final muted = isDark ? AppColors.dMuted : AppColors.muted;
     final arrivals = ref.watch(arrivingFlightsProvider);
     final departures = ref.watch(upcomingFlightsProvider);
-    final step = journey.currentStep;
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: _gutter),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Step 1 of ${journey.steps.length}',
-            style: theme.textTheme.labelSmall?.copyWith(
-              color: isDark ? AppColors.dSky : AppColors.sky,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.1,
+          if (!editing) ...[
+            Text(
+              'Step 1 of ${journey.steps.length}',
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: isDark ? AppColors.dSky : AppColors.sky,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.1,
+              ),
             ),
-          ),
-          const SizedBox(height: 5),
-          Text(step.title, style: theme.textTheme.titleLarge),
-          const SizedBox(height: 2),
-          Text(step.where,
-              style: theme.textTheme.bodySmall?.copyWith(color: muted)),
+            const SizedBox(height: 5),
+            Text('Which flights connect?', style: theme.textTheme.titleLarge),
+            const SizedBox(height: 2),
+            Text('Pick the flight you came in on and the one you leave on.',
+                style: theme.textTheme.bodySmall?.copyWith(color: muted)),
+          ] else ...[
+            Text('Change your flights', style: theme.textTheme.titleLarge),
+            const SizedBox(height: 2),
+            Text('Tap either column to swap - your journey rebuilds around it.',
+                style: theme.textTheme.bodySmall?.copyWith(color: muted)),
+            const SizedBox(height: AppSpacing.smMd),
+            PrimaryButton(
+              label: 'Done',
+              icon: Icons.check_rounded,
+              onPressed: () =>
+                  ref.read(flightEditingProvider.notifier).state = false,
+            ),
+          ],
           const SizedBox(height: AppSpacing.md),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,

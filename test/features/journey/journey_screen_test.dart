@@ -156,6 +156,59 @@ void main() {
     expect(t.takeException(), isNull);
   });
 
+  testWidgets('a running connection can reopen the picker and come back',
+      (t) async {
+    t.view.physicalSize = const Size(375, 1600);
+    t.view.devicePixelRatio = 1.0;
+    addTearDown(t.view.resetPhysicalSize);
+    addTearDown(t.view.resetDevicePixelRatio);
+
+    final running = Journey(
+      stage: JourneyStage.connecting,
+      flight: _flight(),
+      inboundFlight: _flight(),
+      currentIndex: 1,
+      pinnedNow: _now,
+      steps: const [
+        JourneyStep(kind: StepKind.flight, title: 'Flight', where: 'x'),
+        JourneyStep(
+          kind: StepKind.arrive,
+          title: 'Get off and follow Transfers',
+          where: 'Terminal 8 · arrivals level',
+          walkMinutes: 5,
+        ),
+        JourneyStep(
+          kind: StepKind.gate,
+          title: 'Gate C18',
+          where: 'Concourse C',
+          walkMinutes: 12,
+        ),
+      ],
+    );
+
+    await t.pumpWidget(_app(running));
+    await t.pump(const Duration(milliseconds: 200));
+
+    // Mid-journey: step body visible, and the link says flights, plural.
+    expect(find.text('Get off and follow Transfers'), findsOneWidget);
+    expect(find.text('Change flights ›'), findsOneWidget);
+
+    // Reopen the picker without losing the journey.
+    await t.tap(find.text('Change flights ›'));
+    await t.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('I ARRIVED ON'), findsOneWidget);
+    expect(find.text('MY NEXT FLIGHT'), findsOneWidget);
+    expect(find.text('Done'), findsOneWidget);
+
+    // Done returns to the running journey untouched.
+    await t.tap(find.text('Done'));
+    await t.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('Get off and follow Transfers'), findsOneWidget);
+    expect(t.takeException(), isNull);
+  });
+
   testWidgets('with no journey it invites you to pick a stage', (t) async {
     await t.pumpWidget(_app(null));
     await t.pump(const Duration(milliseconds: 200));

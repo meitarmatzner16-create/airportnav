@@ -17,6 +17,11 @@ final journeyStageProvider = StateProvider<JourneyStage?>((ref) => null);
 /// column of the connection picker writes it.
 final selectedInboundFlightProvider = StateProvider<Flight?>((ref) => null);
 
+/// True while the traveller is revisiting step one mid-journey to swap a
+/// flight. The journey keeps running underneath - nothing is cleared, so
+/// backing out with Done costs nothing.
+final flightEditingProvider = StateProvider<bool>((ref) => false);
+
 /// The raw tick counter. Kept separate from the timer so tests can set it.
 final journeyTickValueProvider = StateProvider<int>((ref) => 0);
 
