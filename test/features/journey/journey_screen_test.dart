@@ -213,6 +213,42 @@ void main() {
     expect(t.takeException(), isNull);
   });
 
+  testWidgets('the Flight dot reopens flight selection mid-journey',
+      (t) async {
+    t.view.physicalSize = const Size(375, 1600);
+    t.view.devicePixelRatio = 1.0;
+    addTearDown(t.view.resetPhysicalSize);
+    addTearDown(t.view.resetDevicePixelRatio);
+
+    final running = Journey(
+      stage: JourneyStage.connecting,
+      flight: _flight(),
+      inboundFlight: _flight(),
+      currentIndex: 2,
+      pinnedNow: _now,
+      steps: const [
+        JourneyStep(kind: StepKind.flight, title: 'Flight', where: 'x'),
+        JourneyStep(
+            kind: StepKind.arrive, title: 'Follow Transfer signs', where: 'T8'),
+        JourneyStep(
+            kind: StepKind.transfer, title: 'Terminal transfer', where: 'AirTrain'),
+      ],
+    );
+
+    await t.pumpWidget(_app(running));
+    await t.pump(const Duration(milliseconds: 200));
+
+    expect(find.text("You're connecting!"), findsOneWidget);
+
+    // Tap the spine's Flight dot - not a menu, the dot itself.
+    await t.tap(find.text('Flight'));
+    await t.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('I ARRIVED ON'), findsOneWidget);
+    expect(find.text('MY NEXT FLIGHT'), findsOneWidget);
+    expect(t.takeException(), isNull);
+  });
+
   testWidgets('with no journey it invites you to pick a stage', (t) async {
     await t.pumpWidget(_app(null));
     await t.pump(const Duration(milliseconds: 200));

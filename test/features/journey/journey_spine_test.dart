@@ -50,6 +50,25 @@ void main() {
     expect(t.takeException(), isNull);
   });
 
+  testWidgets('every dot is its own tap target, reporting its index',
+      (t) async {
+    final tapped = <int>[];
+    await t.pumpWidget(_wrap(JourneySpine(
+      journey: _journey(steps: 6),
+      onStepTap: tapped.add,
+    )));
+    await t.pump(const Duration(milliseconds: 50));
+
+    // The Flight dot - the traveller's way back to the board.
+    await t.tap(find.text('Flight'));
+    await t.pump(const Duration(milliseconds: 50));
+    expect(tapped, [0]);
+
+    await t.tap(find.text('Security'));
+    await t.pump(const Duration(milliseconds: 50));
+    expect(tapped, [0, 3]);
+  });
+
   testWidgets('fits a narrow phone without overflowing', (t) async {
     t.view.physicalSize = const Size(320, 800);
     t.view.devicePixelRatio = 1.0;

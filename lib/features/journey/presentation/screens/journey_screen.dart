@@ -57,7 +57,20 @@ class JourneyScreen extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(horizontal: _gutter),
                     child: JourneySpine(
                       journey: journey,
-                      onTap: () => context.push('/journey/steps'),
+                      onStepTap: (i) {
+                        if (journey.steps[i].kind == StepKind.flight) {
+                          // The Flight dot always leads back to the board -
+                          // the choice that started the journey stays open.
+                          if (journey.stage == JourneyStage.connecting) {
+                            ref.read(flightEditingProvider.notifier).state =
+                                true;
+                          } else {
+                            context.push('/flights');
+                          }
+                        } else {
+                          context.push('/journey/steps');
+                        }
+                      },
                     ),
                   ),
                   const SizedBox(height: AppSpacing.md),

@@ -10,11 +10,16 @@ import '../../domain/entities/journey_step.dart';
 /// Amber marks the path already walked - the brand's wayfinding accent, used
 /// as a shape only. Sky marks where you are now. Renders one dot per step,
 /// so a spine with passport control is simply longer.
+///
+/// Every dot is its own tap target: the Flight dot reopens flight selection,
+/// the rest open the step guide. The traveller must always have a way back
+/// to the board, and the dot that put a flight in their journey is the most
+/// natural door to it.
 class JourneySpine extends StatelessWidget {
   final Journey journey;
-  final VoidCallback? onTap;
+  final void Function(int index)? onStepTap;
 
-  const JourneySpine({super.key, required this.journey, this.onTap});
+  const JourneySpine({super.key, required this.journey, this.onStepTap});
 
   @override
   Widget build(BuildContext context) {
@@ -26,17 +31,16 @@ class JourneySpine extends StatelessWidget {
 
     return Semantics(
       label: 'Step ${journey.currentIndex + 1} of ${journey.steps.length}',
-      button: onTap != null,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (var i = 0; i < journey.steps.length; i++)
-                Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (var i = 0; i < journey.steps.length; i++)
+              Expanded(
+                child: InkWell(
+                  onTap: onStepTap == null ? null : () => onStepTap!(i),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                   child: _SpineStep(
                     label: journey.steps[i].kind.short,
                     status: journey.statusOf(i),
@@ -46,8 +50,8 @@ class JourneySpine extends StatelessWidget {
                     sky: sky,
                   ),
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );
